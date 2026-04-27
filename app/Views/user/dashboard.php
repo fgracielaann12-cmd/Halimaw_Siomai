@@ -573,15 +573,11 @@ if (!function_exists('getProductSKU')) {
             <!-- 🔍 CONTROLS -->
             <div class="controls-section d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
                 <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1.8;">
+                    <label for="searchQuery" class="form-label mb-0 fw-bold text-nowrap">Search Item:</label>
                     <div class="position-relative w-100">
                         <input type="text" id="searchQuery" class="form-control" style="padding-right: 2.2rem;" placeholder="Search by item name" oninput="filterTable()">
                         <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3" style="color: #6c757d; opacity: 0.6; pointer-events: none;"></i>
                     </div>
-                    <style>
-                        .search-btn-responsive { width: 100%; }
-                        @media (min-width: 768px) { .search-btn-responsive { width: 120px !important; flex-shrink: 0; } }
-                    </style>
-                    <button onclick="filterTable()" class="btn btn-primary search-btn-responsive">Search</button>
                 </div>
                 <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1;">
                     <label class="form-label mb-0 fw-bold">Category:</label>

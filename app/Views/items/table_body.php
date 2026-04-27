@@ -6,7 +6,6 @@
         <td><?= esc($item['price']) ?></td>
         <td><?= esc($item['category']) ?></td>
         <td><?= esc($item['expiration_date']) ?></td>
-        <td><?= esc($item['barcode']) ?></td>
         <td><?= esc($item['subcategory']) ?></td>
         <td><?= esc($item['auto_delete']) ? 'Yes' : 'No' ?></td>
         <td><?= esc($item['created_at']) ?></td>

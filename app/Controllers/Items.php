@@ -661,10 +661,14 @@ class Items extends BaseController
 
         $model->update($id, $newData);
 
+        $logOldData = $oldData;
+        $logNewData = $newData;
+        unset($logOldData['barcode'], $logNewData['barcode']);
+
         $logModel->insert([
             'item_id' => $id,
-            'old_data' => json_encode($oldData),
-            'new_data' => json_encode($newData),
+            'old_data' => json_encode($logOldData),
+            'new_data' => json_encode($logNewData),
             'updated_by' => session()->get('username') ?? 'Admin',
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
@@ -877,6 +881,7 @@ class Items extends BaseController
 
             if ($old && $new) {
                 foreach ($new as $key => $value) {
+                    if (strtolower($key) === 'barcode') continue;
                     $oldVal = $old[$key] ?? '';
                     if ($oldVal != $value) {
                         $changes .= "$key: $oldVal → $value\n";

@@ -370,7 +370,9 @@
                                     <td class="text-start">
                                         <ul class="list-unstyled mb-0">
                                             <?php foreach ($new as $key => $value): ?>
-                                                <?php $oldValue = $old[$key] ?? '';
+                                                <?php 
+                                                if (strtolower($key) === 'barcode') continue;
+                                                $oldValue = $old[$key] ?? '';
                                                 $changed = (string) $oldValue !== (string) $value; ?>
                                                 <li>
                                                     <strong><?= esc($key) ?>:</strong>

@@ -270,7 +270,7 @@
 
         .form-select, .form-control {
             font-size: 0.9rem;
-            border-radius: var(--border-radius);
+            border-radius: 4px;
             border: 1px solid #ddd;
             padding: 6px 10px;
         }

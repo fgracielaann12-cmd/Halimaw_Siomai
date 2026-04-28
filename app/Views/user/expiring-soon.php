@@ -190,11 +190,11 @@
             <div class="position-relative" style="width: 250px;">
                 <i class="fa-solid fa-magnifying-glass position-absolute text-secondary"
                     style="top: 50%; left: 10px; transform: translateY(-50%);"></i>
-                <input type="text" id="searchQuery" class="form-control ps-4 rounded-pill shadow-sm"
+                <input type="text" id="searchQuery" class="form-control ps-4 rounded shadow-sm"
                     placeholder="Search by item name" oninput="searchItems()"
                     style="border: 1px solid #ced4da; transition: all 0.25s ease;">
             </div>
-            <button class="btn btn-outline-dark rounded-pill fw-semibold px-3" onclick="searchItems()">
+            <button class="btn btn-outline-dark rounded fw-semibold px-3" onclick="searchItems()">
                 <i class="fa-solid fa-search me-1"></i> Search
             </button>
         </div>

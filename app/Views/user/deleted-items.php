@@ -175,7 +175,7 @@
   <!-- Content -->
   <div class="container mt-5">
 
-    <a href="<?= base_url('/items') ?>" class="btn btn-outline-dark fw-semibold rounded-pill shadow-sm px-3 py-1 mb-3">
+    <a href="<?= base_url('/items') ?>" class="btn btn-outline-dark fw-semibold rounded shadow-sm px-3 py-1 mb-3">
       Back to Dashboard
     </a>
 
@@ -199,7 +199,7 @@
       <!-- Search + Sort -->
       <div class="search-sort-bar">
         <div class="position-relative">
-          <input type="text" id="searchQuery" class="form-control ps-4 rounded-pill shadow-sm"
+          <input type="text" id="searchQuery" class="form-control ps-4 rounded shadow-sm"
             placeholder="Search by Product ID or Name" oninput="searchItems()">
         </div>
 

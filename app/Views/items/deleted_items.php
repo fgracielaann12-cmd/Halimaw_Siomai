@@ -25,7 +25,7 @@
             --sidebar-hover: #34495e;
             --sidebar-active: #4e73df;
             --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            --border-radius: 0.65rem;
+            --border-radius: 0.35rem;
         }
 
         * {
@@ -183,14 +183,13 @@
             margin-bottom: 25px;
         }
 
-        #searchQuery {
-            flex: 1;
-            padding: 8px 12px;
-            border-radius: var(--border-radius);
+        .form-select, .form-control {
+            font-size: 0.9rem;
+            border-radius: 4px;
             border: 1px solid #ddd;
-            font-size: 0.95rem;
+            padding: 6px 10px;
         }
-        #searchQuery:focus {
+        .form-control:focus, .form-select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
             outline: none;

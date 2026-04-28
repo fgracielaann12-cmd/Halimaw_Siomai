@@ -170,36 +170,20 @@
         }
 
         /* CONTAINER */
-        .container {
+        .container-fluid {
             padding: 30px 20px;
         }
 
         /* BUTTONS */
-        .btn-back, .btn-export {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 20px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 50px;
-            transition: all 0.2s;
+        .btn-primary-custom {
+            background-color: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: white !important;
         }
-        .btn-back {
-            background: var(--primary);
-            color: white;
-        }
-        .btn-back:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-        .btn-export {
-            background: var(--success);
-            color: white;
-        }
-        .btn-export:hover {
-            background: #17a673;
-            transform: translateY(-2px);
+        .btn-primary-custom:hover {
+            background-color: var(--primary-dark) !important;
+            border-color: var(--primary-dark) !important;
+            color: white !important;
         }
 
         /* CARD */
@@ -207,10 +191,10 @@
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
-            padding: 25px;
+            padding: 0;
+            overflow: hidden;
         }
 
-        /* TABLE */
         .table {
             min-width: 700px;
             font-size: 0.9rem;
@@ -225,6 +209,12 @@
             position: sticky;
             top: 0;
             z-index: 2;
+            white-space: nowrap;
+            padding: 12px 15px;
+        }
+        .table td {
+            white-space: nowrap;
+            padding: 12px 15px;
         }
         .table tbody tr {
             transition: background 0.2s;
@@ -240,7 +230,8 @@
             padding-left: 16px;
         }
         .table li {
-            margin-bottom: 4px;
+            margin-bottom: 2px;
+            font-size: 0.85rem;
         }
 
         /* DIFF HIGHLIGHT */
@@ -258,19 +249,6 @@
             border-radius: var(--border-radius);
             font-weight: 500;
             text-align: center;
-        }
-
-        /* PAGINATION */
-        .pagination {
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .pagination .page-link {
-            color: var(--primary);
-        }
-        .pagination .page-item.active .page-link {
-            background-color: var(--primary);
-            border-color: var(--primary);
         }
 
         /* RESPONSIVE */
@@ -298,10 +276,10 @@
             }
             .sidebar-overlay.active { display: block; }
 
-            .container { padding: 20px 15px; }
+            .container-fluid { padding: 20px 15px; }
             .d-md-flex { flex-direction: column; gap: 10px; }
-            .btn-back, .btn-export { width: 100%; }
             .table { min-width: 600px; font-size: 0.85rem; }
+            .table th, .table td { white-space: nowrap; padding: 12px 15px; }
         }
     </style>
 </head>
@@ -322,7 +300,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="container-fluid">
         <!-- Flash Message -->
         <?php if (session()->getFlashdata('success')): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -332,11 +310,8 @@
         <?php endif; ?>
 
         <!-- Action Buttons -->
-        <div class="d-md-flex justify-content-between align-items-center mb-4">
-            <a href="<?= base_url('/items') ?>" class="btn-back mb-2 mb-md-0">
-                <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
-            </a>
-            <a href="<?= base_url('items/export-logs-csv') ?>" class="btn-export mb-2 mb-md-0">
+        <div class="d-flex justify-content-start align-items-center mb-4">
+            <a href="<?= base_url('items/export-logs-csv') ?>" class="btn btn-primary-custom shadow-sm px-4 py-2 fw-semibold" style="transition: all 0.3s ease; border-radius: 0.375rem;">
                 <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Logs (CSV)
             </a>
         </div>
@@ -344,7 +319,7 @@
         <!-- Table -->
         <div class="table-card">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-top">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -369,22 +344,37 @@
                                     <td><?= esc($log['updated_by']) ?></td>
                                     <td class="text-start">
                                         <ul class="list-unstyled mb-0">
-                                            <?php foreach ($new as $key => $value): ?>
-                                                <?php 
+                                            <?php 
+                                            $hasChanges = false;
+                                            foreach ($new as $key => $value): 
                                                 if (strtolower($key) === 'barcode') continue;
+                                                
                                                 $oldValue = $old[$key] ?? '';
-                                                $changed = (string) $oldValue !== (string) $value; ?>
+                                                // Skip if no change occurred
+                                                if ((string) $oldValue === (string) $value) continue;
+                                                
+                                                // Skip if they are numerically identical (e.g. 115.00 vs 115)
+                                                if (is_numeric($oldValue) && is_numeric($value) && (float)$oldValue === (float)$value) continue;
+                                                
+                                                $hasChanges = true;
+                                                // Format key for better readability
+                                                $displayKey = ucwords(str_replace('_', ' ', $key));
+                                            ?>
                                                 <li>
-                                                    <strong><?= esc($key) ?>:</strong>
-                                                    <?php if ($changed): ?>
-                                                        <span class="text-danger"><?= esc($oldValue === '' ? '(empty)' : $oldValue) ?></span>
-                                                        →
-                                                        <span class="text-success"><?= esc($value) ?></span>
+                                                    <strong class="text-dark"><?= esc($displayKey) ?>:</strong>
+                                                    <?php if ($oldValue !== ''): ?>
+                                                        <span class="text-danger text-decoration-line-through ms-1"><?= esc($oldValue) ?></span>
+                                                        <i class="bi bi-arrow-right mx-1 text-muted" style="font-size: 0.8rem;"></i>
                                                     <?php else: ?>
-                                                        <?= esc($value) ?>
+                                                        <span class="ms-1"></span>
                                                     <?php endif; ?>
+                                                    <span class="text-success fw-semibold"><?= esc($value === '' ? '(empty)' : $value) ?></span>
                                                 </li>
                                             <?php endforeach; ?>
+                                            
+                                            <?php if (!$hasChanges): ?>
+                                                <li class="text-muted fst-italic"><i class="bi bi-info-circle me-1"></i>No modified fields</li>
+                                            <?php endif; ?>
                                         </ul>
                                     </td>
                                     <td><?= esc($log['updated_at']) ?></td>
@@ -397,11 +387,11 @@
                         <?php endif; ?>
                     </tbody>
                 </table>
-
-                <div class="mt-3 d-flex justify-content-center">
-                    <?= $pager->links('logs', 'bootstrap_full') ?>
-                </div>
             </div>
+        </div>
+        
+        <div class="d-flex justify-content-center mt-4">
+            <?= $pager->links('logs', 'bootstrap_full') ?>
         </div>
     </div>
 </div>

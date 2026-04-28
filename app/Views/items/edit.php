@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="<?= csrf_token() ?>">
     <title>Edit Item | Halimaw Siomai</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -167,10 +169,13 @@
 
         /* BUTTONS */
         .btn-pill {
-            border-radius: 50px;
-            padding: 8px 20px;
+            border-radius: 12px;
+            padding: 10px 24px;
             font-weight: 600;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-back {
             background: var(--primary);
@@ -197,6 +202,18 @@
             margin-bottom: 20px;
         }
 
+        /* 🔽 Dropdown Slide Animation (Matches Admin/Staff Inventory) */
+        @keyframes slideDownFade {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .select2-dropdown {
+            animation: slideDownFade 0.2s ease-out forwards;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-radius: 0 0 8px 8px;
+            border: 1px solid #ddd;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 991px) {
             .mobile-menu-toggle { display: block; }
@@ -218,70 +235,13 @@
 
             .container { padding: 20px 15px; }
             .card { padding: 20px; }
-            .btn-pill { width: 100%; }
-            .d-flex.justify-content-between { flex-direction: column; gap: 10px; }
+            .btn-pill { width: 100%; padding: 12px 20px; border-radius: 10px; }
         }
     </style>
 </head>
 <body>
 
-<?php $currentPath = uri_string(); ?>
-
-<!-- Mobile Menu Toggle -->
-<button class="mobile-menu-toggle" id="mobileMenuToggle">
-    <i class="bi bi-list"></i>
-</button>
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-<!-- SIDEBAR -->
-<nav id="sidebar">
-    <a class="navbar-brand" href="#">
-        <img src="<?= base_url('Images/Inventa.png') ?>" alt="Inventa Logo">
-        <span>Halimaw Siomai</span>
-    </a>
-    <ul class="nav flex-column px-2 mt-3">
-        <li class="nav-item">
-            <a class="nav-link <?= ($currentPath === 'items' || $currentPath === '') ? 'active' : '' ?>" href="<?= site_url('items') ?>">
-                <i class="bi bi-house-door"></i> Dashboard
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= ($currentPath === 'admin/pos') ? 'active' : '' ?>" href="<?= site_url('admin/pos') ?>">
-                <i class="bi bi-calculator"></i> POS
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= ($currentPath === 'admin/stock-requests') ? 'active' : '' ?>" href="<?= site_url('admin/stock-requests') ?>">
-                <i class="bi bi-cart-check"></i> Stock Requests
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= ($currentPath === 'items/expiring-soon') ? 'active' : '' ?>" href="<?= site_url('items/expiring-soon') ?>">
-                <i class="bi bi-clock-history"></i> Expiring Soon
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= ($currentPath === 'items/deleted') ? 'active' : '' ?>" href="<?= site_url('items/deleted') ?>">
-                <i class="bi bi-x-circle"></i> Expired
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= ($currentPath === 'admin/users') ? 'active' : '' ?>" href="<?= site_url('admin/users') ?>">
-                <i class="bi bi-people"></i> Staff Management
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= ($currentPath === 'items/logs') ? 'active' : '' ?>" href="<?= site_url('items/logs') ?>">
-                <i class="bi bi-journal-text"></i> Audit Logs
-            </a>
-        </li>
-        <li class="nav-item mt-4">
-            <a class="nav-link text-danger" href="<?= site_url('logout') ?>">
-                <i class="bi bi-box-arrow-right"></i> Logout
-            </a>
-        </li>
-    </ul>
-</nav>
+<?= $this->include('partials/admin_sidebar') ?>
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
@@ -319,19 +279,101 @@
                     required>
             </div>
 
+            <?php $isSiomai = stripos($item['name'], 'siomai') !== false; ?>
+            <?php $targetSize = isset($_GET['size']) ? strtolower($_GET['size']) : null; ?>
+
+            <?php if (!$isSiomai): ?>
             <div class="mb-3">
                 <label for="quantity" class="form-label">Quantity</label>
                 <input type="number" class="form-control" id="quantity" name="quantity"
                     value="<?= esc($item['quantity']) ?>" required>
             </div>
+            <?php else: ?>
+                <input type="hidden" name="quantity" value="<?= esc($item['quantity']) ?>">
+            <?php endif; ?>
+            
+            <?php if ($isSiomai): ?>
+                <?php if (!$targetSize || $targetSize === 'small'): ?>
+                <div class="mb-4 mt-2">
+                    <h6 class="fw-bold mb-3 text-primary">
+                        <i class="bi bi-box-seam me-2"></i>
+                        <?= $targetSize ? 'Edit Small Pack Quantity' : 'Small Pack Quantity' ?>
+                    </h6>
+                    <div class="mb-3">
+                        <label class="form-label">Small Pack Qty (12s)</label>
+                        <input type="number" class="form-control" name="pack_small_qty" value="<?= esc($item['pack_small_qty'] ?? 0) ?>">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3 text-primary">
+                        <i class="bi bi-tag me-2"></i>
+                        <?= $targetSize ? 'Edit Small Pack Price' : 'Small Pack Price' ?>
+                    </h6>
+                    <div class="mb-3">
+                        <label class="form-label">Small Pack Price</label>
+                        <input type="number" step="0.01" class="form-control" name="pack_small_price" value="<?= esc($item['pack_small_price'] ?? 115) ?>">
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <?php if (!$targetSize || $targetSize === 'medium'): ?>
+                <div class="mb-4 <?= !$targetSize ? 'mt-4 border-top pt-4' : 'mt-2' ?>">
+                    <h6 class="fw-bold mb-3 text-primary">
+                        <i class="bi bi-box-seam me-2"></i>
+                        <?= $targetSize ? 'Edit Medium Pack Quantity' : 'Medium Pack Quantity' ?>
+                    </h6>
+                    <div class="mb-3">
+                        <label class="form-label">Medium Pack Qty (20s)</label>
+                        <input type="number" class="form-control" name="pack_medium_qty" value="<?= esc($item['pack_medium_qty'] ?? 0) ?>">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3 text-primary">
+                        <i class="bi bi-tag me-2"></i>
+                        <?= $targetSize ? 'Edit Medium Pack Price' : 'Medium Pack Price' ?>
+                    </h6>
+                    <div class="mb-3">
+                        <label class="form-label">Medium Pack Price</label>
+                        <input type="number" step="0.01" class="form-control" name="pack_medium_price" value="<?= esc($item['pack_medium_price'] ?? 185) ?>">
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <?php if (!$targetSize || $targetSize === 'large'): ?>
+                <div class="mb-4 <?= !$targetSize ? 'mt-4 border-top pt-4' : 'mt-2' ?>">
+                    <h6 class="fw-bold mb-3 text-primary">
+                        <i class="bi bi-box-seam me-2"></i>
+                        <?= $targetSize ? 'Edit Large Pack Quantity' : 'Large Pack Quantity' ?>
+                    </h6>
+                    <div class="mb-3">
+                        <label class="form-label">Large Pack Qty (40s)</label>
+                        <input type="number" class="form-control" name="pack_biggest_qty" value="<?= esc($item['pack_biggest_qty'] ?? 0) ?>">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3 text-primary">
+                        <i class="bi bi-tag me-2"></i>
+                        <?= $targetSize ? 'Edit Large Pack Price' : 'Large Pack Price' ?>
+                    </h6>
+                    <div class="mb-3">
+                        <label class="form-label">Large Pack Price</label>
+                        <input type="number" step="0.01" class="form-control" name="pack_biggest_price" value="<?= esc($item['pack_biggest_price'] ?? 335) ?>">
+                    </div>
+                </div>
+                <?php endif; ?>
+            <?php endif; ?>
 
 
 
+            <?php if (!$isSiomai): ?>
             <div class="mb-3">
                 <label for="price" class="form-label">General Price</label>
                 <input type="number" step="0.01" class="form-control" id="price" name="price"
                     value="<?= esc($item['price']) ?>" required>
             </div>
+            <?php else: ?>
+                <input type="hidden" name="price" value="<?= esc($item['price']) ?>">
+            <?php endif; ?>
 
             <div class="mb-3">
                 <label for="expiration_date" class="form-label">Expiration Date</label>
@@ -341,7 +383,7 @@
 
             <div class="mb-3">
                 <label for="category" class="form-label">Category</label>
-                <select class="form-select" id="category" name="category" required>
+                <select class="form-select select2" id="category" name="category" required>
                     <option value="">Select Category</option>
                     <option value="Food" <?= ($item['category'] === 'Food') ? 'selected' : '' ?>>Food</option>
                     <option value="Non-Food" <?= ($item['category'] === 'Non-Food') ? 'selected' : '' ?>>Non-Food</option>
@@ -354,22 +396,31 @@
                 <label class="form-check-label" for="auto_delete">Auto Delete When Expired</label>
             </div>
 
-            <div class="d-flex justify-content-between mt-4">
-                <div>
-                    <a href="<?= base_url('items') ?>" class="btn btn-secondary btn-pill me-2"><i class="bi bi-arrow-left me-1"></i> Back</a>
+            <div class="d-flex flex-column flex-md-row justify-content-between mt-4 gap-3">
+                <div class="d-flex flex-column flex-md-row gap-3 w-100 w-md-auto">
+                    <a href="<?= base_url('items') ?>" class="btn btn-secondary btn-pill"><i class="bi bi-arrow-left me-2"></i> Back</a>
                     <a href="<?= base_url('items/delete/' . $item['id']) ?>" class="btn btn-danger btn-pill" onclick="return confirm('Are you sure you want to completely delete this item? This action will move it to the Trash.');">
-                        <i class="bi bi-trash me-1"></i> Delete
+                        <i class="bi bi-trash me-2"></i> Delete
                     </a>
                 </div>
-                <button type="submit" class="btn btn-update btn-pill"><i class="bi bi-save me-1"></i> Update Item</button>
+                <button type="submit" class="btn btn-update btn-pill w-100 w-md-auto"><i class="bi bi-save me-2"></i> Update Item</button>
             </div>
         </form>
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Select2
+    $('.select2').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        minimumResultsForSearch: Infinity // Hides the search box since there are only two categories
+    });
+
     // Mobile Menu
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const sidebar = document.getElementById('sidebar');

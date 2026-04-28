@@ -671,12 +671,22 @@ function isActive($paths) {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: none;
+            font-size: 20px;
+            background: #666;
             border: none;
-            font-size: 1.5rem;
+            color: #ffffff;
             cursor: pointer;
-            color: var(--secondary);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            z-index: 10;
         }
+        .close-tutorial:hover { background: #555; }
 
         .timer-bar {
             width: 100%;
@@ -806,12 +816,12 @@ function isActive($paths) {
             position: absolute;
             top: 15px;
             right: 20px;
-            font-size: 28px;
-            background: rgba(255,255,255,0.8);
+            font-size: 24px;
+            background: #666;
             border: none;
-            color: #666;
+            color: #ffffff;
             cursor: pointer;
-            z-index: 10;
+            z-index: 50;
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -819,8 +829,9 @@ function isActive($paths) {
             align-items: center;
             justify-content: center;
             line-height: 1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
         }
-        .shopee-close-btn:hover { color: #333; background: #eee; }
+        .shopee-close-btn:hover { background: #555; }
         
         .shopee-modal-body {
             display: flex;

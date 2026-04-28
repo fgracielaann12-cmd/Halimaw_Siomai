@@ -571,7 +571,7 @@ if (!function_exists('getProductSKU')) {
             </div>
 
             <!-- 🔍 CONTROLS -->
-            <div class="controls-section d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+            <div class="controls-section d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 border p-3 rounded bg-white shadow-sm">
                 <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1.8;">
                     <label for="searchQuery" class="form-label mb-0 fw-bold text-nowrap">Search Item:</label>
                     <div class="position-relative w-100">

@@ -294,7 +294,7 @@ if (!function_exists('getProductSKU')) {
 
         .pos-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 216px));
+            grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
             justify-content: center;
             gap: 20px;
             max-width: 1400px;
@@ -310,7 +310,6 @@ if (!function_exists('getProductSKU')) {
             transition: all 0.25s ease;
             position: relative;
             width: 100%;
-            max-width: 216px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
@@ -743,12 +742,22 @@ if (!function_exists('getProductSKU')) {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: none;
+            font-size: 20px;
+            background: #666;
             border: none;
-            font-size: 1.5rem;
+            color: #ffffff;
             cursor: pointer;
-            color: var(--secondary);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            z-index: 10;
         }
+        .close-tutorial:hover { background: #555; }
 
         .timer-bar {
             width: 100%;

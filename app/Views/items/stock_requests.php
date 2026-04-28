@@ -172,7 +172,7 @@
         /* CONTAINER */
         .container {
             max-width: 96%;
-            padding: 30px 20px;
+            padding: 15px 20px 30px 20px;
         }
 
         /* CARDS */
@@ -251,6 +251,14 @@
             border-radius: 30px;
             font-weight: 500;
         }
+        .table .btn-icon {
+            padding: 4px 8px;
+            font-size: 1rem;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
         .table .btn-success {
             background: var(--success);
             color: white;
@@ -296,7 +304,7 @@
             body > #mobileMenuToggle { display: none !important; }
             .top-navbar {
                 border-radius: 0 !important;
-                margin: 0 0 15px 0 !important;
+                margin: 0 0 5px 0 !important;
             }
             #sidebar { transform: translateX(-100%); }
             .main-content { margin-left: 0; width: 100%; padding-top: 0 !important; }
@@ -314,21 +322,14 @@
             }
             .sidebar-overlay.active { display: block; }
 
-            .container { padding: 20px 15px; }
+            .container { padding: 5px 15px 20px 15px; }
             .d-md-flex { flex-direction: column; gap: 10px; }
             .btn-back, .btn-view-logs { width: 100%; }
             .table { min-width: 600px; font-size: 0.8rem; }
+            .table th, .table td { white-space: nowrap; padding: 12px 15px; }
 
             .summary-card {
-                padding: 10px 15px !important;
                 margin-bottom: 0 !important;
-            }
-            .summary-card h5 {
-                font-size: 0.95rem !important;
-                margin-bottom: 2px !important;
-            }
-            .summary-card h3 {
-                font-size: 1.3rem !important;
             }
         }
     </style>
@@ -371,7 +372,7 @@ $currentPath = $seg1 . '/' . $seg2;
         <?php endif; ?>
 
         <!-- Summary Cards -->
-        <div class="row text-center g-2 mb-3">
+        <div class="row text-center g-3 mb-3">
             <div class="col-md-4">
                 <div class="card border-start border-success border-4 summary-card">
                     <h5 class="text-success">Approved</h5>
@@ -392,15 +393,7 @@ $currentPath = $seg1 . '/' . $seg2;
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="d-md-flex justify-content-between align-items-center mb-3">
-            <a href="<?= site_url('items') ?>" class="btn-back mb-2 mb-md-0">
-                <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
-            </a>
-            <a href="<?= site_url('admin/stock-request-logs') ?>" class="btn-view-logs mb-2 mb-md-0">
-                <i class="bi bi-journal-text me-1"></i> View Request Logs
-            </a>
-        </div>
+
 
         <!-- Table -->
         <div class="table-responsive">
@@ -419,7 +412,8 @@ $currentPath = $seg1 . '/' . $seg2;
                 </thead>
                 <tbody>
                     <?php foreach ($requests as $r): ?>
-                    <tr>
+                    <?php $status = strtolower(trim($r['status'] ?? '')); ?>
+                    <tr class="<?= $status === 'pending' ? 'table-warning' : '' ?>">
                         <td><?= $r['id'] ?></td>
                         <td><?= esc($r['user_name'] ?? 'Unknown') ?></td>
                         <td><a href="<?= site_url('items/edit/' . $r['item_id']) ?>" class="text-decoration-none fw-semibold"><?= esc($r['item_name'] ?? 'Unknown') ?></a></td>
@@ -437,7 +431,6 @@ $currentPath = $seg1 . '/' . $seg2;
                         <td><?= esc($r['reason'] ?? '—') ?></td>
                         <td>
                             <?php
-                            $status = strtolower(trim($r['status'] ?? ''));
                             if ($status === 'approved')
                                 echo '<span class="badge bg-success">Approved</span>';
                             elseif ($status === 'rejected')
@@ -448,10 +441,16 @@ $currentPath = $seg1 . '/' . $seg2;
                         </td>
                         <td>
                             <?php if ($status === 'pending'): ?>
-                                <button class="btn btn-success btn-sm me-1" data-bs-toggle="modal"
-                                    data-bs-target="#approveModal" data-id="<?= $r['id'] ?>">Approve</button>
-                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal"
-                                    data-id="<?= $r['id'] ?>">Reject</button>
+                                <div class="d-flex flex-nowrap">
+                                    <button class="btn btn-success btn-sm btn-icon me-1" data-bs-toggle="modal"
+                                        data-bs-target="#approveModal" data-id="<?= $r['id'] ?>" title="Approve">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm btn-icon" data-bs-toggle="modal" data-bs-target="#rejectModal"
+                                        data-id="<?= $r['id'] ?>" title="Reject">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
                             <?php else: ?>
                                 <span class="text-muted">No actions</span>
                             <?php endif; ?>

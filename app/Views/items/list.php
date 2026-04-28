@@ -219,6 +219,13 @@
             .hide-mobile { display: none; }
             .summary-card h3 { font-size: 1.5rem; }
             .summary-card h6 { font-size: 0.8rem; }
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .controls-section > div {
+                width: 100%;
+            }
         }
 
         /* 🔽 Dropdown Slide Animation */
@@ -251,7 +258,7 @@
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 50px;
+            border-radius: 8px;
             transition: all 0.2s;
             margin-bottom: 20px;
             text-decoration: none;
@@ -300,36 +307,45 @@
             border: none;
             color: inherit;
             font-size: 1.3rem;
-            cursor: pointer;
             margin-left: 12px;
         }
 
-        .inventory-alert, .expiry-alert {
+        .floating-alert {
             position: fixed;
             left: 50%;
-            transform: translateX(-50%);
             z-index: 9998;
-            padding: 10px 20px;
-            border-radius: 10px;
+            padding: 12px 20px;
+            border-radius: 12px;
             font-weight: 500;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             cursor: pointer;
             opacity: 0;
-            transition: opacity 0.5s;
-            max-width: 480px;
+            transform: translateX(-50%) translateY(-20px);
+            transition: all 0.4s ease-in-out;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: max-content;
+            max-width: 92%;
+        }
+        .floating-alert.show { 
+            opacity: 1; 
+            transform: translateX(-50%) translateY(0); 
         }
         .inventory-alert {
             top: 80px;
             background: #fff3cd;
             color: #856404;
+            border: 1px solid #ffeeba;
         }
         .expiry-alert {
-            top: 160px;
+            top: 155px;
             background: #f8d7da;
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
-        .inventory-alert.show, .expiry-alert.show { opacity: 1; }
+
 
         /* TABLE */
         .table-card {
@@ -500,13 +516,16 @@ function getSku($name, $variation = '') {
 <!-- MAIN CONTENT -->
 <div class="main-content">
     <!-- TOP NAVBAR -->
-    <div class="top-navbar" style="padding-left: 20px;">
+    <div class="top-navbar" style="padding-left: 20px; padding-right: 20px;">
         <div class="d-flex align-items-center gap-3">
             <button class="mobile-menu-toggle" id="mobileMenuToggleInline">
                 <i class="bi bi-list"></i>
             </button>
             <h5 class="mb-0"><i class="bi bi-box-seam me-2" style="font-size: 1.25rem;"></i>Admin Inventory</h5>
         </div>
+        <button onclick="location.reload()" class="btn btn-light shadow-sm border" style="height: 40px; width: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px;" title="Refresh Table">
+            <i class="bi bi-arrow-clockwise" style="font-size: 1.2rem; color: #3a3b45;"></i>
+        </button>
     </div>
 
     <div class="container">
@@ -514,16 +533,18 @@ function getSku($name, $variation = '') {
         $totalValue = array_reduce($items, fn($sum, $item) => $sum + (($item['price'] ?? 0) * ($item['quantity'] ?? 0)), 0);
         $lowStockItems = array_filter($items, function($i) {
             if (stripos($i['name'], 'siomai') !== false) {
-                return ($i['pack_small_qty'] ?? 0) <= 10 && ($i['pack_medium_qty'] ?? 0) <= 10 && ($i['pack_biggest_qty'] ?? 0) <= 10;
+                return ($i['pack_small_qty'] ?? 0) <= 10 || ($i['pack_medium_qty'] ?? 0) <= 10 || ($i['pack_biggest_qty'] ?? 0) <= 10;
             }
             return $i['quantity'] <= 10;
         });
         $expiringItems = array_filter($items, function ($i) {
             if (empty($i['expiration_date']) || $i['expiration_date'] === '0000-00-00') return false;
             $today = new DateTime();
+            $today->setTime(0, 0, 0);
             $expiration = new DateTime($i['expiration_date']);
+            $expiration->setTime(0, 0, 0);
             $daysLeft = (int) $today->diff($expiration)->format('%r%a');
-            return $daysLeft <= 10;
+            return $daysLeft >= 0 && $daysLeft <= 10;
         });
         ?>
 
@@ -543,18 +564,19 @@ function getSku($name, $variation = '') {
             </div>
         <?php endif; ?>
 
+        <!-- Add New Item -->
+        <div class="d-flex justify-content-end mb-3">
+            <a href="<?= site_url('items/add') ?>" class="btn-add-new-item mb-0 shadow-sm">Add New Item</a>
+        </div>
+
         <!-- Controls -->
         <div class="controls-section d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 border p-3 rounded bg-white shadow-sm">
             <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1.8;">
+                <label class="form-label mb-0 fw-bold text-nowrap">Search Item:</label>
                 <div class="position-relative w-100">
                     <input type="text" id="searchQuery" class="form-control" style="padding-right: 2.2rem;" placeholder="Search by item name" oninput="filterStatus()">
                     <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3" style="color: #6c757d; opacity: 0.6; pointer-events: none;"></i>
                 </div>
-                <style>
-                    .search-btn-responsive { width: 100%; }
-                    @media (min-width: 768px) { .search-btn-responsive { width: 120px !important; flex-shrink: 0; } }
-                </style>
-                <button onclick="filterStatus()" class="btn btn-primary search-btn-responsive">Search</button>
             </div>
             <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1;">
                 <label class="form-label mb-0 fw-bold">Category:</label>
@@ -596,9 +618,10 @@ function getSku($name, $variation = '') {
 
         <!-- Alerts -->
         <?php if (!empty($lowStockItems)): ?>
-            <div class="inventory-alert" id="lowStockAlert" onclick="showLowStockItems()" style="cursor:pointer;">
+            <div class="floating-alert inventory-alert" id="lowStockAlert" onclick="showLowStockItems()">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
                 You have <?= count($lowStockItems) ?> item(s) running low on stock.
-                <span style="text-decoration: underline; font-size: 0.9rem; margin-left:6px;">Click to view</span>
+                <span class="ms-2 text-decoration-underline" style="font-size: 0.85rem;">Click to view</span>
             </div>
             <div class="text-center mb-3">
                 <button id="showAllBtn" class="btn btn-outline-secondary btn-sm" style="display:none;" onclick="showAllItems()">Show All Items</button>
@@ -607,20 +630,15 @@ function getSku($name, $variation = '') {
 
         <?php if (!empty($expiringItems)): ?>
             <a href="<?= site_url('items/expiring-soon') ?>" class="text-decoration-none">
-                <div class="expiry-alert">
+                <div class="floating-alert expiry-alert">
+                    <i class="bi bi-shield-exclamation me-2 fs-6"></i>
                     You have <?= count($expiringItems) ?> item(s) expiring soon!
-                    <span style="font-size: 0.9rem; text-decoration: underline;">View details →</span>
+                    <span class="ms-2 text-decoration-underline" style="font-size: 0.85rem;">View details →</span>
                 </div>
             </a>
         <?php endif; ?>
 
-        <!-- Add New Item & Refresh Group -->
-        <div class="d-flex mb-3 align-items-center gap-2">
-            <a href="<?= site_url('items/add') ?>" class="btn-add-new-item mb-0">Add New Item</a>
-            <button onclick="location.reload()" class="btn btn-light shadow-sm border" style="height: 40px; width: 45px; display: flex; align-items: center; justify-content: center; border-radius: var(--border-radius);" title="Refresh Table">
-                <i class="bi bi-arrow-clockwise" style="font-size: 1.2rem;"></i>
-            </button>
-        </div>
+        <!-- Alerts Container spacing handled above -->
 
         <!-- Table -->
         <?php if (!empty($items) && is_array($items)): ?>
@@ -673,7 +691,7 @@ function getSku($name, $variation = '') {
                         }
                         $isSiomai = stripos($item['name'], 'siomai') !== false;
                         if ($isSiomai) {
-                            $isLowStock = ($item['pack_small_qty'] ?? 0) <= 10 && ($item['pack_medium_qty'] ?? 0) <= 10 && ($item['pack_biggest_qty'] ?? 0) <= 10;
+                            $isLowStock = ($item['pack_small_qty'] ?? 0) <= 10 || ($item['pack_medium_qty'] ?? 0) <= 10 || ($item['pack_biggest_qty'] ?? 0) <= 10;
                         } else {
                             $isLowStock = $item['quantity'] <= 10;
                         }
@@ -712,7 +730,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle hide-mobile"><?= esc($item['created_at']) ?></td>
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
-                                    <a href="<?= site_url('items/edit/' . $item['id']) ?>" class="btn btn-sm btn-edit">
+                                    <a href="<?= site_url('items/edit/' . $item['id'] . '?size=' . strtolower($sz['l'])) ?>" class="btn btn-sm btn-edit">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
                                     <div class="d-flex align-items-center quantity-control" data-id="<?= $item['id'] ?>" data-size="<?= $sz['s'] ?>">
@@ -999,20 +1017,22 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Alerts
-    document.querySelectorAll('.notification-alert, .inventory-alert, .expiry-alert').forEach((alert, i) => {
+    document.querySelectorAll('.notification-alert').forEach((alert, i) => {
         setTimeout(() => alert.classList.add('show'), 100 + i * 150);
-        if (alert.classList.contains('notification-alert')) {
-            setTimeout(() => {
-                alert.classList.remove('show');
-                setTimeout(() => alert.remove(), 400);
-            }, 5000);
-            alert.querySelector('.close-alert')?.addEventListener('click', () => alert.remove());
-        } else {
-            setTimeout(() => {
-                alert.classList.remove('show');
-                setTimeout(() => alert.remove(), 400);
-            }, 4000);
-        }
+        setTimeout(() => {
+            alert.classList.remove('show');
+            setTimeout(() => alert.remove(), 400);
+        }, 5000);
+        alert.querySelector('.close-alert')?.addEventListener('click', () => alert.remove());
+    });
+
+    // Floating Auto-dismiss Alerts
+    document.querySelectorAll('.floating-alert').forEach((alert, i) => {
+        setTimeout(() => alert.classList.add('show'), 100 + i * 200);
+        setTimeout(() => {
+            alert.classList.remove('show');
+            setTimeout(() => alert.remove(), 400); // Wait for transition
+        }, 4000 + i * 500);
     });
 
 

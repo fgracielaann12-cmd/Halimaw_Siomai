@@ -173,24 +173,6 @@
             padding: 30px 20px;
         }
 
-        /* BUTTONS */
-        .btn-back {
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 20px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            transition: all 0.2s;
-            margin-bottom: 20px;
-        }
-        .btn-back:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
 
         /* FILTER CARD */
         .filter-card {
@@ -201,38 +183,10 @@
             margin-bottom: 25px;
         }
 
-        .filter-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            min-width: 160px;
-        }
-
-        .filter-group label {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--dark);
-        }
-
-        .search-container {
-            display: flex;
-            gap: 10px;
-            flex: 1;
-            min-width: 250px;
-        }
-
         #searchQuery {
             flex: 1;
-            padding: 8px 16px;
-            border-radius: 30px;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
             border: 1px solid #ddd;
             font-size: 0.95rem;
         }
@@ -242,33 +196,55 @@
             outline: none;
         }
 
-        .search-button {
-            background: var(--success);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 8px 16px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .search-button:hover {
-            background: #17a673;
-            transform: translateY(-2px);
-        }
-
         /* TABLE CARD */
         .table-card {
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
-            padding: 20px;
+            overflow: hidden;
+            padding: 0;
+            margin-bottom: 24px;
+        }
+
+        /* 🔽 Dropdown Slide Animation */
+        @keyframes slideDownFade {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .dropdown-menu.show {
+            animation: slideDownFade 0.2s ease-out forwards;
+        }
+        .dropdown-item.active, .dropdown-item:active {
+            background-color: var(--primary);
+            color: white;
         }
 
         /* TABLE */
         .table {
-            min-width: 900px;
-            font-size: 0.9rem;
+            width: 100%;
+            font-size: 0.8rem;
             margin: 0;
+        }
+        .table th, .table td {
+            white-space: nowrap;
+            padding: 0.5rem 0.5rem;
+        }
+
+        /* Custom Table Scrollbar */
+        .table-responsive::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+            margin: 0 10px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
         .table th {
             background: var(--primary);
@@ -324,16 +300,14 @@
             .sidebar-overlay.active { display: block; }
 
             .container { padding: 20px 15px; }
-            .filter-row { flex-direction: column; gap: 15px; }
-            .search-container { flex-direction: column; }
-            .search-button, #searchQuery { width: 100%; }
-
-            /* Hide less important columns */
-            .table th:nth-child(n+9):not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)),
-            .table td:nth-child(n+9):not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)) {
-                display: none;
+            #searchQuery { width: 100%; }
+            .table { 
+                min-width: 800px; 
+                font-size: 0.9rem !important; 
             }
-            .table { min-width: 600px; }
+            .table th, .table td {
+                padding: 0.75rem 0.5rem !important;
+            }
         }
     </style>
 </head>
@@ -364,49 +338,64 @@
             </div>
         <?php endif; ?>
 
-        <!-- Back Button -->
-        <a href="<?= base_url('/items') ?>" class="btn-back">
-            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
-        </a>
 
         <?php if (!empty($items) || !empty($deletedItems)): ?>
             <!-- Filter Card -->
             <div class="filter-card">
-                <div class="filter-row">
-                    <div class="search-container">
-                        <input type="text" id="searchQuery" class="form-control" placeholder="Search by Product ID or Name" oninput="filterAndSort()">
-                        <button onclick="filterAndSort()" class="search-button">
-                            <i class="bi bi-search"></i> Search
-                        </button>
+                <div class="filter-row d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3 w-100">
+                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:2.7;">
+                        <label class="form-label mb-0 fw-bold text-nowrap">Search Item:</label>
+                        <div class="position-relative w-100">
+                            <input type="text" id="searchQuery" class="form-control" style="padding-right: 2.2rem;" placeholder="Search by Product ID or Name" oninput="filterAndSort()">
+                            <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3" style="color: #6c757d; opacity: 0.6; pointer-events: none;"></i>
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <label for="categoryFilter">Category</label>
-                        <select id="categoryFilter" class="form-select" onchange="filterAndSort()">
-                            <option value="all">All Categories</option>
-                            <option value="food">Food</option>
-                            <option value="non-food">Non-Food</option>
-                        </select>
+                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1;">
+                        <label class="form-label mb-0 fw-bold text-nowrap">Category:</label>
+                        <div class="dropdown w-100">
+                            <button class="btn btn-outline-secondary dropdown-toggle w-100 d-flex justify-content-between align-items-center bg-white text-dark" type="button" id="categoryFilterBtn" data-bs-toggle="dropdown" aria-expanded="false" style="border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 0.375rem 0.75rem;">
+                                <span id="categoryFilterText">All Categories</span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="categoryFilterBtn">
+                                <li><a class="dropdown-item active" href="#" onclick="selectDropdown('categoryFilter', 'all', 'All Categories', event)">All Categories</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('categoryFilter', 'food', 'Food', event)">Food</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('categoryFilter', 'non-food', 'Non-Food', event)">Non-Food</a></li>
+                            </ul>
+                            <input type="hidden" id="categoryFilter" value="all">
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <label for="sortFilter">Sort By</label>
-                        <select id="sortFilter" class="form-select" onchange="filterAndSort()">
-                            <option value="deleted_desc">Latest Deleted</option>
-                            <option value="deleted_asc">Oldest Deleted</option>
-                            <option value="name_asc">Name (A–Z)</option>
-                            <option value="name_desc">Name (Z–A)</option>
-                            <option value="quantity_asc">Quantity (Low → High)</option>
-                            <option value="quantity_desc">Quantity (High → Low)</option>
-                            <option value="date_asc">Date (Oldest → Newest)</option>
-                            <option value="date_desc">Date (Newest → Oldest)</option>
-                        </select>
+                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1;">
+                        <label class="form-label mb-0 fw-bold text-nowrap">Sort By:</label>
+                        <div class="dropdown w-100">
+                            <button class="btn btn-outline-secondary dropdown-toggle w-100 d-flex justify-content-between align-items-center bg-white text-dark" type="button" id="sortFilterBtn" data-bs-toggle="dropdown" aria-expanded="false" style="border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 0.375rem 0.75rem;">
+                                <span id="sortFilterText">Latest Deleted</span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="sortFilterBtn">
+                                <li><a class="dropdown-item active" href="#" onclick="selectDropdown('sortFilter', 'deleted_desc', 'Latest Deleted', event)">Latest Deleted</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'deleted_asc', 'Oldest Deleted', event)">Oldest Deleted</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'name_asc', 'Name (A–Z)', event)">Name (A–Z)</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'name_desc', 'Name (Z–A)', event)">Name (Z–A)</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'quantity_asc', 'Quantity (Low → High)', event)">Quantity (Low → High)</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'quantity_desc', 'Quantity (High → Low)', event)">Quantity (High → Low)</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'date_asc', 'Date (Oldest → Newest)', event)">Date (Oldest → Newest)</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'date_desc', 'Date (Newest → Oldest)', event)">Date (Newest → Oldest)</a></li>
+                            </ul>
+                            <input type="hidden" id="sortFilter" value="deleted_desc">
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <label for="deleteTypeFilter">Delete Type</label>
-                        <select id="deleteTypeFilter" class="form-select" onchange="filterAndSort()">
-                            <option value="all">All Delete Types</option>
-                            <option value="auto">Auto Deleted</option>
-                            <option value="manual">Manually Deleted</option>
-                        </select>
+                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1;">
+                        <label class="form-label mb-0 fw-bold text-nowrap">Delete Type:</label>
+                        <div class="dropdown w-100">
+                            <button class="btn btn-outline-secondary dropdown-toggle w-100 d-flex justify-content-between align-items-center bg-white text-dark" type="button" id="deleteTypeFilterBtn" data-bs-toggle="dropdown" aria-expanded="false" style="border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 0.375rem 0.75rem;">
+                                <span id="deleteTypeFilterText">All Delete Types</span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="deleteTypeFilterBtn">
+                                <li><a class="dropdown-item active" href="#" onclick="selectDropdown('deleteTypeFilter', 'all', 'All Delete Types', event)">All Delete Types</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('deleteTypeFilter', 'auto', 'Auto Deleted', event)">Auto Deleted</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('deleteTypeFilter', 'manual', 'Manually Deleted', event)">Manually Deleted</a></li>
+                            </ul>
+                            <input type="hidden" id="deleteTypeFilter" value="all">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -424,7 +413,6 @@
                                 <th>Price</th>
                                 <th>Expiration Date</th>
                                 <th>Days Expired</th>
-                                <th>Barcode</th>
                                 <th>Delete Type</th>
                                 <th>Status</th>
                                 <th>Created At</th>
@@ -457,7 +445,6 @@
                                     <td>₱<?= esc(number_format($item['price'] ?? 0, 2)) ?></td>
                                     <td><?= esc($item['expiration_date'] ?? '-') ?></td>
                                     <td><?= $daysExpired > 0 ? "Expired $daysExpired day" . ($daysExpired == 1 ? '' : 's') . " ago" : '-' ?></td>
-                                    <td><?= esc($item['barcode'] ?? '-') ?></td>
                                     <td><span class="badge <?= $deleteBadge ?>"><?= $deleteType ?></span></td>
                                     <td><span class="badge bg-danger">Expired</span></td>
                                     <td><?= esc($item['created_at'] ?? '-') ?></td>
@@ -509,6 +496,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Helper for Custom Dropdowns
+    window.selectDropdown = function(inputId, value, text, event) {
+        event.preventDefault();
+        document.getElementById(inputId).value = value;
+        document.getElementById(inputId + 'Text').textContent = text;
+        const menu = event.target.closest('.dropdown-menu');
+        menu.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
+        event.target.classList.add('active');
+        filterAndSort();
+    };
+
     // Filter & Sort
     window.filterAndSort = function() {
         const query = (document.getElementById('searchQuery').value || '').toLowerCase();
@@ -521,7 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const product = row.children[0].textContent.toLowerCase();
             const name = row.children[1].textContent.toLowerCase();
             const cat = row.children[2].textContent.toLowerCase();
-            const type = row.children[8].textContent.toLowerCase();
+            const type = row.children[7].textContent.toLowerCase();
             row.style.display = ((product.includes(query) || name.includes(query)) && 
                 (category === 'all' || cat === category) && 
                 (deleteType === 'all' || 
@@ -539,11 +537,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'quantity_desc': return parseInt(getVal(b, 3) || 0) - parseInt(getVal(a, 3) || 0);
                 case 'date_asc': return new Date(getVal(a, 5)) - new Date(getVal(b, 5));
                 case 'date_desc': return new Date(getVal(b, 5)) - new Date(getVal(a, 5));
-                case 'deleted_asc': return new Date(getVal(a, 11) || 0) - new Date(getVal(b, 11) || 0);
+                case 'deleted_asc': return new Date(getVal(a, 10) || 0) - new Date(getVal(b, 10) || 0);
                 case 'deleted_desc':
                 default:
-                    const typeA = getVal(a, 8), typeB = getVal(b, 8);
-                    const dateA = new Date(getVal(a, 11) || 0), dateB = new Date(getVal(b, 11) || 0);
+                    const typeA = getVal(a, 7), typeB = getVal(b, 7);
+                    const dateA = new Date(getVal(a, 10) || 0), dateB = new Date(getVal(b, 10) || 0);
                     if (typeA.includes('manual') && !typeB.includes('manual')) return -1;
                     if (!typeA.includes('manual') && typeB.includes('manual')) return 1;
                     return dateB - dateA;

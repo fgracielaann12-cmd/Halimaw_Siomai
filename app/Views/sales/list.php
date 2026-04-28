@@ -285,6 +285,14 @@
             #sidebar { transform: translateX(-100%); }
             .main-content { margin-left: 0; width: 100%; }
             #sidebar.active { transform: translateX(0); }
+            
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .controls-section > div {
+                width: 100%;
+            }
 
             .sidebar-overlay {
                 display: none;
@@ -309,14 +317,16 @@
             .chart-filters {
                 width: 100%;
                 display: flex;
-                overflow-x: auto;
-                white-space: nowrap;
             }
             .chart-filter-btn {
-                flex: 1 0 auto;
-                text-align: center;
-                padding: 6px 10px;
-                font-size: 0.8rem;
+                flex: 1;
+                min-width: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 6px 0;
+                font-size: 0.7rem;
+                white-space: nowrap;
             }
         }
         /* PERFORMANCE METRICS CSS */
@@ -587,19 +597,20 @@
             <?php endif; ?>
 
             <!-- Controls -->
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
-                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 w-100">
-                    <!-- Search -->
-                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1;">
-                        <input type="text" id="searchQuery" class="form-control" placeholder="Search by product or user" oninput="searchSales()">
-                        <button onclick="searchSales()" class="btn btn-primary w-100 w-md-auto">Search</button>
+            <div class="controls-section d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 border p-3 rounded bg-white shadow-sm">
+                <!-- Search -->
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1.8;">
+                    <label class="form-label mb-0 fw-bold text-nowrap">Search Item:</label>
+                    <div class="position-relative w-100">
+                        <input type="text" id="searchQuery" class="form-control" style="padding-right: 2.2rem;" placeholder="Search by product or user" oninput="searchSales()">
+                        <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3" style="color: #6c757d; opacity: 0.6; pointer-events: none;"></i>
                     </div>
-                    
-                    <!-- Date Range -->
-                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1;">
-                        <label for="dateFilter" class="form-label mb-0 fw-bold">Date:</label>
-                        <input type="date" id="dateFilter" class="form-control" onchange="filterDate()">
-                    </div>
+                </div>
+                
+                <!-- Date Range -->
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1;">
+                    <label for="dateFilter" class="form-label mb-0 fw-bold text-nowrap">Date:</label>
+                    <input type="date" id="dateFilter" class="form-control" onchange="filterDate()">
                 </div>
             </div>
 

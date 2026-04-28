@@ -177,6 +177,7 @@
             box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
             outline: none;
         }
+
         .search-button {
             background: var(--primary);
             color: white;
@@ -286,13 +287,14 @@
             </div>
         <?php endif; ?>
 
-        <!-- Search -->
-        <div class="search-container">
-            <div class="search-bar">
-                <input type="text" id="searchQuery" class="form-control" placeholder="Search by item name" oninput="searchItems()">
-                <button onclick="searchItems()" class="search-button">
-                    <i class="bi bi-search"></i> Search
-                </button>
+        <!-- Controls -->
+        <div class="controls-section d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 border p-3 rounded bg-white shadow-sm">
+            <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 w-100">
+                <label class="form-label mb-0 fw-bold text-nowrap">Search Item:</label>
+                <div class="position-relative w-100">
+                    <input type="text" id="searchQuery" class="form-control" style="padding-right: 2.2rem;" placeholder="Search by item name" oninput="searchItems()">
+                    <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3" style="color: #6c757d; opacity: 0.6; pointer-events: none;"></i>
+                </div>
             </div>
         </div>
 
@@ -300,7 +302,7 @@
         <?php if (!empty($items) && is_array($items)): ?>
             <div class="table-card">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table id="itemsTable" class="table table-hover align-middle">
                         <thead>
                             <tr>
                                 <th>Name</th>

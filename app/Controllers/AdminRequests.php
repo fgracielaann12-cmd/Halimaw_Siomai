@@ -67,7 +67,21 @@ $requests = $builder->get()->getResultArray();
             return redirect()->back()->with('error', 'Item not found.');
         }
 
-        $oldQty = (int) $item['quantity'];
+        $reason = $request['reason'] ?? '';
+        $qtyField = 'quantity';
+        
+        if (preg_match('/\[Variation:\s*(Small|Medium|Large)\]/i', $reason, $matches)) {
+            $varType = strtolower($matches[1]);
+            if ($varType === 'small') {
+                $qtyField = 'pack_small_qty';
+            } elseif ($varType === 'medium') {
+                $qtyField = 'pack_medium_qty';
+            } elseif ($varType === 'large') {
+                $qtyField = 'pack_biggest_qty';
+            }
+        }
+
+        $oldQty = (int) ($item[$qtyField] ?? 0);
         $qty = abs((int)$request['quantity']); // ensure positive
 
         // Handle action: add or subtract
@@ -80,13 +94,13 @@ $requests = $builder->get()->getResultArray();
         }
 
         // Update item quantity
-        $itemModel->update($item['id'], ['quantity' => $newQty]);
+        $itemModel->update($item['id'], [$qtyField => $newQty]);
 
         // Log the update to item_logs
         $logModel->insert([
             'item_id'    => $item['id'],
-            'old_data'   => json_encode(['quantity' => $oldQty]),
-            'new_data'   => json_encode(['quantity' => $newQty]),
+            'old_data'   => json_encode([$qtyField => $oldQty]),
+            'new_data'   => json_encode([$qtyField => $newQty]),
             'updated_by' => session()->get('username') ?? 'Admin',
             'updated_at' => date('Y-m-d H:i:s'),
         ]);

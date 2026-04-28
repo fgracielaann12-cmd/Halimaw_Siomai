@@ -318,6 +318,18 @@
             .d-md-flex { flex-direction: column; gap: 10px; }
             .btn-back, .btn-view-logs { width: 100%; }
             .table { min-width: 600px; font-size: 0.8rem; }
+
+            .summary-card {
+                padding: 10px 15px !important;
+                margin-bottom: 0 !important;
+            }
+            .summary-card h5 {
+                font-size: 0.95rem !important;
+                margin-bottom: 2px !important;
+            }
+            .summary-card h3 {
+                font-size: 1.3rem !important;
+            }
         }
     </style>
 </head>
@@ -359,21 +371,21 @@ $currentPath = $seg1 . '/' . $seg2;
         <?php endif; ?>
 
         <!-- Summary Cards -->
-        <div class="row text-center mb-4">
-            <div class="col-md-4 mb-3">
-                <div class="card border-start border-success border-4">
+        <div class="row text-center g-2 mb-3">
+            <div class="col-md-4">
+                <div class="card border-start border-success border-4 summary-card">
                     <h5 class="text-success">Approved</h5>
                     <h3><?= $approvedCount ?? 0 ?></h3>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
-                <div class="card border-start border-danger border-4">
+            <div class="col-md-4">
+                <div class="card border-start border-danger border-4 summary-card">
                     <h5 class="text-danger">Rejected</h5>
                     <h3><?= $rejectedCount ?? 0 ?></h3>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
-                <div class="card border-start border-warning border-4">
+            <div class="col-md-4">
+                <div class="card border-start border-warning border-4 summary-card">
                     <h5 class="text-warning">Pending</h5>
                     <h3><?= $pendingCount ?? 0 ?></h3>
                 </div>

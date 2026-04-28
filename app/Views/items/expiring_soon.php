@@ -165,16 +165,31 @@
             display: flex;
             gap: 10px;
         }
-        .form-select, .form-control {
-            font-size: 0.9rem;
-            border-radius: 4px;
+        #searchQuery {
+            flex: 1;
+            padding: 8px 16px;
+            border-radius: 30px;
             border: 1px solid #ddd;
-            padding: 6px 10px;
+            font-size: 0.95rem;
         }
-        .form-control:focus, .form-select:focus {
+        #searchQuery:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
             outline: none;
+        }
+
+        .search-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .search-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
         }
 
         /* CARD */

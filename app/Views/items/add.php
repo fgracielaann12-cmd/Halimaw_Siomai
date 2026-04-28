@@ -86,6 +86,8 @@
             font-weight: 500;
         }
         #sidebar .nav-link:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             background-color: var(--sidebar-hover);
             color: white;
         }

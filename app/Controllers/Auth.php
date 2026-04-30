@@ -80,7 +80,7 @@ class Auth extends Controller
             'username' => $this->request->getPost('username'),
             'email' => $this->request->getPost('email'),
             'password' => $this->request->getPost('password'),
-            'role' => 'user'
+            'role' => 'staff'
         ]);
 
         return redirect()->to('/login')->with('success', '✅ Account created successfully! You can now log in.');

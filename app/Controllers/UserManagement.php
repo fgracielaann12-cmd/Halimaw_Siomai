@@ -21,7 +21,7 @@ class UserManagement extends BaseController
     {
         $data = [
             'title' => 'Staff Management',
-            'users' => $this->userModel->orderBy('id', 'DESC')->findAll()
+            'users' => $this->userModel->orderBy('id', 'ASC')->findAll()
         ];
 
         return view('user/admin/users/index', $data);

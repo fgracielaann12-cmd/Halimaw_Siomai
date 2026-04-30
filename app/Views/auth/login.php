@@ -10,7 +10,7 @@
 <style>
 /* --- Keep all your existing styles here --- */
 :root { --primary: #4e73df; --primary-dark: #2e59d9; --secondary: #858796; --success: #1cc88a; --danger: #e74a3b; --warning: #f6c23e; --info: #36b9cc; --light: #f8f9fc; --dark: #5a5c69; }
-body { background: linear-gradient(135deg, #4e73df, #2e59d9); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; position: relative; overflow: hidden; }
+body { background: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; position: relative; overflow: hidden; }
 .login-card { width: 100%; max-width: 420px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 40px 35px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2); position: relative; z-index: 1; animation: fadeInUp 0.6s ease-out; }
 .logo-container { display: flex; justify-content: center; margin-bottom: 25px; position: relative; }
 .logo { max-width: 120px; height: auto; border-radius: 12px; box-shadow: 0 8px 25px rgba(78,115,223,0.4); transition: transform 0.3s ease, box-shadow 0.3s ease; border: 3px solid white; }

@@ -12,7 +12,7 @@
 
     <style>
     body {
-        background: linear-gradient(135deg, #d5d7da, #c1c5ca);
+        background: white;
         font-family: Helvetica, Arial, sans-serif;
         min-height: 100vh;
         display: flex;
@@ -93,7 +93,7 @@
 </head>
 
 <body>
-
+q
     <div class="login-card">
 
         <!-- Logo -->

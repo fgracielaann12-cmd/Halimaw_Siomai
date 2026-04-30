@@ -115,23 +115,6 @@
         /* MOBILE MENU */
         .mobile-menu-toggle {
             display: none;
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 998;
-            background: var(--sidebar-bg);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: var(--card-shadow);
-        }
-
-        .mobile-menu-toggle-inline {
-            display: none;
             background: var(--sidebar-bg);
             color: white;
             border: none;
@@ -146,17 +129,19 @@
             flex-shrink: 0;
             transition: all 0.2s;
         }
-        .mobile-menu-toggle-inline:hover {
+        .mobile-menu-toggle:hover {
             background: var(--sidebar-hover);
         }
+        body > #mobileMenuToggle { display: none !important; }
 
         /* TOP NAVBAR */
         .top-navbar {
             background: white;
-            padding: 12px 20px;
+            height: 60px;
+            padding: 0 20px;
             border-radius: 0 0 var(--border-radius) var(--border-radius);
             box-shadow: var(--card-shadow);
-            margin: 0 0 10px 0 !important;
+            margin: 0 0 20px 0 !important;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -278,8 +263,7 @@
 
         /* MEDIA QUERIES */
         @media (max-width: 991px) {
-            .mobile-menu-toggle { display: block; }
-            .mobile-menu-toggle-inline { display: flex; }
+            .mobile-menu-toggle { display: flex; }
             body > #mobileMenuToggle { display: none !important; }
             .top-navbar {
                 border-radius: 0 !important;
@@ -321,10 +305,10 @@
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
-    <!-- TOP NAVBAR MATCHING STAFF POS/DASHBOARD -->
-    <div class="top-navbar">
+    <!-- TOP NAVBAR -->
+    <div class="top-navbar" style="padding-left: 20px;">
         <div class="d-flex align-items-center gap-3">
-            <button class="mobile-menu-toggle-inline d-lg-none" id="mobileMenuToggleInline">
+            <button class="mobile-menu-toggle" id="mobileMenuToggleInline">
                 <i class="bi bi-list"></i>
             </button>
             <h5 class="mb-0"><i class="bi bi-trash-fill me-2" style="font-size: 1.25rem;"></i>Expired</h5>

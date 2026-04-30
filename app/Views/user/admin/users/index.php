@@ -33,7 +33,7 @@
 </style>
 
 <div class="container-fluid">
-    <div class="d-flex justify-content-start align-items-center mb-4">
+    <div class="d-flex justify-content-start align-items-center mb-4 animated-actions">
         <a href="<?= site_url('admin/staff/users/create') ?>" class="btn btn-primary shadow-sm px-4 py-2 fw-semibold" style="transition: all 0.3s ease; border-radius: 0.375rem;">
             <i class="bi bi-person-plus-fill me-2"></i> Add Staff
         </a>

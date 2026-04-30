@@ -6,31 +6,138 @@
 <title>Login | Halimaw Siomai</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* --- Keep all your existing styles here --- */
-:root { --primary: #4e73df; --primary-dark: #2e59d9; --secondary: #858796; --success: #1cc88a; --danger: #e74a3b; --warning: #f6c23e; --info: #36b9cc; --light: #f8f9fc; --dark: #5a5c69; }
-body { background: linear-gradient(-45deg, #000428, #004e92, #1e3c72, #6dd5ed); background-size: 300% 300%; animation: gradientBG 6s ease infinite; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; position: relative; overflow: hidden; }
-.login-card { width: 100%; max-width: 420px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 40px 35px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2); position: relative; z-index: 1; animation: fadeInUp 0.6s ease-out; }
-.logo-container { display: flex; justify-content: center; margin-bottom: 25px; position: relative; }
-.logo { max-width: 120px; height: auto; border-radius: 12px; box-shadow: 0 8px 25px rgba(78,115,223,0.4); transition: transform 0.3s ease, box-shadow 0.3s ease; border: 3px solid white; }
-.logo:hover { transform: scale(1.05); box-shadow: 0 12px 30px rgba(78,115,223,0.6); }
-.login-title { text-align: center; font-size: 1.8rem; font-weight: 700; color: var(--dark); margin-bottom: 30px; text-shadow: 0 1px 2px rgba(0,0,0,0.1); letter-spacing: -0.5px; }
-.login-subtitle { text-align: center; color: var(--secondary); margin-bottom: 25px; font-size: 0.95rem; font-weight: 500; }
-.form-control { height: 52px; border-radius: 12px; font-size: 16px; border: 2px solid #e1e5f1; padding: 0 20px; background: #fafbff; transition: all 0.3s ease; font-weight: 500; }
-.form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(78,115,223,0.2); background: white; outline: none; }
-.form-control::placeholder { color: var(--secondary); font-weight: 400; }
-.input-group { position: relative; margin-bottom: 20px; }
-.input-group i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 18px; }
-.input-group input { padding-left: 50px; }
-.submit-button { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 16px; letter-spacing: 0.5px; text-transform: uppercase; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(78,115,223,0.4); }
-.submit-button:hover { background: linear-gradient(135deg, var(--primary-dark), #1a4bb8); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(78,115,223,0.6); }
-.alert { border-radius: 12px; font-weight: 600; text-align: center; padding: 15px 20px; margin-bottom: 25px; border: none; font-size: 0.95rem; animation: slideIn 0.4s ease; }
-.alert-danger { background: linear-gradient(135deg, #ffebee, #f8d7da); color: #c62828; border-left: 4px solid #e74a3b; }
-.alert-success { background: linear-gradient(135deg, #e8f5e9, #d1e7dd); color: #2e7d32; border-left: 4px solid #1cc88a; }
+:root { --primary: #0da1f2; --primary-dark: #0a81c2; --secondary: #858796; --dark: #5a5c69; }
+body { 
+    background: linear-gradient(-45deg, #000428, #004e92, #1e3c72, #6dd5ed);
+    background-size: 300% 300%; 
+    animation: gradientBG 6s ease infinite;
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    min-height: 100vh; 
+    margin: 0; 
+    padding: 20px; 
+    font-family: 'Poppins', sans-serif;
+    position: relative; 
+    overflow: hidden;
+}
+.login-card { 
+    width: 100%; 
+    max-width: 420px; 
+    background: #ffffff; 
+    padding: 40px 35px; 
+    border-radius: 12px; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+    border: 2px solid #0da1f2; 
+    position: relative; 
+    z-index: 1; 
+    animation: fadeInUp 0.6s ease-out; 
+}
+.logo-container { 
+    display: flex; 
+    justify-content: center; 
+    margin-bottom: 10px; 
+}
+.logo { 
+    max-width: 180px; 
+    height: auto; 
+    transition: transform 0.3s ease;
+}
+.logo:hover {
+    transform: scale(1.05);
+}
+.login-title { 
+    text-align: center; 
+    font-size: 1.6rem; 
+    font-weight: 800; 
+    color: #2262a6; 
+    margin-bottom: 5px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+}
+.login-subtitle { 
+    text-align: center; 
+    color: #7a7a7a; 
+    margin-bottom: 30px; 
+    font-size: 0.9rem; 
+    font-weight: 600; 
+}
+.form-control { 
+    height: 50px; 
+    border-radius: 8px; 
+    font-size: 15px; 
+    border: none; 
+    padding: 0 25px; 
+    background: #e6e6e6; 
+    color: #555; 
+    font-weight: 600; 
+    transition: all 0.3s ease; 
+}
+.form-control:focus { 
+    background: #dcdcdc; 
+    box-shadow: none; 
+    outline: none; 
+}
+.form-control::placeholder { 
+    color: #7a7a7a; 
+    font-weight: 600; 
+}
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+.custom-input-group { 
+    position: relative; 
+    margin-bottom: 15px; 
+    display: flex;
+}
+.password-toggle { 
+    position: absolute; 
+    right: 20px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    color: #7a7a7a; 
+    font-size: 20px; 
+    cursor: pointer; 
+    z-index: 10;
+}
+.password-toggle:hover {
+    color: #555;
+}
+.submit-button { 
+    width: 100%; 
+    padding: 12px; 
+    background: #0da1f2; 
+    color: #fff; 
+    border: none; 
+    border-radius: 8px; 
+    font-weight: 700; 
+    cursor: pointer; 
+    font-size: 16px; 
+    text-transform: uppercase; 
+    transition: all 0.3s ease; 
+    margin-top: 15px; 
+}
+.submit-button:hover { 
+    background: #0a81c2; 
+    transform: translateY(-2px); 
+}
+.alert { 
+    border-radius: 12px; 
+    font-weight: 600; 
+    text-align: center; 
+    padding: 12px; 
+    margin-bottom: 25px; 
+    border: none; 
+    font-size: 0.9rem; 
+}
+.alert-danger { background: #ffebee; color: #c62828; }
+.alert-success { background: #e8f5e9; color: #2e7d32; }
 @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 @keyframes fadeInUp { from {opacity: 0; transform: translateY(30px);} to {opacity: 1; transform: translateY(0);} }
-@keyframes slideIn { from {opacity: 0; transform: translateX(-20px);} to {opacity: 1; transform: translateX(0);} }
 </style>
 </head>
 <body>
@@ -39,7 +146,7 @@ body { background: linear-gradient(-45deg, #000428, #004e92, #1e3c72, #6dd5ed); 
     <div class="logo-container">
         <img src="<?= base_url('Images/Inventa.png') ?>" class="logo" alt="Halimaw Siomai Logo">
     </div>
-    <h2 class="login-title">Halimaw Siomai</h2>
+    <h2 class="login-title">HALIMAW SIOMAI</h2>
     <p class="login-subtitle">POS Inventory Management System</p>
 
     <?php if(session()->getFlashdata('error')): ?>
@@ -51,17 +158,28 @@ body { background: linear-gradient(-45deg, #000428, #004e92, #1e3c72, #6dd5ed); 
 
     <form method="post" action="<?= base_url('/authenticate') ?>">
         <?= csrf_field() ?>
-        <div class="input-group">
-            <i class="bi bi-person"></i>
-            <input type="text" name="login" class="form-control" placeholder="Username or Email" required>
+        <div class="custom-input-group">
+            <input type="text" name="login" class="form-control" placeholder="User:" required>
         </div>
-        <div class="input-group">
-            <i class="bi bi-lock"></i>
-            <input type="password" name="password" class="form-control" placeholder="Password" required>
+        <div class="custom-input-group">
+            <input type="password" name="password" id="password" class="form-control" placeholder="Password:" required>
+            <i class="bi bi-eye-fill password-toggle" id="togglePassword"></i>
         </div>
         <button type="submit" class="submit-button">Log In</button>
     </form>
 </div>
+
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+
+    togglePassword.addEventListener('click', function (e) {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        this.classList.toggle('bi-eye-fill');
+        this.classList.toggle('bi-eye-slash-fill');
+    });
+</script>
 
 </body>
 </html>

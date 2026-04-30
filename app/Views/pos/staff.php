@@ -1620,7 +1620,7 @@ if (!function_exists('getProductSKU')) {
                                 color: white;
                                 border: none;
                                 padding: 0.75rem;
-                                border-radius: var(--border-radius);
+                                border-radius: 8px;
                                 font-size: 1rem;
                                 box-shadow: 0 4px 12px rgba(0,0,0,0.2);
                                 transition: all 0.25s ease;

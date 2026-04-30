@@ -10,7 +10,7 @@
 <style>
 /* --- Keep all your existing styles here --- */
 :root { --primary: #4e73df; --primary-dark: #2e59d9; --secondary: #858796; --success: #1cc88a; --danger: #e74a3b; --warning: #f6c23e; --info: #36b9cc; --light: #f8f9fc; --dark: #5a5c69; }
-body { background: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; position: relative; overflow: hidden; }
+body { background: linear-gradient(-45deg, #000428, #004e92, #1e3c72, #6dd5ed); background-size: 300% 300%; animation: gradientBG 6s ease infinite; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; position: relative; overflow: hidden; }
 .login-card { width: 100%; max-width: 420px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 40px 35px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2); position: relative; z-index: 1; animation: fadeInUp 0.6s ease-out; }
 .logo-container { display: flex; justify-content: center; margin-bottom: 25px; position: relative; }
 .logo { max-width: 120px; height: auto; border-radius: 12px; box-shadow: 0 8px 25px rgba(78,115,223,0.4); transition: transform 0.3s ease, box-shadow 0.3s ease; border: 3px solid white; }
@@ -28,6 +28,7 @@ body { background: white; display: flex; justify-content: center; align-items: c
 .alert { border-radius: 12px; font-weight: 600; text-align: center; padding: 15px 20px; margin-bottom: 25px; border: none; font-size: 0.95rem; animation: slideIn 0.4s ease; }
 .alert-danger { background: linear-gradient(135deg, #ffebee, #f8d7da); color: #c62828; border-left: 4px solid #e74a3b; }
 .alert-success { background: linear-gradient(135deg, #e8f5e9, #d1e7dd); color: #2e7d32; border-left: 4px solid #1cc88a; }
+@keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 @keyframes fadeInUp { from {opacity: 0; transform: translateY(30px);} to {opacity: 1; transform: translateY(0);} }
 @keyframes slideIn { from {opacity: 0; transform: translateX(-20px);} to {opacity: 1; transform: translateX(0);} }
 </style>

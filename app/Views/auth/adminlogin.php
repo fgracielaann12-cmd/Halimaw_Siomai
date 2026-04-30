@@ -12,13 +12,21 @@
 
     <style>
     body {
-        background: white;
+        background: linear-gradient(-45deg, #000428, #004e92, #1e3c72, #6dd5ed);
+        background-size: 300% 300%;
+        animation: gradientBG 6s ease infinite;
         font-family: Helvetica, Arial, sans-serif;
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 20px;
+    }
+
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
 
     .login-card {
@@ -93,7 +101,7 @@
 </head>
 
 <body>
-q
+
     <div class="login-card">
 
         <!-- Logo -->

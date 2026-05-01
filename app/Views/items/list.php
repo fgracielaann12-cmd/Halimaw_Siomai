@@ -47,7 +47,7 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        .top-navbar {
+        .top-navbar { position: sticky; top: 0; z-index: 1000;
             animation: fadeSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .container > h5, .container > .row:first-of-type > h2, .container > h2:first-of-type, .page-title, .pos-items {
@@ -201,7 +201,7 @@
         }
 
         /* TOP NAVBAR */
-        .top-navbar {
+        .top-navbar { position: sticky; top: 0; z-index: 1000;
             background: white;
             padding: 12px 20px;
             border-radius: var(--border-radius);
@@ -546,7 +546,7 @@
             .sidebar-overlay.active { display: block; }
 
             .container { padding: 0 15px 15px; }
-            .top-navbar { padding: 10px 15px; }
+            .top-navbar { position: sticky; top: 0; z-index: 1000; padding: 10px 15px; }
             .table { min-width: 600px; }
         }
     </style>

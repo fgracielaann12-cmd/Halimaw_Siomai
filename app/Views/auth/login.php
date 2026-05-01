@@ -48,7 +48,6 @@
             opacity: 0;
             transform: translateY(20px);
         }
-
         to {
             opacity: 1;
             transform: translateY(0);
@@ -105,6 +104,11 @@
 
     .form-control::placeholder {
         color: #6c757d;
+    }
+
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+        display: none;
     }
 
     .form-control:focus {
@@ -185,7 +189,7 @@
                 <i class="bi bi-eye password-icon" id="togglePassword"></i>
             </div>
 
-            <button type="submit" class="submit-button">Log In</button>
+            <button type="submit" class="submit-button">LOG IN</button>
         </form>
 
     </div>

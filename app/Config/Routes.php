@@ -142,5 +142,25 @@ $routes->post('admin/staff/pos/sell', 'PosController::sell');
 // Also add if frontend uses /staff/pos/sell (without admin prefix)
 $routes->post('staff/pos/sell', 'PosController::sell');
 
-// Admin-wide logs (outside items group, as originally intended)
 $routes->get('admin/stock-request-logs', 'AdminRequests::logs');
+
+// -------------------------------------------------------------
+// API ROUTES (For External Ordering Platform)
+// -------------------------------------------------------------
+$routes->group('api', function ($routes) {
+    // Allows handling preflight requests for CORS
+    $routes->options('(:any)', 'ApiController::getProducts'); 
+    
+    // Get all products
+    $routes->get('products', 'ApiController::getProducts');
+    
+    // Online Orders
+    $routes->post('submit-order', 'ApiController::submitOrder');
+    $routes->get('pending-orders', 'ApiController::getPendingOrders');
+    $routes->post('confirm-order', 'ApiController::confirmOrder');
+});
+
+// -------------------------------------------------------------
+// CUSTOMER FRONTEND ROUTE
+// -------------------------------------------------------------
+$routes->get('order', 'CustomerOrderController::index');

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <<<<<<< HEAD
+<<<<<<< HEAD
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login | Halimaw Siomai</title>
@@ -266,6 +267,8 @@ input[type="password"]::-ms-clear {
     </div>
 </div>
 =======
+=======
+>>>>>>> e1fd03ff317f9ed42bbd79b38ff6499ed96136f3
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Halimaw Siomai</title>
@@ -372,6 +375,14 @@ input[type="password"]::-ms-clear {
         color: #6c757d;
     }
 
+<<<<<<< HEAD
+=======
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+        display: none;
+    }
+
+>>>>>>> e1fd03ff317f9ed42bbd79b38ff6499ed96136f3
     .form-control:focus {
         outline: none;
         box-shadow: inset 0 0 0 2px #d1d3e2;
@@ -463,7 +474,10 @@ input[type="password"]::-ms-clear {
         // Toggle Password Visibility
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');
+<<<<<<< HEAD
 >>>>>>> d359fb5bd23650a9fe211093a51533f51111cd73
+=======
+>>>>>>> e1fd03ff317f9ed42bbd79b38ff6499ed96136f3
 
         togglePassword.addEventListener('click', function (e) {
             const type = password.getAttribute('type') === 'password' ? 'text' : 'password';

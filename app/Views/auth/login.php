@@ -372,6 +372,14 @@ input[type="password"]::-ms-clear {
         color: #6c757d;
     }
 
+<<<<<<< HEAD
+=======
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+        display: none;
+    }
+
+>>>>>>> 4c9d3f946323a014e33ff3a8ec9a75ad172bb193
     .form-control:focus {
         outline: none;
         box-shadow: inset 0 0 0 2px #d1d3e2;

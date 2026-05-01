@@ -510,7 +510,10 @@ $currentPath = $seg1 . '/' . $seg2;
                     <tr class="<?= $status === 'pending' ? 'table-warning' : '' ?>">
                         <td><?= $r['id'] ?></td>
                         <td><?= esc($r['user_name'] ?? 'Unknown') ?></td>
-                        <td><a href="<?= site_url('items/edit/' . $r['item_id']) ?>" class="text-decoration-none fw-semibold"><?= esc($r['item_name'] ?? 'Unknown') ?></a></td>
+                        <td>
+                            <a href="<?= site_url('items/edit/' . $r['item_id']) ?>" class="text-decoration-none fw-semibold"><?= esc($r['item_name'] ?? 'Unknown') ?></a><br>
+                            <small class="text-muted">Batch: <?= esc($r['item_date'] ?? 'N/A') ?> | Exp: <?= empty($r['item_exp']) ? 'N/A' : esc($r['item_exp']) ?></small>
+                        </td>
                         <td><?= $r['quantity'] ?></td>
                         <td>
                             <?php

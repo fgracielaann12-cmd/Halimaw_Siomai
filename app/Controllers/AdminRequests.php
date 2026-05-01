@@ -16,7 +16,7 @@ class AdminRequests extends Controller
 
         // Build main query for requests
         $builder = $db->table('stock_requests');
-$builder->select('stock_requests.*, items.name AS item_name, users.username AS user_name');
+$builder->select('stock_requests.*, items.name AS item_name, items.created_at AS item_date, items.expiration_date AS item_exp, users.username AS user_name');
 $builder->join('items', 'items.id = stock_requests.item_id', 'left');
 $builder->join('users', 'users.id = stock_requests.user_id', 'left');
 $builder->groupBy('stock_requests.id'); // 👈 ensures each request appears only once

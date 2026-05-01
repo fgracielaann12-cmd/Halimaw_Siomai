@@ -825,6 +825,10 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle hide-mobile"><?= esc($item['created_at']) ?></td>
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
+                                    <button type="button" class="btn btn-sm btn-info text-white" 
+                                            onclick="showItemInfo('<?= esc($item['product_id']) ?><?= $sz['s'] ?>', '<?= esc($item['name']) ?> (<?= $sz['l'] ?>)', '<?= esc(getSku($item['name'], $sz['s_sku'])) ?>', '<?= esc($item['category'] ?? '—') ?>', '<?= esc($sz['q']) ?> <?= $sz['ql'] ?>', '₱<?= number_format($sz['p'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '—' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\'><?= $statusLabel ?></span>')" title="View Info">
+                                        <i class="bi bi-info-circle"></i>
+                                    </button>
                                     <a href="<?= site_url('items/edit/' . $item['id'] . '?size=' . strtolower($sz['l'])) ?>" class="btn btn-sm btn-edit">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
@@ -867,6 +871,10 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle hide-mobile"><?= esc($item['created_at']) ?></td>
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
+                                    <button type="button" class="btn btn-sm btn-info text-white" 
+                                            onclick="showItemInfo('<?= esc($item['product_id']) ?>', '<?= esc($item['name']) ?>', '<?= esc(getSku($item['name'])) ?>', '<?= esc($item['category'] ?? '—') ?>', '<?= esc($item['quantity']) ?>', '₱<?= number_format($item['price'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '—' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\'><?= $statusLabel ?></span>')" title="View Info">
+                                        <i class="bi bi-info-circle"></i>
+                                    </button>
                                     <a href="<?= site_url('items/edit/' . $item['id']) ?>" class="btn btn-sm btn-edit">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
@@ -890,6 +898,40 @@ function getSku($name, $variation = '') {
         <?php else: ?>
             <div class="alert alert-warning text-center">No items found in the database.</div>
         <?php endif; ?>
+    </div>
+</div>
+
+<!-- Item Info Modal -->
+<div class="modal fade" id="itemInfoModal" tabindex="-1" aria-labelledby="itemInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header" style="background: var(--primary); color: white;">
+                <h5 class="modal-title w-100 text-center fw-bold" id="itemInfoModalLabel">
+                    <i class="bi bi-info-circle me-2"></i>Product Information
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <h4 id="infoName" class="fw-bold text-dark mb-1"></h4>
+                    <span id="infoStatus"></span>
+                </div>
+                <table class="table table-borderless table-sm mb-0">
+                    <tbody>
+                        <tr><th class="text-secondary" style="width: 45%;">Product ID</th><td id="infoProductId" class="fw-medium"></td></tr>
+                        <tr><th class="text-secondary">SKU</th><td id="infoSku" class="fw-medium"></td></tr>
+                        <tr><th class="text-secondary">Category</th><td id="infoCategory" class="fw-medium"></td></tr>
+                        <tr><th class="text-secondary">Quantity</th><td id="infoQuantity" class="fw-medium"></td></tr>
+                        <tr><th class="text-secondary">Price</th><td id="infoPrice" class="fw-medium"></td></tr>
+                        <tr><th class="text-secondary">Batch (Date Entry)</th><td id="infoDateEntry" class="fw-medium"></td></tr>
+                        <tr><th class="text-secondary">Expiration Date</th><td id="infoExpiration" class="fw-medium"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer border-0 pb-3 justify-content-center">
+                <button type="button" class="btn btn-light shadow-sm px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -1130,7 +1172,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 4000 + i * 500);
     });
 
-
+    window.showItemInfo = function(product_id, name, sku, category, qty, price, date_entry, exp_date, status_html) {
+        document.getElementById('infoProductId').textContent = product_id;
+        document.getElementById('infoName').textContent = name;
+        document.getElementById('infoSku').textContent = sku;
+        document.getElementById('infoCategory').textContent = category;
+        document.getElementById('infoQuantity').textContent = qty;
+        document.getElementById('infoPrice').textContent = price;
+        document.getElementById('infoDateEntry').textContent = date_entry;
+        document.getElementById('infoExpiration').textContent = exp_date;
+        document.getElementById('infoStatus').innerHTML = status_html;
+        new bootstrap.Modal(document.getElementById('itemInfoModal')).show();
+    };
 
 });
 </script>

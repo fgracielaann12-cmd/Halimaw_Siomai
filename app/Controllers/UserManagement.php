@@ -19,9 +19,12 @@ class UserManagement extends BaseController
      */
     public function index()
     {
+        // Force update all 'user' roles to 'staff' to ensure it uses the correct DB
+        $this->userModel->where('role', 'user')->set(['role' => 'staff'])->update();
+
         $data = [
             'title' => 'Staff Management',
-            'users' => $this->userModel->orderBy('id', 'DESC')->findAll()
+            'users' => $this->userModel->orderBy('id', 'ASC')->findAll()
         ];
 
         return view('user/admin/users/index', $data);

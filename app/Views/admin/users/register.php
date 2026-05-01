@@ -3,7 +3,44 @@
 <head>
   <title>Register | Inventa</title>
   <style>
-    body {
+        /* --- Premium Startup Animations --- */
+        @keyframes fadeSlideDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeScaleUp {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .top-navbar {
+            animation: fadeSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .container > h5, .container > .row:first-of-type > h2, .container > h2:first-of-type, .page-title, .pos-items {
+            opacity: 0;
+            animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+        }
+        .container > .row, .controls-section, .summary-card {
+            opacity: 0;
+            animation: fadeScaleUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+        }
+        .controls-section {
+            animation-name: fadeSlideUp !important;
+        }
+        .container > .text-center {
+            opacity: 0;
+            animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+        }
+        .table-responsive-custom, .pos-sidebar, .table-responsive, .table-card {
+            opacity: 0;
+            animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+        }
+
+        body {
       font-family: Helvetica;
       background: #d1d5da;
       display: flex;

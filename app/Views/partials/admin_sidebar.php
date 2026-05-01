@@ -63,9 +63,25 @@ $expiredNotif = $db->table('items')
 }
 
 /* Prevent text wrapping overlapping issues in sidebar navigation */
-#sidebar .nav-link {
-    white-space: nowrap !important;
-}
+
+
+
+        #sidebar .nav-link {
+            color: var(--sidebar-text);
+            padding: 0.75rem 1.25rem;
+            margin: 0.25rem 1rem;
+            border-radius: 0.4rem;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            text-decoration: none;
+            white-space: normal; line-height: 1.2;
+            overflow: hidden;
+            width: calc(100% - 2rem);
+        }
 </style>
 
 <!-- Mobile Menu Toggle -->

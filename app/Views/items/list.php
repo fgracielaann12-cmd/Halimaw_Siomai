@@ -445,15 +445,14 @@
             margin-bottom: 20px;
         }
         #itemsTable {
-            min-width: 900px;
+            width: 100%;
             font-size: 0.9rem;
             margin: 0;
         }
         #itemsTable th, #itemsTable td,
         #batchRecordsTable th, #batchRecordsTable td {
             text-align: center !important;
-            white-space: nowrap !important;
-            min-width: max-content !important;
+            white-space: nowrap;
         }
         #itemsTable thead th {
             background: var(--primary);

@@ -1,6 +1,0 @@
-product_id,name,quantity,price,expiration_date,barcode,auto_delete
-P001,Milk,10,35,2025-11-05,1234567890,Yes
-P002,Bread,25,10,2025-10-30,1234567891,No
-P003,Butter,8,50,2025-12-01,1234567892,Yes
-P004,Eggs,30,8,2025-10-28,1234567893,No
-P005,Cheese,5,120,2025-12-15,1234567894,Yes

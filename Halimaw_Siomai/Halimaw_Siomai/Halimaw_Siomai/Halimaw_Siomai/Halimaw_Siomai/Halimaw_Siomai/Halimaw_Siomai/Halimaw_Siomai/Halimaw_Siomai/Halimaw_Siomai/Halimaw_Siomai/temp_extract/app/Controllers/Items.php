@@ -1,0 +1,885 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\ItemModel;
+use App\Models\DeletedItemModel;
+use App\Models\ItemLogModel;
+
+class Items extends BaseController
+{
+    public function index()
+    {
+        $model = new ItemModel();
+        $deletedModel = new DeletedItemModel();
+
+        date_default_timezone_set('Asia/Manila');
+
+        $today = date('Y-m-d');
+        $warningDays = 10;
+
+        $updatedItems = [];
+        $items = $model->orderBy('created_at', 'ASC')->findAll();
+
+        foreach ($items as $item) {
+            // ✅ Skip already deleted items
+            if (in_array($item['status'], ['manually deleted', 'auto deleted'])) {
+                continue;
+            }
+
+            // Handle missing expiration
+            if (empty($item['expiration_date'])) {
+                $item['status'] = $item['status'] ?? 'unknown';
+                $item['status_label'] = '❓ Unknown';
+                $item['days_left'] = null;
+                $updatedItems[] = $item;
+                continue;
+            }
+
+            $expirationDate = $item['expiration_date'];
+            $daysLeft = (int) floor((strtotime($expirationDate) - strtotime($today)) / (60 * 60 * 24));
+
+            if ($daysLeft < 0) {
+                $status = 'expired';
+                $status_label = "❌ Expired (" . abs($daysLeft) . " days ago)";
+            } elseif ($daysLeft <= $warningDays) {
+                $status = 'expiring soon';
+                $status_label = "⚠️ Expiring Soon ({$daysLeft} days left)";
+            } else {
+                $status = 'active';
+                $status_label = "✅ Active ({$daysLeft} days left)";
+            }
+
+            if (!isset($item['status']) || $item['status'] !== $status) {
+                $model->update($item['id'], ['status' => $status]);
+            }
+
+            $item['status_label'] = $status_label;
+            $item['days_left'] = $daysLeft;
+
+            // ✅ AUTO-DELETE LOGIC (Separates items into Unconsumed vs Expired)
+            if (
+                $status === 'expired' &&
+                ($item['auto_delete'] ?? 0) == 1 &&
+                !in_array($item['status'], ['manually deleted', 'unconsumed'])
+            ) {
+                $salesModel = new \App\Models\SalesModel();
+                $saleCount = $salesModel->where('product_id', $item['product_id'])->countAllResults();
+                $delStatus = ($saleCount > 0) ? 'expired' : 'unconsumed';
+
+                $exists = $deletedModel->where('product_id', $item['product_id'])->first();
+                if (!$exists) {
+                    $deletedModel->insert([
+                        'product_id' => $item['product_id'],
+                        'name' => $item['name'],
+                        'category' => $item['category'] ?? null,
+                        'subcategory' => $item['subcategory'] ?? null,
+                        'quantity' => $item['quantity'],
+                        'price' => $item['price'] ?? 0.00,
+                        'expiration_date' => $item['expiration_date'],
+                        'barcode' => $item['barcode'] ?? '',
+                        'auto_delete' => $item['auto_delete'] ?? 0,
+                        'status' => $delStatus,
+                        'created_at' => $item['created_at'] ?? date('Y-m-d H:i:s'),
+                        'deleted_at' => date('Y-m-d H:i:s'),
+                    ]);
+                }
+                
+                // Do not remove from the active items table
+            }
+
+            $updatedItems[] = $item;
+        }
+
+        // ✅ Calculate total inventory value
+        $totalValue = 0;
+        foreach ($updatedItems as $it) {
+            $qty = (float) ($it['quantity'] ?? 0);
+            $prc = (float) ($it['price'] ?? 0);
+            $totalValue += $qty * $prc;
+        }
+
+        $data['items'] = $updatedItems;
+        $data['totalValue'] = $totalValue;
+        $data['currentPath'] = service('uri')->getPath();
+
+        return view('items/list', $data);
+    }
+
+    public function add()
+    {
+        $itemModel = new ItemModel();
+        
+        $items = $itemModel->like('product_id', 'P', 'after')->findAll();
+        $maxNum = 0;
+        
+        foreach ($items as $item) {
+            if (preg_match('/^P(\d+)$/i', $item['product_id'], $matches)) {
+                $num = (int) $matches[1];
+                if ($num > $maxNum) {
+                    $maxNum = $num;
+                }
+            }
+        }
+        
+        $nextProductId = 'P' . str_pad($maxNum + 1, 3, '0', STR_PAD_LEFT);
+        
+        return view('items/add', ['nextProductId' => $nextProductId]);
+    }
+
+    public function store()
+    {
+        helper(['form', 'filesystem']);
+        $itemModel = new ItemModel();
+        $file = $this->request->getFile('bulk_file');
+
+        // --- Handle BULK upload ---
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $ext = strtolower($file->getClientExtension());
+
+            require_once ROOTPATH . 'vendor/autoload.php';
+
+            $rows = [];
+
+            // Excel files
+            if (in_array($ext, ['xlsx', 'xls'])) {
+                $reader = $ext === 'xlsx'
+                    ? new \PhpOffice\PhpSpreadsheet\Reader\Xlsx()
+                    : new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+
+                $spreadsheet = $reader->load($file->getTempName());
+                $sheetRows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+                foreach ($sheetRows as $r) {
+                    $rows[] = array_values($r);
+                }
+            } else {
+                // CSV
+                $tmp = $file->getTempName();
+                if (($handle = fopen($tmp, 'r')) !== false) {
+                    while (($data = fgetcsv($handle, 0, ',')) !== false) {
+                        if (count(array_filter($data)) === 0) continue;
+                        $rows[] = $data;
+                    }
+                    fclose($handle);
+                }
+            }
+
+            if (!empty($rows)) {
+                $header = $rows[0];
+                if (isset($header[0]) && preg_match('/product|name/i', implode(' ', $header))) {
+                    array_shift($rows);
+                }
+            }
+
+            $count = 0;
+            $skipped = 0;
+
+            foreach ($rows as $row) {
+                $product_id = trim($row[0] ?? '');
+                $name = trim($row[1] ?? '');
+                $quantity = (int) ($row[2] ?? 0);
+                $expiration_date = trim($row[3] ?? '');
+                $category = trim($row[4] ?? '');
+                $subcategory = trim($row[5] ?? '');
+
+                if ($product_id === '' || $name === '') continue;
+
+                if ($itemModel->where('product_id', $product_id)->first()) {
+                    $skipped++;
+                    continue;
+                }
+
+                $auto_delete = 0;
+                if (strtolower($category) === 'food') {
+                    $auto_delete = 1;
+                } elseif (strtolower($category) === 'non-food' && strtolower($subcategory) === 'expirable') {
+                    $auto_delete = 1;
+                }
+
+                if (strtolower($category) === 'non-food' && strtolower($subcategory) === 'non-expirable') {
+                    $expiration_date = null;
+                }
+
+                $data = [
+                    'product_id' => $product_id,
+                    'name' => $name,
+                    'quantity' => $quantity,
+                    'price' => 0.00,
+                    'barcode' => '',
+                    'expiration_date' => $expiration_date ?: null,
+                    'category' => $category,
+                    'subcategory' => $subcategory ?: null,
+                    'auto_delete' => $auto_delete,
+                    'status' => 'active',
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
+
+                $itemModel->insert($data);
+                $count++;
+            }
+
+            $msg = "$count items uploaded successfully.";
+            if ($skipped > 0) $msg .= " $skipped duplicate Product IDs were skipped.";
+            return redirect()->to(site_url('items'))->with('success', $msg);
+        }
+
+        // --- Handle SINGLE manual add ---
+        $product_id = $this->request->getPost('product_id');
+
+        if ($itemModel->where('product_id', $product_id)->first()) {
+            return redirect()->back()->with('error', 'Product ID already exists. Please use a unique one.');
+        }
+
+        $rules = [
+            'product_id' => 'required',
+            'name' => 'required|min_length[2]',
+            'quantity' => 'required|numeric|greater_than[0]',
+            'price' => 'required|numeric|greater_than_equal_to[0]',
+            'category' => 'required'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $category = $this->request->getPost('category');
+        $subcategory = $this->request->getPost('subcategory');
+        $expiration_date = $this->request->getPost('expiration_date');
+
+        $auto_delete = 0;
+        if (strtolower($category) === 'food' || strtolower($subcategory) === 'expirable') {
+            $auto_delete = 1;
+        }
+
+        $data = [
+            'product_id' => $this->request->getPost('product_id'),
+            'name' => $this->request->getPost('name'),
+            'quantity' => $this->request->getPost('quantity'),
+            'price' => $this->request->getPost('price') ?? 0.00,
+            'barcode' => '',
+            'expiration_date' => $expiration_date ?: null,
+            'category' => $category,
+            'subcategory' => $subcategory ?: null,
+            'auto_delete' => $auto_delete,
+            'status' => 'active',
+            'pack_small_qty' => $this->request->getPost('pack_small_qty') ?: 0,
+            'pack_medium_qty' => $this->request->getPost('pack_medium_qty') ?: 0,
+            'pack_biggest_qty' => $this->request->getPost('pack_biggest_qty') ?: 0,
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
+
+        $itemModel->insert($data);
+        return redirect()->to('/items')->with('success', 'Item added successfully!');
+    }
+
+    public function bulkUpload()
+    {
+        helper(['form']);
+
+        $itemModel = new ItemModel();
+        $file = $this->request->getFile('bulk_file');
+
+        if (!$file || !$file->isValid() || $file->hasMoved()) {
+            return redirect()->back()->with('error', 'No valid CSV file uploaded.');
+        }
+
+        if ($file->getClientExtension() !== 'csv') {
+            return redirect()->back()->with('error', 'Only CSV files are allowed for bulk upload.');
+        }
+
+        $path = $file->getTempName();
+        $rows = [];
+
+        if (($handle = fopen($path, 'r')) !== false) {
+            while (($data = fgetcsv($handle, 0, ',')) !== false) {
+                if (count(array_filter($data)) === 0) continue;
+                $rows[] = $data;
+            }
+            fclose($handle);
+        }
+
+        if (empty($rows)) {
+            return redirect()->back()->with('error', 'Uploaded file is empty.');
+        }
+
+        $header = $rows[0];
+        if (!empty($header) && preg_match('/product|name|quantity/i', implode(',', $header))) {
+            array_shift($rows);
+        }
+
+        $inserted = 0;
+        $skipped = 0;
+        $errors = [];
+
+        foreach ($rows as $index => $row) {
+            if (count($row) < 4) {
+                $errors[] = "Row " . ($index + 2) . ": Not enough columns (expected at least 4).";
+                continue;
+            }
+
+            $product_id = trim($row[0] ?? '');
+            $name = trim($row[1] ?? '');
+            $quantity = (int) ($row[2] ?? 0);
+            $expiration_date = trim($row[3] ?? '');
+            $category = trim($row[4] ?? '');
+            $subcategory = trim($row[5] ?? '');
+
+            if ($product_id === '' || $name === '' || $quantity <= 0) {
+                $errors[] = "Row " . ($index + 2) . ": Missing Product ID, Name, or invalid Quantity.";
+                continue;
+            }
+
+            if ($itemModel->where('product_id', $product_id)->first()) {
+                $skipped++;
+                continue;
+            }
+
+            $auto_delete = 0;
+            if (strtolower($category) === 'food') {
+                $auto_delete = 1;
+            } elseif (strtolower($category) === 'non-food' && strtolower($subcategory) === 'expirable') {
+                $auto_delete = 1;
+            }
+
+            if (strtolower($category) === 'non-food' && strtolower($subcategory) === 'non-expirable') {
+                $expiration_date = null;
+            }
+
+            if ($expiration_date !== '' && !strtotime($expiration_date)) {
+                $errors[] = "Row " . ($index + 2) . ": Invalid expiration date format.";
+                continue;
+            }
+
+            $data = [
+                'product_id' => $product_id,
+                'name' => $name,
+                'quantity' => $quantity,
+                'price' => 0.00,
+                'barcode' => '',
+                'expiration_date' => $expiration_date ?: null,
+                'category' => $category,
+                'subcategory' => in_array(strtolower($subcategory), ['expirable', 'non-expirable']) ? $subcategory : null,
+                'auto_delete' => $auto_delete,
+                'status' => 'active',
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+
+            try {
+                $itemModel->insert($data);
+                $inserted++;
+            } catch (\Exception $e) {
+                $errors[] = "Row " . ($index + 2) . ": " . $e->getMessage();
+            }
+        }
+
+        $msg = "$inserted item(s) uploaded successfully.";
+        if ($skipped > 0) {
+            $msg .= " $skipped duplicate(s) skipped.";
+        }
+        if (!empty($errors)) {
+            $msg .= " " . count($errors) . " row(s) failed. " . implode(' | ', array_slice($errors, 0, 3));
+        }
+
+        return !empty($errors)
+            ? redirect()->back()->with('error', $msg)
+            : redirect()->to('/items')->with('success', $msg);
+    }
+
+    public function edit($id)
+    {
+        $model = new ItemModel();
+        $item = $model->find($id);
+
+        if (!$item) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Item not found');
+        }
+
+        return view('items/edit', ['item' => $item]);
+    }
+
+    public function update($id)
+    {
+        helper(['form']);
+
+        $rules = [
+            'product_id' => 'required',
+            'name' => 'required|min_length[2]',
+            'quantity' => 'required|numeric|greater_than[0]',
+            'price' => 'required|decimal|greater_than_equal_to[0]',
+            'category' => 'required',
+        ];
+
+        $exp = $this->request->getPost('expiration_date');
+        if (!empty($exp)) {
+            $rules['expiration_date'] = 'valid_date';
+        }
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $model = new ItemModel();
+        $logModel = new ItemLogModel();
+        $oldData = $model->find($id);
+
+        $newData = [
+            'product_id' => $this->request->getPost('product_id'),
+            'name' => $this->request->getPost('name'),
+            'quantity' => $this->request->getPost('quantity'),
+            'price' => $this->request->getPost('price'),
+            'expiration_date' => $this->request->getPost('expiration_date') ?: null,
+            'barcode' => $this->request->getPost('barcode'),
+            'category' => $this->request->getPost('category'),
+            'subcategory' => $this->request->getPost('subcategory') ?: null,
+            'auto_delete' => $this->request->getPost('auto_delete') ? 1 : 0,
+            'pack_small_qty' => $this->request->getPost('pack_small_qty') ?: 0,
+            'pack_small_price' => $this->request->getPost('pack_small_price') ?: 115,
+            'pack_medium_qty' => $this->request->getPost('pack_medium_qty') ?: 0,
+            'pack_medium_price' => $this->request->getPost('pack_medium_price') ?: 185,
+            'pack_biggest_qty' => $this->request->getPost('pack_biggest_qty') ?: 0,
+            'pack_biggest_price' => $this->request->getPost('pack_biggest_price') ?: 335,
+        ];
+
+        $model->update($id, $newData);
+
+        $logModel->insert([
+            'item_id' => $id,
+            'old_data' => json_encode($oldData),
+            'new_data' => json_encode($newData),
+            'updated_by' => session()->get('username') ?? 'Admin',
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return redirect()->to('/items')->with('success', 'Item updated successfully (changes logged)!');
+    }
+
+    public function expired()
+    {
+        $itemModel = new ItemModel();
+        $deletedModel = new DeletedItemModel();
+        $today = date('Y-m-d');
+
+        $expiredItems = $itemModel
+            ->where('expiration_date <', $today)
+            ->orderBy('expiration_date', 'ASC')
+            ->findAll();
+
+        $deletedItems = $deletedModel
+            ->orderBy('deleted_at', 'DESC')
+            ->findAll();
+
+        foreach ($expiredItems as &$item) {
+            if (!empty($item['expiration_date'])) {
+                $expDate = new \DateTime($item['expiration_date']);
+                $todayDate = new \DateTime($today);
+                $item['expired_label'] = ($expDate < $todayDate)
+                    ? "Expired " . $todayDate->diff($expDate)->days . " days ago"
+                    : "Expiring in " . $expDate->diff($todayDate)->days . " days";
+            } else {
+                $item['expired_label'] = "No expiration date";
+            }
+            $item['status'] = 'expired';
+        }
+
+        foreach ($deletedItems as &$dItem) {
+            $dItem['expired_label'] = match ($dItem['status']) {
+                'auto deleted' => "Auto deleted item",
+                'manually deleted' => "Manually deleted item",
+                default => ucfirst($dItem['status'] ?? 'deleted'),
+            };
+        }
+
+        return view('items/expired_items', [
+            'items' => $expiredItems,
+            'deletedItems' => $deletedItems
+        ]);
+    }
+
+    public function unconsumedHistory()
+    {
+        $deletedModel = new DeletedItemModel();
+        
+        $unconsumedItems = $deletedModel
+            ->where('status', 'unconsumed')
+            ->orderBy('deleted_at', 'DESC')
+            ->findAll();
+
+        return view('items/unconsumed', ['items' => $unconsumedItems]);
+    }
+
+    public function expiringSoon()
+    {
+        $model = new ItemModel();
+        $today = date('Y-m-d');
+        $warningDays = 10;
+        $futureDate = date('Y-m-d', strtotime("+$warningDays days"));
+
+        // Mark expiring soon as seen to clear notification
+        $model->where('is_expiring_seen', 0)
+              ->where('expiration_date !=', null)
+              ->where('expiration_date !=', '0000-00-00')
+              ->where('expiration_date >=', $today)
+              ->where('expiration_date <=', $futureDate)
+              ->set(['is_expiring_seen' => 1])
+              ->update();
+
+        $items = $model
+            ->where('expiration_date >=', $today)
+            ->where('expiration_date <=', $futureDate)
+            ->orderBy('expiration_date', 'ASC')
+            ->findAll();
+
+        foreach ($items as &$item) {
+            $item['days_left'] = (int) floor((strtotime($item['expiration_date']) - strtotime($today)) / (60 * 60 * 24));
+        }
+
+        return view('items/expiring_soon', ['items' => $items]);
+    }
+
+    public function deleted()
+    {
+        $itemModel = new ItemModel();
+        $deletedModel = new DeletedItemModel();
+        $today = date('Y-m-d');
+
+        // Mark expired items as seen to clear notification
+        $itemModel->where('is_expired_seen', 0)
+                  ->where('expiration_date !=', null)
+                  ->where('expiration_date !=', '0000-00-00')
+                  ->where('expiration_date <', $today)
+                  ->set(['is_expired_seen' => 1])
+                  ->update();
+
+        $expiredItems = [];
+        $rawExpiredItems = $itemModel
+            ->where('expiration_date <', $today)
+            ->orderBy('expiration_date', 'ASC')
+            ->findAll();
+
+        $deletedItems = $deletedModel
+            ->where('status !=', 'unconsumed')
+            ->orderBy('deleted_at', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->findAll();
+
+        foreach ($rawExpiredItems as $rawItem) {
+            // Check if it already exists in deleted_items to prevent duplicates or showing unconsumed items
+            $inDeleted = false;
+            foreach ($deletedItems as $dItem) {
+                if ($dItem['product_id'] === $rawItem['product_id']) {
+                    $inDeleted = true;
+                    break;
+                }
+            }
+            if (!$inDeleted) {
+                // Also verify it's not in unconsumed
+                $isUnconsumed = $deletedModel->where('product_id', $rawItem['product_id'])->where('status', 'unconsumed')->first();
+                if (!$isUnconsumed) {
+                    $expiredItems[] = $rawItem;
+                }
+            }
+        }
+
+        foreach ($expiredItems as &$item) {
+            if (!empty($item['expiration_date'])) {
+                $daysDiff = (int) floor((strtotime($today) - strtotime($item['expiration_date'])) / (60 * 60 * 24));
+                $item['days_expired'] = "Expired {$daysDiff} days ago";
+            } else {
+                $item['days_expired'] = "-";
+            }
+            $item['delete_type'] = ($item['auto_delete'] ?? 0) ? 'Auto Deleted' : 'Expired';
+        }
+
+        foreach ($deletedItems as &$dItem) {
+            if (!empty($dItem['deleted_at'])) {
+                $daysDiff = (int) floor((strtotime($today) - strtotime($dItem['deleted_at'])) / (60 * 60 * 24));
+                $dItem['days_expired'] = "Deleted {$daysDiff} days ago";
+            } else {
+                $dItem['days_expired'] = "-";
+            }
+            $dItem['delete_type'] = $dItem['status'] ?? 'Deleted';
+        }
+
+        return view('items/deleted_items', [
+            'items' => $expiredItems,
+            'deletedItems' => $deletedItems
+        ]);
+    }
+
+    public function logs()
+    {
+        $logModel = new ItemLogModel();
+        $logModel->select('item_logs.*, items.product_id, items.name as item_name')
+            ->join('items', 'items.id = item_logs.item_id', 'left');
+
+        $search = trim((string) $this->request->getGet('search'));
+        $dateFilter = $this->request->getGet('date');
+        $perPage = 10;
+
+        if ($search !== '') {
+            $logModel->groupStart()
+                ->like('items.product_id', $search)
+                ->orLike('items.name', $search)
+                ->orLike('item_logs.updated_by', $search)
+                ->groupEnd();
+        }
+
+        if ($dateFilter === 'week') {
+            $logModel->where('item_logs.updated_at >=', date('Y-m-d', strtotime('-7 days')));
+        } elseif ($dateFilter === 'month') {
+            $logModel->where('item_logs.updated_at >=', date('Y-m-01'));
+        }
+
+        return view('items/logs', [
+            'logs' => $logModel->orderBy('item_logs.updated_at', 'DESC')->paginate($perPage, 'logs'),
+            'pager' => $logModel->pager,
+            'search' => $search,
+            'dateFilter' => $dateFilter
+        ]);
+    }
+
+    public function exportLogsCsv()
+    {
+        $logModel = new ItemLogModel();
+        $logModel->select('item_logs.*, items.product_id, items.name as item_name')
+            ->join('items', 'items.id = item_logs.item_id', 'left');
+        $logs = $logModel->orderBy('item_logs.updated_at', 'DESC')->findAll();
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="item_logs.csv"');
+
+        $output = fopen('php://output', 'w');
+        fputcsv($output, ['Product ID', 'Item Name', 'Updated By', 'Changes', 'Updated At']);
+
+        foreach ($logs as $log) {
+            $old = json_decode($log['old_data'], true);
+            $new = json_decode($log['new_data'], true);
+            $changes = '';
+
+            if ($old && $new) {
+                foreach ($new as $key => $value) {
+                    $oldVal = $old[$key] ?? '';
+                    if ($oldVal != $value) {
+                        $changes .= "$key: $oldVal → $value\n";
+                    }
+                }
+            }
+
+            fputcsv($output, [
+                $log['product_id'] ?? '',
+                $log['item_name'] ?? '',
+                $log['updated_by'] ?? '',
+                trim($changes),
+                $log['updated_at'] ?? '',
+            ]);
+        }
+
+        fclose($output);
+        exit;
+    }
+
+    public function increaseQuantity($id)
+    {
+        $model = new ItemModel();
+        $item = $model->find($id);
+        $data = $this->request->getJSON(true) ?: $this->request->getPost();
+        $amount = (int) ($data['amount'] ?? 0);
+
+        if ($amount <= 0) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid amount.']);
+        }
+
+        if ($item) {
+            $newQty = (int) $item['quantity'] + $amount;
+            $model->update($id, ['quantity' => $newQty]);
+            return $this->response->setJSON([
+                'success' => true,
+                'newQty' => $newQty,
+                'message' => 'Quantity increased successfully.'
+            ]);
+        }
+
+        return $this->response->setJSON(['success' => false, 'message' => 'Item not found.']);
+    }
+
+    public function decreaseQuantity($id)
+    {
+        $model = new ItemModel();
+        $item = $model->find($id);
+        $data = $this->request->getJSON(true) ?: $this->request->getPost();
+        $amount = (int) ($data['amount'] ?? 0);
+
+        if ($amount <= 0) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid amount.']);
+        }
+
+        if ($item && $item['quantity'] >= $amount) {
+            $newQty = (int) $item['quantity'] - $amount;
+            $model->update($id, ['quantity' => $newQty]);
+            return $this->response->setJSON([
+                'success' => true,
+                'newQty' => $newQty,
+                'message' => 'Quantity decreased successfully.'
+            ]);
+        }
+
+        return $this->response->setJSON(['success' => false, 'message' => 'Not enough stock to decrease.']);
+    }
+
+    public function deletePermanent($id)
+    {
+        $deletedModel = new DeletedItemModel();
+        if (!$deletedModel->find($id)) {
+            return redirect()->to(site_url('items/deleted'))->with('error', 'Item not found or already deleted.');
+        }
+
+        $deletedModel->delete($id);
+        return redirect()->to(site_url('items/deleted'))->with('success', 'Item permanently deleted.');
+    }
+
+    public function delete($id)
+    {
+        $model = new ItemModel();
+        $deletedModel = new DeletedItemModel();
+        $item = $model->find($id);
+
+        if (!$item) {
+            return redirect()->to('/items')->with('error', 'Item not found or already deleted.');
+        }
+
+        if ($deletedModel->where('product_id', $item['product_id'])->first()) {
+            $model->delete($id);
+            return redirect()->to('/items')->with('info', 'Item already existed in Deleted Items.');
+        }
+
+        $deletedModel->insert([
+            'product_id' => $item['product_id'],
+            'name' => $item['name'],
+            'category' => $item['category'] ?? null,
+            'subcategory' => $item['subcategory'] ?? null,
+            'quantity' => $item['quantity'],
+            'price' => $item['price'] ?? 0.00,
+            'expiration_date' => $item['expiration_date'],
+            'barcode' => $item['barcode'] ?? '',
+            'auto_delete' => $item['auto_delete'],
+            'status' => 'manually deleted',
+            'created_at' => $item['created_at'] ?? date('Y-m-d H:i:s'),
+            'deleted_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $model->delete($id);
+        return redirect()->to('/items')->with('success', 'Item manually deleted successfully!');
+    }
+
+    public function deleteMultiple()
+    {
+        $json = $this->request->getJSON(true) ?: $this->request->getPost();
+        $ids = $json['ids'] ?? [];
+
+        if (empty($ids)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'No items selected.']);
+        }
+
+        $itemModel = new ItemModel();
+        $deletedModel = new DeletedItemModel();
+        $movedCount = 0;
+
+        foreach ($ids as $id) {
+            $item = $itemModel->find($id);
+            if (!$item) continue;
+
+            if ($deletedModel->where('product_id', $item['product_id'])->first()) {
+                $itemModel->delete($id);
+                continue;
+            }
+
+            $deletedModel->insert([
+                'product_id' => $item['product_id'],
+                'name' => $item['name'],
+                'category' => $item['category'] ?? null,
+                'subcategory' => $item['subcategory'] ?? null,
+                'quantity' => $item['quantity'],
+                'price' => $item['price'] ?? 0.00,
+                'expiration_date' => $item['expiration_date'],
+                'barcode' => $item['barcode'] ?? '',
+                'auto_delete' => $item['auto_delete'],
+                'status' => 'manually deleted',
+                'created_at' => $item['created_at'] ?? date('Y-m-d H:i:s'),
+                'deleted_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            $itemModel->delete($id);
+            $movedCount++;
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => "$movedCount item(s) moved to Deleted Items."
+        ]);
+    }
+
+    public function updateMultipleQuantity()
+    {
+        $json = $this->request->getJSON(true);
+        $ids = $json['ids'] ?? [];
+        $action = $json['action'] ?? '';
+        $amount = (int) ($json['amount'] ?? 0);
+
+        if (empty($ids) || $amount <= 0) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid selection or amount.']);
+        }
+
+        $itemModel = new ItemModel();
+
+        foreach ($ids as $id) {
+            $item = $itemModel->find($id);
+            if (!$item) continue;
+
+            $newQuantity = ($action === 'increase')
+                ? $item['quantity'] + $amount
+                : max(0, $item['quantity'] - $amount);
+
+            $itemModel->update($id, ['quantity' => $newQuantity]);
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => "Quantity successfully " . ($action === 'increase' ? 'added to' : 'reduced for') . " " . count($ids) . " item(s)."
+        ]);
+    }
+
+    public function exportSalesCsv()
+    {
+        $salesModel = new \App\Models\SalesModel();
+        $sales = $salesModel
+            ->select('sales.*, products.name as product_name, users.username as user_name')
+            ->join('products', 'products.id = sales.product_id', 'left')
+            ->join('users', 'users.id = sales.user_id', 'left')
+            ->orderBy('sales.created_at', 'DESC')
+            ->findAll();
+
+        $filename = 'sales_export_' . date('Y-m-d_H-i-s') . '.csv';
+        header("Content-type: text/csv");
+        header("Content-Disposition: attachment; filename={$filename}");
+        header("Pragma: no-cache");
+        header("Expires: 0");
+
+        $output = fopen('php://output', 'w');
+        fputcsv($output, ['ID', 'Product', 'User', 'Pack', 'Qty', 'Price', 'Total', 'Payment', 'Date']);
+        foreach ($sales as $sale) {
+            fputcsv($output, [
+                $sale->id,
+                $sale->product_name ?? 'N/A',
+                $sale->user_name ?? 'N/A',
+                $sale->pack ?? '',
+                $sale->quantity,
+                $sale->price,
+                $sale->total,
+                $sale->payment_method ?? 'N/A',
+                $sale->created_at
+            ]);
+        }
+        fclose($output);
+        exit;
+    }
+}

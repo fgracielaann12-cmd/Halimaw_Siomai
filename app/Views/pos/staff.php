@@ -95,7 +95,7 @@ if (!function_exists('getProductSKU')) {
             to { opacity: 1; transform: scale(1); }
         }
 
-        .top-navbar { position: sticky; top: 0; z-index: 1000;
+        .top-navbar {
             animation: fadeSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .pos-items {
@@ -130,7 +130,10 @@ if (!function_exists('getProductSKU')) {
             display: flex;
             flex-direction: column;
             box-shadow: var(--card-shadow);
+            overflow-y: auto;
         }
+        #sidebar::-webkit-scrollbar { width: 6px; }
+        #sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
 
         #sidebar .nav {
             width: 100%;
@@ -274,7 +277,7 @@ if (!function_exists('getProductSKU')) {
         }
 
         /* TOP NAVBAR */
-        .top-navbar { position: sticky; top: 0; z-index: 1000;
+        .top-navbar {
             background: white;
             height: 60px;
             padding: 0 20px;
@@ -347,7 +350,7 @@ if (!function_exists('getProductSKU')) {
         @media (max-width: 991px) {
             .mobile-menu-toggle { display: flex; }
             .hide-mobile { display: none !important; }
-            .top-navbar { position: sticky; top: 0; z-index: 1000;
+            .top-navbar {
                 border-radius: 0 !important;
                 margin: 0 0 15px 0 !important;
             }
@@ -497,9 +500,6 @@ if (!function_exists('getProductSKU')) {
         /* SIDEBAR CART */
         .pos-sidebar {
             width: 340px;
-            position: sticky;
-            top: 80px;
-            align-self: flex-start;
         }
 
         .cart-summary, .checkout-summary {
@@ -1384,13 +1384,9 @@ if (!function_exists('getProductSKU')) {
 
             <!-- CART + CHECKOUT -->
             <div class="pos-sidebar">
-                <div class="cart-summary mb-3">
-                    <h4><i class="bi bi-globe me-2"></i>Order Online</h4>
-                    <div class="cart-items" id="online-orders-list"><p class="text-muted">No online orders yet.</p></div>
-                </div>
                 <div class="cart-summary">
                     <h4><i class="bi bi-cart me-2"></i>Cart Summary</h4>
-                    <div class="cart-items" id="main-cart-items"><p class="text-muted">No items added.</p></div>
+                    <div class="cart-items"><p class="text-muted">No items added.</p></div>
                 </div>
                 <div class="checkout-summary">
                     <h4><i class="bi bi-credit-card me-2"></i>Checkout</h4>
@@ -1434,6 +1430,10 @@ if (!function_exists('getProductSKU')) {
                         <span class="sm-value fw-normal text-dark" id="smPieces" style="font-size: 0.95rem;"></span>
                     </div>
 
+                    <div class="sm-info-row" id="smExprRow" style="display:none;">
+                        <span class="sm-label">Expires</span>
+                        <span class="sm-value text-muted" id="smExpr"></span>
+                    </div>
 
                     <div class="sm-info-row sm-variation-row" id="smVariationRow">
                         <span class="sm-label">Pack</span>
@@ -1453,7 +1453,7 @@ if (!function_exists('getProductSKU')) {
 
                     <div class="sm-actions">
                         <button class="sm-btn-add" onclick="smAddToCart()" style="width: 100%;">
-                            <i class="bi bi-bag-plus"></i> Add To Bag
+                            <i class="bi bi-cart-plus"></i> Add To Cart
                         </button>
                     </div>
                 </div>
@@ -1584,9 +1584,9 @@ if (!function_exists('getProductSKU')) {
                                     <?php foreach ($displayRows as $vItem): ?>
                                         <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
                                             <?php if (function_exists('getProductSKU')): ?>
-                                                <?= esc(getProductSKU($item['name'], $vItem['variation'])) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
+                                                <?= esc(getProductSKU($item['name'], $vItem['variation'])) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
                                             <?php else: ?>
-                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
+                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
                                             <?php endif; ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -1718,49 +1718,6 @@ if (!function_exists('getProductSKU')) {
         </div>
     </div>
 
-    <!-- Online Order Details Modal -->
-    <div class="modal fade" id="onlineOrderModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header" style="background: var(--primary); color: white;">
-                    <h5 class="modal-title w-100 text-center fw-bold">
-                        <i class="bi bi-globe me-2"></i>Online Order <span id="onlineOrderIdTitle"></span>
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <h6 class="text-secondary fw-semibold border-bottom pb-2 mb-3">Customer Details</h6>
-                    <div class="mb-2"><strong>Name:</strong> <span id="ooCustomerName"></span></div>
-                    <div class="mb-2"><strong>Phone:</strong> <span id="ooCustomerPhone"></span></div>
-                    <div class="mb-4"><strong>Email:</strong> <span id="ooCustomerEmail"></span></div>
-
-                    <h6 class="text-secondary fw-semibold border-bottom pb-2 mb-3">Order Items</h6>
-                    <div class="table-responsive mb-4" style="max-height: 200px; overflow-y: auto;">
-                        <table class="table table-hover table-sm align-middle">
-                            <thead class="table-light sticky-top">
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Qty</th>
-                                    <th class="text-end">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ooItemsList"></tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center p-3 rounded" style="background: #f8f9fa; border-left: 4px solid var(--primary);">
-                        <span class="fs-5 fw-semibold text-dark">Grand Total</span>
-                        <span class="fs-4 fw-bold text-primary" id="ooGrandTotal"></span>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 d-flex gap-2 w-100">
-                    <button type="button" class="btn btn-light flex-fill m-0" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary flex-fill m-0" id="btnConfirmOnlineOrder" onclick="confirmOnlineOrder()">Confirm</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -1828,147 +1785,6 @@ if (!function_exists('getProductSKU')) {
             sidebarOverlay.classList.remove('active');
             document.body.style.overflow = '';
             if (mobileMenuToggle) {
-                // nothing
-            }
-        }
-
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', closeSidebar);
-        }
-
-        // Online Orders
-        let pendingOnlineOrders = [];
-        let pendingOnlineCustomerName = '';
-        let pendingOnlineCustomerEmail = '';
-
-        function fetchOnlineOrders() {
-            fetch('<?= site_url("api/pending-orders") ?>')
-                .then(res => res.json())
-                .then(data => {
-                    if(data.status === 'success') {
-                        pendingOnlineOrders = data.data;
-                        renderOnlineOrders();
-                    }
-                })
-                .catch(err => console.error('Error fetching online orders:', err));
-        }
-
-        function renderOnlineOrders() {
-            const list = document.getElementById('online-orders-list');
-            if(pendingOnlineOrders.length === 0) {
-                list.innerHTML = '<p class="text-muted">No online orders yet.</p>';
-                return;
-            }
-
-            let html = '';
-            pendingOnlineOrders.forEach((order, index) => {
-                html += `
-                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                        <div>
-                            <a href="#" class="fw-bold text-primary text-decoration-none" onclick="viewOnlineOrder(${index}); return false;">${order.order_id}</a>
-                            <div class="text-muted" style="font-size: 0.85rem;">${order.customer_name}</div>
-                        </div>
-                        <span class="badge bg-warning text-dark">Pending</span>
-                    </div>
-                `;
-            });
-            list.innerHTML = html;
-        }
-
-        window.viewOnlineOrder = function(index) {
-            const order = pendingOnlineOrders[index];
-            document.getElementById('onlineOrderIdTitle').textContent = order.order_id;
-            document.getElementById('ooCustomerName').textContent = order.customer_name;
-            document.getElementById('ooCustomerPhone').textContent = order.customer_phone;
-            document.getElementById('ooCustomerEmail').textContent = order.customer_email;
-            document.getElementById('ooGrandTotal').textContent = '₱' + parseFloat(order.total_amount).toFixed(2);
-
-            const itemsList = document.getElementById('ooItemsList');
-            let itemsHtml = '';
-            order.items.forEach(item => {
-                let name = item.product_name;
-                if (item.variation) name += ` <small class="text-muted">(${item.variation})</small>`;
-                itemsHtml += `
-                    <tr>
-                        <td>${name}</td>
-                        <td>x${item.quantity}</td>
-                        <td class="text-end">₱${parseFloat(item.subtotal).toFixed(2)}</td>
-                    </tr>
-                `;
-            });
-            itemsList.innerHTML = itemsHtml;
-
-            const modal = new bootstrap.Modal(document.getElementById('onlineOrderModal'));
-            modal.show();
-        };
-
-        window.confirmOnlineOrder = function() {
-            const orderId = document.getElementById('onlineOrderIdTitle').textContent;
-            if (!orderId) return;
-            
-            if (!confirm(`Are you sure you want to confirm Order ${orderId}?`)) {
-                return;
-            }
-
-            const btn = document.getElementById('btnConfirmOnlineOrder');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Confirming...';
-            btn.disabled = true;
-
-            fetch('<?= site_url("api/confirm-order") ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ order_id: orderId })
-            })
-            .then(res => res.json())
-            .then(data => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                
-                if (data.status === 'success') {
-                    // Populate cart with online order items
-                    const order = pendingOnlineOrders.find(o => o.order_id === orderId);
-                    if (order) {
-                        cartItems.length = 0; // Clear existing cart
-                        order.items.forEach(item => {
-                            cartItems.push({
-                                name: item.product_name,
-                                pack: item.variation,
-                                price: parseFloat(item.price),
-                                qty: parseInt(item.quantity),
-                                product_id: parseInt(item.product_id),
-                                type: item.variation ? 'siomai' : 'other',
-                                packSize: 1
-                            });
-                        });
-                        updateCart();
-                        
-                        // Save customer details for when staff manually clicks Checkout
-                        pendingOnlineCustomerName = order.customer_name;
-                        pendingOnlineCustomerEmail = order.customer_email;
-                    }
-
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('onlineOrderModal'));
-                    modal.hide();
-                    fetchOnlineOrders(); // Refresh the list
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(err => {
-                console.error('Error confirming order:', err);
-                alert('Failed to confirm order. Please try again.');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            });
-        };
-
-        // Fetch every 10 seconds
-        setInterval(fetchOnlineOrders, 10000);
-        fetchOnlineOrders(); // Initial fetch
-
                 // removed arrow
             }
         }
@@ -2120,7 +1936,7 @@ if (!function_exists('getProductSKU')) {
 
         // POS Functionality
         const cartItems = [];
-        const cartContainer = document.getElementById('main-cart-items');
+        const cartContainer = document.querySelector('.cart-items');
         const cartTotal = document.getElementById('cart-total');
         let selectedPaymentMethod = 'cash';
 
@@ -2135,11 +1951,19 @@ if (!function_exists('getProductSKU')) {
             const productId = parseInt(card.dataset.productId);
             const stock = parseInt(card.dataset.stock || "0");
             const image = card.dataset.image;
+            const expr = card.dataset.expr;
             
             // Populate basic DOM
             document.getElementById('smImage').src = image;
             document.getElementById('smTitle').textContent = name;
             document.getElementById('smStock').textContent = stock + " left";
+            
+            if (expr && expr.trim() !== "") {
+                document.getElementById('smExprRow').style.display = 'flex';
+                document.getElementById('smExpr').textContent = expr;
+            } else {
+                document.getElementById('smExprRow').style.display = 'none';
+            }
 
             document.getElementById('smQtyInput').value = 1;
 
@@ -2459,13 +2283,9 @@ if (!function_exists('getProductSKU')) {
             vatIncludedRadio.onchange = updateVatCalculation;
             vatExcludedRadio.onchange = updateVatCalculation;
             
-            // Clear previous inputs or populate with pending online order details
-            document.getElementById('checkoutCustomerName').value = pendingOnlineCustomerName;
-            document.getElementById('checkoutCustomerEmail').value = pendingOnlineCustomerEmail;
-            
-            // Reset them so future walk-in orders don't reuse the same name
-            pendingOnlineCustomerName = '';
-            pendingOnlineCustomerEmail = '';
+            // Clear previous inputs
+            document.getElementById('checkoutCustomerName').value = '';
+            document.getElementById('checkoutCustomerEmail').value = '';
 
             // Show modal
             new bootstrap.Modal(document.getElementById('checkoutReviewModal')).show();

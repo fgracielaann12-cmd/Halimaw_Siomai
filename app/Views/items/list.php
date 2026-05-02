@@ -442,13 +442,13 @@
             margin-bottom: 20px;
         }
         #itemsTable {
-            min-width: 900px;
+            width: 100%;
             font-size: 0.9rem;
             margin: 0;
         }
         #itemsTable th, #itemsTable td {
             text-align: center !important;
-            white-space: nowrap;
+            vertical-align: middle;
         }
         #itemsTable thead th {
             background: var(--primary);

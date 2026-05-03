@@ -82,7 +82,7 @@ if (!function_exists('getProductSKU')) {
             to { opacity: 1; transform: scale(1); }
         }
 
-        .top-navbar { position: sticky; top: 0; z-index: 1000;
+        .top-navbar {
             animation: fadeSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .container > h5 {
@@ -129,7 +129,10 @@ if (!function_exists('getProductSKU')) {
             display: flex;
             flex-direction: column;
             box-shadow: var(--card-shadow);
+            overflow-y: auto;
         }
+        #sidebar::-webkit-scrollbar { width: 6px; }
+        #sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
 
         #sidebar .nav {
             width: 100%;
@@ -239,7 +242,7 @@ if (!function_exists('getProductSKU')) {
         }
 
         /* TOP NAVBAR */
-        .top-navbar { position: sticky; top: 0; z-index: 1000;
+        .top-navbar {
             background: white;
             height: 60px;
             padding: 0 20px;
@@ -353,6 +356,8 @@ if (!function_exists('getProductSKU')) {
         /* Responsive Table Wrapper */
         .table-responsive-custom {
             overflow-x: auto;
+            overflow-y: auto;
+            max-height: 65vh;
             -webkit-overflow-scrolling: touch;
             border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
@@ -413,6 +418,8 @@ if (!function_exists('getProductSKU')) {
             flex-wrap: wrap;
             gap: 16px;
             align-items: center;
+            position: relative;
+            z-index: 10;
         }
         .controls-section .form-control,
         .controls-section .form-select {
@@ -883,9 +890,9 @@ if (!function_exists('getProductSKU')) {
                                     <?php foreach ($displayRows as $vItem): ?>
                                         <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
                                             <?php if (function_exists('getProductSKU')): ?>
-                                                <?= esc(getProductSKU($item['name'], $vItem['variation'] ?? null)) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
+                                                <?= esc(getProductSKU($item['name'], $vItem['variation'] ?? null)) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
                                             <?php else: ?>
-                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
+                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
                                             <?php endif; ?>
                                         </option>
                                     <?php endforeach; ?>

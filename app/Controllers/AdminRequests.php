@@ -87,14 +87,23 @@ $requests = $builder->get()->getResultArray();
         // Handle action: add or subtract
         $action = strtolower(trim($request['action'] ?? 'add'));
 
+        $updateData = [];
+
         if ($action === 'subtract') {
             $newQty = max(0, $oldQty - $qty); // decrease quantity
         } else {
             $newQty = $oldQty + $qty; // increase quantity
+            
+            // If it's an addition (new batch), update the Date Entry and Expiration Date
+            $updateData['created_at'] = date('Y-m-d H:i:s');
+            // Set expiration date 20 days newly fresh
+            $updateData['expiration_date'] = date('Y-m-d', strtotime('+20 days'));
         }
 
-        // Update item quantity
-        $itemModel->update($item['id'], [$qtyField => $newQty]);
+        $updateData[$qtyField] = $newQty;
+
+        // Update item quantity (and dates if applicable)
+        $itemModel->update($item['id'], $updateData);
 
         // Log the update to item_logs
         $logModel->insert([

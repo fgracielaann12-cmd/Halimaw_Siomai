@@ -445,7 +445,7 @@
             margin-bottom: 20px;
         }
         #itemsTable {
-            min-width: 900px;
+            width: 100%;
             font-size: 0.9rem;
             margin: 0;
         }

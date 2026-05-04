@@ -3,6 +3,9 @@
 use CodeIgniter\Boot;
 use Config\Paths;
 
+$_SERVER['CI_ENVIRONMENT'] = 'development';
+define('ENVIRONMENT', 'development');
+
 /*
  *---------------------------------------------------------------
  * CHECK PHP VERSION

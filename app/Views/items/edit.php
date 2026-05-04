@@ -48,7 +48,7 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        .top-navbar {
+        .top-navbar { position: sticky; top: 0; z-index: 1000;
             animation: fadeSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .container > h5, .container > .row:first-of-type > h2, .container > h2:first-of-type, .page-title, .pos-items {

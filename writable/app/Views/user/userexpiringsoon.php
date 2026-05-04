@@ -136,8 +136,8 @@ button.btn-outline-dark:hover {
 <!-- ✅ Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center gap-3" href="http://192.168.0.55/inventa/public/index.php/items">
-            <img src="http://192.168.0.55/inventa/public/Images/Inventa.png" alt="Inventa Logo" style="width: 50px; height: 50px;">
+        <a class="navbar-brand d-flex align-items-center gap-3" href="<?= site_url('items') ?>">
+            <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo" style="width: 50px; height: 50px;">
             <span class="brand-text">Inventa</span>
         </a>
 

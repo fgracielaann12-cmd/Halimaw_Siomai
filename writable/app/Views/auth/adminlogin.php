@@ -75,7 +75,7 @@
 </head>
 <body>
   <div class="login-container">
-    <img src="<?= base_url('Images/Inventa.png') ?>" alt="Inventa Logo" class="logo d-block mx-auto mb-3" style="max-width: 100px;">
+    <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo" class="logo d-block mx-auto mb-3" style="max-width: 100px;">
     <h2> Inventa </h2>
 
     <!-- Flash Messages -->

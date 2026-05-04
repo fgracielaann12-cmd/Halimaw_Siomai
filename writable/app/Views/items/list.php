@@ -266,7 +266,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-3" href="<?= site_url('items') ?>">
-                <img src="/inventa/public/Images/Inventa.png" alt="Inventa Logo" style="width: 50px; height: 50px;">
+                <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo" style="width: 50px; height: 50px;">
                 <span class="brand-text">Inventa</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

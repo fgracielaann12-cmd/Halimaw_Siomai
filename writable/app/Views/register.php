@@ -75,7 +75,7 @@ background-color: #45a049;
 
 <body>
   <div class="register-container">
-    <img src="Images/Inventa.png" alt="Inventa Logo" class="logo"
+    <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo" class="logo"
          style="display: block; margin: 0 auto 20px auto; max-width: 100px;">
 
     <h2>Register Account</h2>

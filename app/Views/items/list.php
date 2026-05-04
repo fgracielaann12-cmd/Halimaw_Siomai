@@ -451,13 +451,13 @@
             margin-bottom: 20px;
         }
         #itemsTable {
-            min-width: 900px;
+            width: 100%;
             font-size: 0.9rem;
             margin: 0;
         }
         #itemsTable th, #itemsTable td {
             text-align: center !important;
-            white-space: nowrap;
+            vertical-align: middle !important;
         }
         #itemsTable thead th {
             background: var(--primary);
@@ -558,7 +558,6 @@
 
             .container { padding: 0 15px 15px; }
             .top-navbar { padding: 10px 15px; }
-            .table { min-width: 600px; }
         }
     </style>
     <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
@@ -704,9 +703,14 @@ function getSku($name, $variation = '') {
             </button>
             <h5 class="mb-0"><i class="bi bi-box-seam me-2" style="font-size: 1.25rem;"></i>Admin Inventory</h5>
         </div>
-        <button onclick="location.reload()" class="btn btn-light shadow-sm border" style="height: 40px; width: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px;" title="Refresh Table">
-            <i class="bi bi-arrow-clockwise" style="font-size: 1.2rem; color: #3a3b45;"></i>
-        </button>
+        <div class="d-flex align-items-center gap-2">
+            <a href="<?= site_url('items/add') ?>" class="btn-add-new-item mb-0 shadow-sm" style="height: 40px; margin: 0; padding: 0 16px;">
+                <i class="bi bi-plus-lg me-2"></i>Add New Item
+            </a>
+            <button onclick="location.reload()" class="btn btn-light shadow-sm border" style="height: 40px; width: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px;" title="Refresh Table">
+                <i class="bi bi-arrow-clockwise" style="font-size: 1.2rem; color: #3a3b45;"></i>
+            </button>
+        </div>
     </div>
 
     <div class="container">
@@ -745,10 +749,7 @@ function getSku($name, $variation = '') {
             </div>
         <?php endif; ?>
 
-        <!-- Add New Item -->
-        <div class="d-flex justify-content-end mb-3">
-            <a href="<?= site_url('items/add') ?>" class="btn-add-new-item mb-0 shadow-sm">Add New Item</a>
-        </div>
+        <!-- Add New Item (Moved to Header) -->
 
         <!-- Controls -->
         <div class="controls-section d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 border p-3 rounded bg-white shadow-sm">
@@ -890,8 +891,8 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle"><?= esc($item['product_id']) ?><?= $sz['s'] ?></td>
                             <td class="text-center align-middle"><?= esc($item['name']) ?> <small class="text-muted">(<?= $sz['l'] ?>)</small></td>
                             <td class="text-center align-middle"><?= esc(getSku($item['name'], $sz['s_sku'])) ?></td>
-                            <td class="text-center align-middle">₱<?= number_format($sz['p'], 2) ?></td>
-                            <td class="text-center align-middle" style="white-space: nowrap;"><span><?= esc($sz['q']) ?></span> <small class="text-muted"><?= $sz['ql'] ?></small></td>
+                            <td class="text-center align-middle text-nowrap">₱<?= number_format($sz['p'], 2) ?></td>
+                            <td class="text-center align-middle text-nowrap"><span><?= esc($sz['q']) ?></span> <small class="text-muted"><?= $sz['ql'] ?></small></td>
                             <td class="text-center align-middle hide-mobile">
                                 <?php 
                                 $val = $sz['p'] * $sz['q'];
@@ -936,8 +937,8 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle"><?= esc($item['product_id']) ?></td>
                             <td class="text-center align-middle"><?= esc($item['name']) ?></td>
                             <td class="text-center align-middle"><?= esc(getSku($item['name'])) ?></td>
-                            <td class="text-center align-middle">₱<?= number_format($item['price'], 2) ?></td>
-                            <td class="text-center align-middle" style="white-space: nowrap;"><span><?= esc($item['quantity']) ?></span><?php if (stripos($item['name'], 'burger patty') !== false): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?></td>
+                            <td class="text-center align-middle text-nowrap">₱<?= number_format($item['price'], 2) ?></td>
+                            <td class="text-center align-middle text-nowrap"><span><?= esc($item['quantity']) ?></span><?php if (stripos($item['name'], 'burger patty') !== false): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?></td>
                             <td class="text-center align-middle hide-mobile">
                                 <?php 
                                 $val = $item['price'] * $item['quantity'];

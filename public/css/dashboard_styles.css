@@ -18,16 +18,18 @@ body {
 
 /* === POS Items === */
 .pos-grid { display:flex; flex-wrap:wrap; gap:15px; }
-.pos-item-card { background:#fffaf4; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,0.08); padding:10px; transition: transform 0.2s; }
-.pos-item-card:hover { transform: translateY(-3px); }
-.pos-item-card img { border-radius:8px; max-height:100px; object-fit:cover; }
+.pos-item-card { background:#fffaf4; border-radius:5px; box-shadow:0 4px 16px rgba(0,0,0,0.08); padding:10px; transition: transform 0.2s; }
+.pos-item-card:hover { transform:scale(1.03); }
+.pos-item-card img { border-radius:5px; max-height:100px; object-fit:cover; }
+.pos-item-title { font-weight:700; color:#4e342e; font-size:0.9rem; margin-top:8px; }
+.pos-item-price { color:#e65100; font-weight:700; font-size:1.1rem; }
 
 /* === Buttons === */
-.btn-add-new-item { background:#6d4c41; color:#fff; border-radius:50px; padding:6px 12px; font-size:0.85rem; transition: all 0.3s ease; }
-.btn-add-new-item:hover { background:#5d4037; transform: scale(1.05); }
+.btn-add-new-item { background:#6d4c41; color:#fff; border-radius:5px; padding:6px 12px; font-size:0.85rem; transition: all 0.3s ease; }
+.btn-add-new-item:hover { background:#5d4037; color:#fff; }
 
-/* === Checkout / Cart === */
-.pos-checkout { background:#fffaf4; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+/* Checkout Panel */
+.pos-checkout { background:#fffaf4; border-radius:5px; box-shadow:0 4px 16px rgba(0,0,0,0.08); }
 .cart-items { max-height:300px; overflow-y:auto; }
 .cart-items p { margin:0.2rem 0; }
 

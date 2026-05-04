@@ -20,7 +20,7 @@
             --sidebar-active: #4e73df;     /* Blue active */
             --content-bg: #f8f9fc;
             --card-shadow: 0 0.15rem 1.75rem rgba(58, 59, 69, 0.15);
-            --border-radius: 0.65rem;
+            --border-radius: 5px;
             --primary: #4e73df;            /* Blue header */
             --warning-bg: #fff3cd;         /* Yellow alert */
             --danger-bg: #f8d7da;          /* Red alert */
@@ -274,7 +274,7 @@
         /* ✨ ENHANCED TABLE (MATCHES SCREENSHOT) */
         .table-card {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             overflow: hidden;
             padding: 0;
@@ -337,7 +337,7 @@
 
         /* ✨ BUTTONS (MATCHES SCREENSHOT) */
         .btn {
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             font-weight: 600;
             padding: 0.5rem 1rem;
             transition: all 0.2s ease;
@@ -367,7 +367,7 @@
         /* ✨ FORM CONTROLS */
         .form-control,
         .form-select {
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             border: 1px solid #ddd;
             padding: 0.45rem 0.75rem;
             font-family: 'Poppins', sans-serif;
@@ -380,7 +380,7 @@
 
         /* ✨ ALERTS (MATCHES SCREENSHOT) */
         .alert {
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             border: none;
             padding: 14px 20px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.08);
@@ -406,7 +406,7 @@
         /* ✨ INVENTORY SUMMARY CARD (MATCHES SCREENSHOT) */
         .inventory-summary {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             padding: 20px;
             margin-bottom: 24px;
@@ -449,6 +449,89 @@
             .top-navbar { position: sticky; top: 0; z-index: 1000; border-radius: 0; margin-bottom: 15px; } 
             #sidebar.active { transform: translateX(0); }
             .table { min-width: 600px; font-size: 0.85rem; }
+        }
+    </style>
+    
+    
+    
+    
+    
+    
+    
+    
+    <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 12px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn, .btn-export, .btn-add-new-item,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 12px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 12px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+
+        /* --- UNIFIED TABLE SCROLLING & SIZING FIX --- */
+        .table, table {
+            font-size: 0.95rem !important;
+        }
+        .table th, .table td, table th, table td {
+            padding: 12px 15px !important;
+            vertical-align: middle !important;
+        }
+        @media (max-width: 991px) {
+            .table, table { font-size: 0.9rem !important; }
+            .table th, .table td, table th, table td { padding: 0.75rem 0.5rem !important; }
+        }
+        .table-responsive, .table-responsive-custom {
+            max-height: 65vh !important;
+            overflow-y: auto !important;
+        }
+        .table-responsive::-webkit-scrollbar, .table-responsive-custom::-webkit-scrollbar {
+            width: 8px; height: 8px;
+        }
+        .table-responsive::-webkit-scrollbar-track, .table-responsive-custom::-webkit-scrollbar-track {
+            background: #f1f1f1; border-radius: 4px; margin: 0 10px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb, .table-responsive-custom::-webkit-scrollbar-thumb {
+            background: #c1c1c1; border-radius: 4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover, .table-responsive-custom::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        /* Sticky Headers */
+        .table thead th, table thead th, .table th {
+            position: sticky !important;
+            top: -1px !important;
+            z-index: 10 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            background-color: var(--primary, #4e73df) !important;
+            color: white !important;
+        }
+        /* Fix dropdown clipping globally */
+        .controls-section {
+            position: relative;
+            z-index: 1050 !important;
         }
     </style>
 </head>

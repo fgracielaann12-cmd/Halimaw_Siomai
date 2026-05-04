@@ -74,7 +74,7 @@ if (!function_exists('getProductSKU')) {
             --sidebar-hover: #34495e;
             --sidebar-active: #4e73df;
             --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            --border-radius: 0.65rem;
+            --border-radius: 5px;
         }
 
         * {
@@ -95,7 +95,7 @@ if (!function_exists('getProductSKU')) {
             to { opacity: 1; transform: scale(1); }
         }
 
-        .top-navbar { position: sticky; top: 0; z-index: 1000;
+        .top-navbar {
             animation: fadeSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .pos-items {
@@ -130,7 +130,10 @@ if (!function_exists('getProductSKU')) {
             display: flex;
             flex-direction: column;
             box-shadow: var(--card-shadow);
+            overflow-y: auto;
         }
+        #sidebar::-webkit-scrollbar { width: 6px; }
+        #sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 5px; }
 
         #sidebar .nav {
             width: 100%;
@@ -274,7 +277,7 @@ if (!function_exists('getProductSKU')) {
         }
 
         /* TOP NAVBAR */
-        .top-navbar { position: sticky; top: 0; z-index: 1000;
+        .top-navbar {
             background: white;
             height: 60px;
             padding: 0 20px;
@@ -347,7 +350,7 @@ if (!function_exists('getProductSKU')) {
         @media (max-width: 991px) {
             .mobile-menu-toggle { display: flex; }
             .hide-mobile { display: none !important; }
-            .top-navbar { position: sticky; top: 0; z-index: 1000;
+            .top-navbar {
                 border-radius: 0 !important;
                 margin: 0 0 15px 0 !important;
             }
@@ -377,7 +380,7 @@ if (!function_exists('getProductSKU')) {
 
         .pos-item-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 5px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.06);
             padding: 12px;
             text-align: center;
@@ -463,7 +466,7 @@ if (!function_exists('getProductSKU')) {
             padding: 3px 6px;
             font-size: 0.7rem;
             border: 1px solid #ddd;
-            border-radius: 10px;
+            border-radius: 5px;
             background: #f8f9fa;
             color: var(--dark);
             cursor: pointer;
@@ -482,7 +485,7 @@ if (!function_exists('getProductSKU')) {
             border: none !important;
             padding: 10px !important;
             font-weight: 600 !important;
-            border-radius: var(--border-radius) !important;
+            border-radius: 5px; !important;
             width: 100% !important;
             transition: all 0.2s ease !important;
             margin-top: 8px !important;
@@ -497,14 +500,11 @@ if (!function_exists('getProductSKU')) {
         /* SIDEBAR CART */
         .pos-sidebar {
             width: 340px;
-            position: sticky;
-            top: 80px;
-            align-self: flex-start;
         }
 
         .cart-summary, .checkout-summary {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             padding: 20px;
         }
@@ -626,7 +626,7 @@ if (!function_exists('getProductSKU')) {
             border: none;
             padding: 10px;
             font-weight: 600;
-            border-radius: 10px;
+            border-radius: 5px;
             width: 100%;
             margin: 12px 0;
             transition: background 0.2s;
@@ -642,7 +642,7 @@ if (!function_exists('getProductSKU')) {
             border: 1px solid #ddd;
             padding: 10px;
             font-weight: 500;
-            border-radius: 10px;
+            border-radius: 5px;
             width: 100%;
             transition: all 0.2s;
         }
@@ -673,7 +673,7 @@ if (!function_exists('getProductSKU')) {
             justify-content: center;
             padding: 8px 10px;
             border: 1px solid #ddd;
-            border-radius: 30px;
+            border-radius: 5px;
             background: white;
             font-size: 0.75rem;
             cursor: pointer;
@@ -705,7 +705,7 @@ if (!function_exists('getProductSKU')) {
             min-width: 300px;
             max-width: 500px;
             text-align: center;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             padding: 14px 24px;
             font-size: 0.95rem;
             font-weight: 500;
@@ -762,7 +762,7 @@ if (!function_exists('getProductSKU')) {
 
         .tutorial-content {
             background: white;
-            border-radius: 12px;
+            border-radius: 5px;
             max-width: 600px;
             width: 90%;
             padding: 30px;
@@ -1069,7 +1069,7 @@ if (!function_exists('getProductSKU')) {
             padding: 8px 16px;
             background: white;
             border: 1px solid rgba(0,0,0,.09);
-            border-radius: 10px;
+            border-radius: 5px;
             cursor: pointer;
             outline: none;
             position: relative;
@@ -1124,7 +1124,7 @@ if (!function_exists('getProductSKU')) {
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 10px;
+            border-radius: 5px;
             font-size: 0.95rem;
             font-weight: 600;
             display: flex;
@@ -1146,7 +1146,7 @@ if (!function_exists('getProductSKU')) {
             color: #555;
             border: 1px solid rgba(0,0,0,.09);
             padding: 10px 20px;
-            border-radius: 10px;
+            border-radius: 5px;
             font-size: 0.95rem;
             font-weight: 600;
             display: flex;
@@ -1162,6 +1162,44 @@ if (!function_exists('getProductSKU')) {
         .sm-btn-back:hover {
             background: #f8f8f8;
             border-color: rgba(0,0,0,.2);
+        }
+        
+        
+            /* Unified 5px Border Radius for All Buttons System-Wide */
+        button, .btn, .btn.rounded-1, .btn.rounded-1, .btn-add-to-cart, .btn, #checkout-btn, #clear-cart, .submit-button, a.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light {
+            border-radius: 5px !important;
+        }
+    </style>
+    <!-- UNIFIED 5PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 5px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 5px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 5px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
         }
     </style>
 </head>
@@ -1384,13 +1422,9 @@ if (!function_exists('getProductSKU')) {
 
             <!-- CART + CHECKOUT -->
             <div class="pos-sidebar">
-                <div class="cart-summary mb-3">
-                    <h4><i class="bi bi-globe me-2"></i>Order Online</h4>
-                    <div class="cart-items" id="online-orders-list"><p class="text-muted">No online orders yet.</p></div>
-                </div>
                 <div class="cart-summary">
                     <h4><i class="bi bi-cart me-2"></i>Cart Summary</h4>
-                    <div class="cart-items" id="main-cart-items"><p class="text-muted">No items added.</p></div>
+                    <div class="cart-items"><p class="text-muted">No items added.</p></div>
                 </div>
                 <div class="checkout-summary">
                     <h4><i class="bi bi-credit-card me-2"></i>Checkout</h4>
@@ -1434,6 +1468,10 @@ if (!function_exists('getProductSKU')) {
                         <span class="sm-value fw-normal text-dark" id="smPieces" style="font-size: 0.95rem;"></span>
                     </div>
 
+                    <div class="sm-info-row" id="smExprRow" style="display:none;">
+                        <span class="sm-label">Expires</span>
+                        <span class="sm-value text-muted" id="smExpr"></span>
+                    </div>
 
                     <div class="sm-info-row sm-variation-row" id="smVariationRow">
                         <span class="sm-label">Pack</span>
@@ -1453,7 +1491,7 @@ if (!function_exists('getProductSKU')) {
 
                     <div class="sm-actions">
                         <button class="sm-btn-add" onclick="smAddToCart()" style="width: 100%;">
-                            <i class="bi bi-bag-plus"></i> Add To Bag
+                            <i class="bi bi-cart-plus"></i> Add To Cart
                         </button>
                     </div>
                 </div>
@@ -1567,7 +1605,7 @@ if (!function_exists('getProductSKU')) {
                             <label for="requestItemModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-box me-1"></i> Select Item
                             </label>
-                            <select id="requestItemModal" class="form-select shadow-sm" required style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                            <select id="requestItemModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
                                     <?php
@@ -1584,9 +1622,9 @@ if (!function_exists('getProductSKU')) {
                                     <?php foreach ($displayRows as $vItem): ?>
                                         <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
                                             <?php if (function_exists('getProductSKU')): ?>
-                                                <?= esc(getProductSKU($item['name'], $vItem['variation'])) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
+                                                <?= esc(getProductSKU($item['name'], $vItem['variation'])) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
                                             <?php else: ?>
-                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
+                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
                                             <?php endif; ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -1597,7 +1635,7 @@ if (!function_exists('getProductSKU')) {
                             <label for="requestActionModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-arrow-left-right me-1"></i> Adjustment Type
                             </label>
-                            <select id="requestActionModal" class="form-select shadow-sm" required style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                            <select id="requestActionModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Select action —</option>
                                 <option value="add">Add Stock</option>
                                 <option value="subtract">Reduce Stock</option>
@@ -1608,14 +1646,14 @@ if (!function_exists('getProductSKU')) {
                                 <i class="bi bi-hash me-1"></i> Quantity
                             </label>
                             <input type="number" id="requestQtyModal" class="form-control shadow-sm" min="1" placeholder="Enter adjustment amount" required
-                                   style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                                   style="border-radius: 5px; padding: 0.6rem 1rem;">
                         </div>
                         <div class="mb-4">
                             <label for="requestReasonModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-journal-text me-1"></i> Reason / Notes
                             </label>
                             <textarea id="requestReasonModal" class="form-control shadow-sm" rows="3" placeholder="e.g., spillage, delivery, inventory correction..." required
-                                      style="border-radius: var(--border-radius); padding: 0.6rem 1rem;"></textarea>
+                                      style="border-radius: 5px; padding: 0.6rem 1rem;"></textarea>
                         </div>
                         <div class="d-grid">
                             <button type="submit" class="btn fw-bold" style="
@@ -1654,7 +1692,7 @@ if (!function_exists('getProductSKU')) {
                             <label for="pullOutItemModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-box me-1"></i> Select Item
                             </label>
-                            <select id="pullOutItemModal" class="form-select shadow-sm" required style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                            <select id="pullOutItemModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
                                     <?php
@@ -1684,7 +1722,7 @@ if (!function_exists('getProductSKU')) {
                             <label for="pullOutReasonModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-exclamation-triangle me-1"></i> Reason
                             </label>
-                            <select id="pullOutReasonModal" class="form-select shadow-sm" required style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                            <select id="pullOutReasonModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Select Reason —</option>
                                 <option value="SPOILED">Spoiled / Expired</option>
                                 <option value="CONTAMINATED">Contaminated</option>
@@ -1697,65 +1735,22 @@ if (!function_exists('getProductSKU')) {
                                 <i class="bi bi-hash me-1"></i> Quantity to Pull-Out
                             </label>
                             <input type="number" id="pullOutQtyModal" class="form-control shadow-sm" min="1" placeholder="Enter amount" required
-                                   style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                                   style="border-radius: 5px; padding: 0.6rem 1rem;">
                         </div>
                         <div class="mb-4">
                             <label for="pullOutNoteModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-journal-text me-1"></i> Additional Notes (Optional)
                             </label>
                             <textarea id="pullOutNoteModal" class="form-control shadow-sm" rows="3" placeholder="Provide extra details..."
-                                      style="border-radius: var(--border-radius); padding: 0.6rem 1rem;"></textarea>
+                                      style="border-radius: 5px; padding: 0.6rem 1rem;"></textarea>
                         </div>
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <button type="button" class="btn btn-light border shadow-sm px-4 fw-semibold" data-bs-dismiss="modal" style="border-radius: var(--border-radius);">Cancel</button>
-                            <button type="submit" class="btn btn-danger shadow-sm px-4 fw-semibold" style="border-radius: var(--border-radius);">
+                            <button type="button" class="btn btn-light border shadow-sm px-4 fw-semibold" data-bs-dismiss="modal" style="border-radius: 5px;">Cancel</button>
+                            <button type="submit" class="btn btn-danger shadow-sm px-4 fw-semibold" style="border-radius: 5px;">
                                 <i class="bi bi-send me-2"></i>Submit Pull-Out
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Online Order Details Modal -->
-    <div class="modal fade" id="onlineOrderModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header" style="background: var(--primary); color: white;">
-                    <h5 class="modal-title w-100 text-center fw-bold">
-                        <i class="bi bi-globe me-2"></i>Online Order <span id="onlineOrderIdTitle"></span>
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <h6 class="text-secondary fw-semibold border-bottom pb-2 mb-3">Customer Details</h6>
-                    <div class="mb-2"><strong>Name:</strong> <span id="ooCustomerName"></span></div>
-                    <div class="mb-2"><strong>Phone:</strong> <span id="ooCustomerPhone"></span></div>
-                    <div class="mb-4"><strong>Email:</strong> <span id="ooCustomerEmail"></span></div>
-
-                    <h6 class="text-secondary fw-semibold border-bottom pb-2 mb-3">Order Items</h6>
-                    <div class="table-responsive mb-4" style="max-height: 200px; overflow-y: auto;">
-                        <table class="table table-hover table-sm align-middle">
-                            <thead class="table-light sticky-top">
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Qty</th>
-                                    <th class="text-end">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ooItemsList"></tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center p-3 rounded" style="background: #f8f9fa; border-left: 4px solid var(--primary);">
-                        <span class="fs-5 fw-semibold text-dark">Grand Total</span>
-                        <span class="fs-4 fw-bold text-primary" id="ooGrandTotal"></span>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 d-flex gap-2 w-100">
-                    <button type="button" class="btn btn-light flex-fill m-0" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary flex-fill m-0" id="btnConfirmOnlineOrder" onclick="confirmOnlineOrder()">Confirm</button>
                 </div>
             </div>
         </div>
@@ -1828,147 +1823,6 @@ if (!function_exists('getProductSKU')) {
             sidebarOverlay.classList.remove('active');
             document.body.style.overflow = '';
             if (mobileMenuToggle) {
-                // nothing
-            }
-        }
-
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', closeSidebar);
-        }
-
-        // Online Orders
-        let pendingOnlineOrders = [];
-        let pendingOnlineCustomerName = '';
-        let pendingOnlineCustomerEmail = '';
-
-        function fetchOnlineOrders() {
-            fetch('<?= site_url("api/pending-orders") ?>')
-                .then(res => res.json())
-                .then(data => {
-                    if(data.status === 'success') {
-                        pendingOnlineOrders = data.data;
-                        renderOnlineOrders();
-                    }
-                })
-                .catch(err => console.error('Error fetching online orders:', err));
-        }
-
-        function renderOnlineOrders() {
-            const list = document.getElementById('online-orders-list');
-            if(pendingOnlineOrders.length === 0) {
-                list.innerHTML = '<p class="text-muted">No online orders yet.</p>';
-                return;
-            }
-
-            let html = '';
-            pendingOnlineOrders.forEach((order, index) => {
-                html += `
-                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                        <div>
-                            <a href="#" class="fw-bold text-primary text-decoration-none" onclick="viewOnlineOrder(${index}); return false;">${order.order_id}</a>
-                            <div class="text-muted" style="font-size: 0.85rem;">${order.customer_name}</div>
-                        </div>
-                        <span class="badge bg-warning text-dark">Pending</span>
-                    </div>
-                `;
-            });
-            list.innerHTML = html;
-        }
-
-        window.viewOnlineOrder = function(index) {
-            const order = pendingOnlineOrders[index];
-            document.getElementById('onlineOrderIdTitle').textContent = order.order_id;
-            document.getElementById('ooCustomerName').textContent = order.customer_name;
-            document.getElementById('ooCustomerPhone').textContent = order.customer_phone;
-            document.getElementById('ooCustomerEmail').textContent = order.customer_email;
-            document.getElementById('ooGrandTotal').textContent = '₱' + parseFloat(order.total_amount).toFixed(2);
-
-            const itemsList = document.getElementById('ooItemsList');
-            let itemsHtml = '';
-            order.items.forEach(item => {
-                let name = item.product_name;
-                if (item.variation) name += ` <small class="text-muted">(${item.variation})</small>`;
-                itemsHtml += `
-                    <tr>
-                        <td>${name}</td>
-                        <td>x${item.quantity}</td>
-                        <td class="text-end">₱${parseFloat(item.subtotal).toFixed(2)}</td>
-                    </tr>
-                `;
-            });
-            itemsList.innerHTML = itemsHtml;
-
-            const modal = new bootstrap.Modal(document.getElementById('onlineOrderModal'));
-            modal.show();
-        };
-
-        window.confirmOnlineOrder = function() {
-            const orderId = document.getElementById('onlineOrderIdTitle').textContent;
-            if (!orderId) return;
-            
-            if (!confirm(`Are you sure you want to confirm Order ${orderId}?`)) {
-                return;
-            }
-
-            const btn = document.getElementById('btnConfirmOnlineOrder');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Confirming...';
-            btn.disabled = true;
-
-            fetch('<?= site_url("api/confirm-order") ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ order_id: orderId })
-            })
-            .then(res => res.json())
-            .then(data => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                
-                if (data.status === 'success') {
-                    // Populate cart with online order items
-                    const order = pendingOnlineOrders.find(o => o.order_id === orderId);
-                    if (order) {
-                        cartItems.length = 0; // Clear existing cart
-                        order.items.forEach(item => {
-                            cartItems.push({
-                                name: item.product_name,
-                                pack: item.variation,
-                                price: parseFloat(item.price),
-                                qty: parseInt(item.quantity),
-                                product_id: parseInt(item.product_id),
-                                type: item.variation ? 'siomai' : 'other',
-                                packSize: 1
-                            });
-                        });
-                        updateCart();
-                        
-                        // Save customer details for when staff manually clicks Checkout
-                        pendingOnlineCustomerName = order.customer_name;
-                        pendingOnlineCustomerEmail = order.customer_email;
-                    }
-
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('onlineOrderModal'));
-                    modal.hide();
-                    fetchOnlineOrders(); // Refresh the list
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(err => {
-                console.error('Error confirming order:', err);
-                alert('Failed to confirm order. Please try again.');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            });
-        };
-
-        // Fetch every 10 seconds
-        setInterval(fetchOnlineOrders, 10000);
-        fetchOnlineOrders(); // Initial fetch
-
                 // removed arrow
             }
         }
@@ -2120,7 +1974,7 @@ if (!function_exists('getProductSKU')) {
 
         // POS Functionality
         const cartItems = [];
-        const cartContainer = document.getElementById('main-cart-items');
+        const cartContainer = document.querySelector('.cart-items');
         const cartTotal = document.getElementById('cart-total');
         let selectedPaymentMethod = 'cash';
 
@@ -2135,11 +1989,19 @@ if (!function_exists('getProductSKU')) {
             const productId = parseInt(card.dataset.productId);
             const stock = parseInt(card.dataset.stock || "0");
             const image = card.dataset.image;
+            const expr = card.dataset.expr;
             
             // Populate basic DOM
             document.getElementById('smImage').src = image;
             document.getElementById('smTitle').textContent = name;
             document.getElementById('smStock').textContent = stock + " left";
+            
+            if (expr && expr.trim() !== "") {
+                document.getElementById('smExprRow').style.display = 'flex';
+                document.getElementById('smExpr').textContent = expr;
+            } else {
+                document.getElementById('smExprRow').style.display = 'none';
+            }
 
             document.getElementById('smQtyInput').value = 1;
 
@@ -2459,13 +2321,9 @@ if (!function_exists('getProductSKU')) {
             vatIncludedRadio.onchange = updateVatCalculation;
             vatExcludedRadio.onchange = updateVatCalculation;
             
-            // Clear previous inputs or populate with pending online order details
-            document.getElementById('checkoutCustomerName').value = pendingOnlineCustomerName;
-            document.getElementById('checkoutCustomerEmail').value = pendingOnlineCustomerEmail;
-            
-            // Reset them so future walk-in orders don't reuse the same name
-            pendingOnlineCustomerName = '';
-            pendingOnlineCustomerEmail = '';
+            // Clear previous inputs
+            document.getElementById('checkoutCustomerName').value = '';
+            document.getElementById('checkoutCustomerEmail').value = '';
 
             // Show modal
             new bootstrap.Modal(document.getElementById('checkoutReviewModal')).show();

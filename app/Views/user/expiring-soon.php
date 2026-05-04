@@ -135,6 +135,89 @@
             box-shadow: 0 5px 8px rgba(0, 0, 0, 0.15);
         }
     </style>
+    
+    
+    
+    
+    
+    
+    
+    
+    <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 12px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn, .btn-export, .btn-add-new-item,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 12px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 12px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+
+        /* --- UNIFIED TABLE SCROLLING & SIZING FIX --- */
+        .table, table {
+            font-size: 0.95rem !important;
+        }
+        .table th, .table td, table th, table td {
+            padding: 12px 15px !important;
+            vertical-align: middle !important;
+        }
+        @media (max-width: 991px) {
+            .table, table { font-size: 0.9rem !important; }
+            .table th, .table td, table th, table td { padding: 0.75rem 0.5rem !important; }
+        }
+        .table-responsive, .table-responsive-custom {
+            max-height: 65vh !important;
+            overflow-y: auto !important;
+        }
+        .table-responsive::-webkit-scrollbar, .table-responsive-custom::-webkit-scrollbar {
+            width: 8px; height: 8px;
+        }
+        .table-responsive::-webkit-scrollbar-track, .table-responsive-custom::-webkit-scrollbar-track {
+            background: #f1f1f1; border-radius: 4px; margin: 0 10px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb, .table-responsive-custom::-webkit-scrollbar-thumb {
+            background: #c1c1c1; border-radius: 4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover, .table-responsive-custom::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        /* Sticky Headers */
+        .table thead th, table thead th, .table th {
+            position: sticky !important;
+            top: -1px !important;
+            z-index: 10 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            background-color: var(--primary, #4e73df) !important;
+            color: white !important;
+        }
+        /* Fix dropdown clipping globally */
+        .controls-section {
+            position: relative;
+            z-index: 1050 !important;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
@@ -180,7 +263,7 @@
     <div class="container mt-5">
 
         <a href="<?= base_url('/items') ?>"
-            class="btn btn-outline-dark fw-semibold rounded-pill shadow-sm px-3 py-1 mb-3 d-inline-flex align-items-center"
+            class="btn btn-outline-dark fw-semibold rounded-1 shadow-sm px-3 py-1 mb-3 d-inline-flex align-items-center"
             style="transition: all 0.3s ease;">
             <i class="fa-solid fa-arrow-left me-2"></i> Back to Dashboard
         </a>
@@ -190,11 +273,11 @@
             <div class="position-relative" style="width: 250px;">
                 <i class="fa-solid fa-magnifying-glass position-absolute text-secondary"
                     style="top: 50%; left: 10px; transform: translateY(-50%);"></i>
-                <input type="text" id="searchQuery" class="form-control ps-4 rounded-pill shadow-sm"
+                <input type="text" id="searchQuery" class="form-control ps-4 rounded-1 shadow-sm"
                     placeholder="Search by item name" oninput="searchItems()"
                     style="border: 1px solid #ced4da; transition: all 0.25s ease;">
             </div>
-            <button class="btn btn-outline-dark rounded-pill fw-semibold px-3" onclick="searchItems()">
+            <button class="btn btn-outline-dark rounded-1 fw-semibold px-3" onclick="searchItems()">
                 <i class="fa-solid fa-search me-1"></i> Search
             </button>
         </div>

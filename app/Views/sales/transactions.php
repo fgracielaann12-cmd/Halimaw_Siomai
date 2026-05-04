@@ -24,7 +24,7 @@
             --sidebar-hover: #34495e;
             --sidebar-active: #4e73df;
             --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            --border-radius: 0.35rem;
+            --border-radius: 5px;
         }
 
         * {
@@ -241,7 +241,7 @@
 
         .table-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             padding: 0;
             margin-bottom: 20px;
@@ -315,6 +315,89 @@
         }
 
     </style>
+    
+    
+    
+    
+    
+    
+    
+    
+    <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 12px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn, .btn-export, .btn-add-new-item,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 12px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 12px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+
+        /* --- UNIFIED TABLE SCROLLING & SIZING FIX --- */
+        .table, table {
+            font-size: 0.95rem !important;
+        }
+        .table th, .table td, table th, table td {
+            padding: 12px 15px !important;
+            vertical-align: middle !important;
+        }
+        @media (max-width: 991px) {
+            .table, table { font-size: 0.9rem !important; }
+            .table th, .table td, table th, table td { padding: 0.75rem 0.5rem !important; }
+        }
+        .table-responsive, .table-responsive-custom {
+            max-height: 65vh !important;
+            overflow-y: auto !important;
+        }
+        .table-responsive::-webkit-scrollbar, .table-responsive-custom::-webkit-scrollbar {
+            width: 8px; height: 8px;
+        }
+        .table-responsive::-webkit-scrollbar-track, .table-responsive-custom::-webkit-scrollbar-track {
+            background: #f1f1f1; border-radius: 4px; margin: 0 10px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb, .table-responsive-custom::-webkit-scrollbar-thumb {
+            background: #c1c1c1; border-radius: 4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover, .table-responsive-custom::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        /* Sticky Headers */
+        .table thead th, table thead th, .table th {
+            position: sticky !important;
+            top: -1px !important;
+            z-index: 10 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            background-color: var(--primary, #4e73df) !important;
+            color: white !important;
+        }
+        /* Fix dropdown clipping globally */
+        .controls-section {
+            position: relative;
+            z-index: 1050 !important;
+        }
+    </style>
 </head>
 <body>
     <?= view('partials/admin_sidebar') ?>
@@ -329,7 +412,7 @@
                 <h5 class="mb-0"><i class="bi bi-clock-history me-2" style="font-size: 1.25rem;"></i>Transaction History</h5>
             </div>
             <div>
-                <a href="<?= site_url('admin/sales') ?>" class="btn btn-light rounded-circle shadow-sm" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: #f8f9fa; border: 1px solid #dee2e6; color: #495057;">
+                <a href="<?= site_url('admin/sales') ?>" class="btn btn-light rounded-1 shadow-sm" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: #f8f9fa; border: 1px solid #dee2e6; color: #495057;">
                     <i class="bi bi-x-lg"></i>
                 </a>
             </div>
@@ -409,7 +492,7 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-0">
-                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary rounded-1 px-4" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>

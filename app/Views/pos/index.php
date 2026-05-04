@@ -46,7 +46,7 @@ function isActive($paths) {
             --sidebar-hover: #34495e;
             --sidebar-active: #4e73df;
             --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            --border-radius: 0.35rem;
+            --border-radius: 5px;
         }
 
         * { font-family: 'Poppins', sans-serif; }
@@ -319,7 +319,7 @@ function isActive($paths) {
 
         .pos-item-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 5px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.06);
             padding: 12px;
             text-align: center;
@@ -424,7 +424,7 @@ function isActive($paths) {
             border: none !important;
             padding: 10px !important;
             font-weight: 600 !important;
-            border-radius: var(--border-radius) !important;
+            border-radius: 5px; !important;
             width: 100% !important;
             transition: all 0.2s ease !important;
             margin-top: 8px !important;
@@ -446,7 +446,7 @@ function isActive($paths) {
 
         .cart-summary, .checkout-summary {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             padding: 20px;
         }
@@ -567,7 +567,7 @@ function isActive($paths) {
             border: none;
             padding: 10px;
             font-weight: 600;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             width: 100%;
             margin: 12px 0;
             transition: background 0.2s;
@@ -583,7 +583,7 @@ function isActive($paths) {
             border: 1px solid #ddd;
             padding: 10px;
             font-weight: 500;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             width: 100%;
             transition: all 0.2s;
         }
@@ -614,7 +614,7 @@ function isActive($paths) {
             justify-content: center;
             padding: 8px 10px;
             border: 1px solid #ddd;
-            border-radius: 30px;
+            border-radius: 5px;
             background: white;
             font-size: 0.75rem;
             cursor: pointer;
@@ -646,7 +646,7 @@ function isActive($paths) {
             min-width: 300px;
             max-width: 500px;
             text-align: center;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             padding: 14px 24px;
             font-size: 0.95rem;
             font-weight: 500;
@@ -703,7 +703,7 @@ function isActive($paths) {
 
         .tutorial-content {
             background: white;
-            border-radius: 12px;
+            border-radius: 5px;
             max-width: 600px;
             width: 90%;
             padding: 30px;
@@ -1005,7 +1005,7 @@ function isActive($paths) {
             padding: 8px 16px;
             background: white;
             border: 1px solid rgba(0,0,0,.09);
-            border-radius: 10px;
+            border-radius: 5px;
             cursor: pointer;
             outline: none;
             position: relative;
@@ -1061,7 +1061,7 @@ function isActive($paths) {
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 10px;
+            border-radius: 5px;
             font-size: 0.95rem;
             font-weight: 600;
             display: flex;
@@ -1099,6 +1099,89 @@ function isActive($paths) {
         .sm-btn-back:hover {
             background: #f8f8f8;
             border-color: rgba(0,0,0,.2);
+        }
+    </style>
+    
+    
+    
+    
+    
+    
+    
+    
+    <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 12px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn, .btn-export, .btn-add-new-item,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 12px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 12px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+
+        /* --- UNIFIED TABLE SCROLLING & SIZING FIX --- */
+        .table, table {
+            font-size: 0.95rem !important;
+        }
+        .table th, .table td, table th, table td {
+            padding: 12px 15px !important;
+            vertical-align: middle !important;
+        }
+        @media (max-width: 991px) {
+            .table, table { font-size: 0.9rem !important; }
+            .table th, .table td, table th, table td { padding: 0.75rem 0.5rem !important; }
+        }
+        .table-responsive, .table-responsive-custom {
+            max-height: 65vh !important;
+            overflow-y: auto !important;
+        }
+        .table-responsive::-webkit-scrollbar, .table-responsive-custom::-webkit-scrollbar {
+            width: 8px; height: 8px;
+        }
+        .table-responsive::-webkit-scrollbar-track, .table-responsive-custom::-webkit-scrollbar-track {
+            background: #f1f1f1; border-radius: 4px; margin: 0 10px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb, .table-responsive-custom::-webkit-scrollbar-thumb {
+            background: #c1c1c1; border-radius: 4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover, .table-responsive-custom::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        /* Sticky Headers */
+        .table thead th, table thead th, .table th {
+            position: sticky !important;
+            top: -1px !important;
+            z-index: 10 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            background-color: var(--primary, #4e73df) !important;
+            color: white !important;
+        }
+        /* Fix dropdown clipping globally */
+        .controls-section {
+            position: relative;
+            z-index: 1050 !important;
         }
     </style>
 </head>

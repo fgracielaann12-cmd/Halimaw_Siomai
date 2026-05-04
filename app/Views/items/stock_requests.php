@@ -434,6 +434,7 @@
     
     
     
+    
     <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
     <style>
         :root {
@@ -466,7 +467,18 @@
             border-bottom-right-radius: 0 !important;
         }
 
-        /* --- UNIFIED TABLE SCROLLING & HEADER FIX --- */
+        /* --- UNIFIED TABLE SCROLLING & SIZING FIX --- */
+        .table, table {
+            font-size: 0.95rem !important;
+        }
+        .table th, .table td, table th, table td {
+            padding: 12px 15px !important;
+            vertical-align: middle !important;
+        }
+        @media (max-width: 991px) {
+            .table, table { font-size: 0.9rem !important; }
+            .table th, .table td, table th, table td { padding: 0.75rem 0.5rem !important; }
+        }
         .table-responsive, .table-responsive-custom {
             max-height: 65vh !important;
             overflow-y: auto !important;

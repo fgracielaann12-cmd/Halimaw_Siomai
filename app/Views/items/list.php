@@ -937,7 +937,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle"><?= esc($item['name']) ?></td>
                             <td class="text-center align-middle"><?= esc(getSku($item['name'])) ?></td>
                             <td class="text-center align-middle">₱<?= number_format($item['price'], 2) ?></td>
-                            <td class="text-center align-middle"><span><?= esc($item['quantity']) ?></span><?php if (stripos($item['name'], 'burger patty') !== false): ?> <small class="text-muted">(6)</small><?php endif; ?></td>
+                            <td class="text-center align-middle"><span><?= esc($item['quantity']) ?></span><?php if (stripos($item['name'], 'burger patty') !== false): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?></td>
                             <td class="text-center align-middle hide-mobile">
                                 <?php 
                                 $val = $item['price'] * $item['quantity'];

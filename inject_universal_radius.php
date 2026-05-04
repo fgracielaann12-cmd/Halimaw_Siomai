@@ -1,6 +1,6 @@
 <?php
 
-$dir = new RecursiveDirectoryIterator('c:\xampp\htdocs\Halimaw_Siomai\app\Views');
+$dir = new RecursiveDirectoryIterator('c:\xampp\htdocs\Halimaw_Siomai\Halimaw_Siomai\app\Views');
 $iterator = new RecursiveIteratorIterator($dir);
 
 $cssBlock = <<<HTML
@@ -76,7 +76,7 @@ $cssBlock = <<<HTML
         /* Fix dropdown clipping globally */
         .controls-section {
             position: relative;
-            z-index: 1050 !important;
+            z-index: 10 !important;
         }
     </style>
 HTML;
@@ -84,7 +84,7 @@ HTML;
 $filesUpdated = 0;
 
 foreach ($iterator as $file) {
-    if ($file->isFile() && $file->getExtension() === 'php') {
+    if ($file->isFile() && $file->getExtension() === 'php' && strpos($file->getPathname(), DIRECTORY_SEPARATOR . 'auth' . DIRECTORY_SEPARATOR) === false) {
         $path = $file->getPathname();
         $content = file_get_contents($path);
         

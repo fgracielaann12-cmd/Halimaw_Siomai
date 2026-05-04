@@ -87,7 +87,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1000;
+            z-index: 1050;
             transition: transform 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -412,7 +412,7 @@
                 width: 100%;
                 height: 100%;
                 background: rgba(0,0,0,0.5);
-                z-index: 999;
+                z-index: 1040;
             }
             .sidebar-overlay.active { display: block; }
 
@@ -427,6 +427,7 @@
             }
         }
     </style>
+    
     
     
     
@@ -507,7 +508,7 @@
         /* Fix dropdown clipping globally */
         .controls-section {
             position: relative;
-            z-index: 1050 !important;
+            z-index: 10 !important;
         }
     </style>
 </head>

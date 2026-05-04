@@ -12,7 +12,7 @@ EOD;
 
 $count = 0;
 foreach ($iterator as $file) {
-    if ($file->isFile() && $file->getExtension() === 'php') {
+    if ($file->isFile() && $file->getExtension() === 'php' && strpos($file->getPathname(), DIRECTORY_SEPARATOR . 'auth' . DIRECTORY_SEPARATOR) === false) {
         $content = file_get_contents($file->getPathname());
         
         // Remove my previous 12px or 5px injection if it exists

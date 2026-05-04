@@ -26,6 +26,7 @@ $errorId = uniqid('error', true);
     
     
     
+    
     <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
     <style>
         :root {
@@ -98,7 +99,7 @@ $errorId = uniqid('error', true);
         /* Fix dropdown clipping globally */
         .controls-section {
             position: relative;
-            z-index: 1050 !important;
+            z-index: 10 !important;
         }
     </style>
 </head>

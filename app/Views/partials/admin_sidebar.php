@@ -51,9 +51,11 @@ $expiredNotif = $db->table('items')
 .badge-dot {
     width: 20px !important;
     height: 20px !important;
+    flex-shrink: 0 !important;
     padding: 0 !important;
     border-radius: 50% !important;
     display: inline-flex !important;
+    flex-shrink: 0 !important;
     align-items: center !important;
     justify-content: center !important;
     line-height: 1 !important;
@@ -127,7 +129,7 @@ $expiredNotif = $db->table('items')
         </li>
         <li class="nav-item">
             <a class="nav-link <?= isActive(['admin/sales']) ?>" href="<?= site_url('admin/sales') ?>">
-                <i class="bi bi-receipt"></i> Sales Records
+                <i class="bi bi-receipt"></i> Sales&nbsp;Records
                 <?php if (isset($salesNotif) && $salesNotif > 0): ?>
                     <span class="badge bg-danger badge-dot ms-auto"><?= $salesNotif ?></span>
                 <?php endif; ?>
@@ -135,7 +137,7 @@ $expiredNotif = $db->table('items')
         </li>
         <li class="nav-item">
             <a class="nav-link <?= isActive(['admin/stock-requests', 'admin/approve-request', 'admin/reject-request', 'admin/stock-request-logs']) ?>" href="<?= site_url('admin/stock-requests') ?>">
-                <i class="bi bi-cart-check"></i> Stock Requests
+                <i class="bi bi-cart-check"></i> Stock&nbsp;Requests
                 <?php if (isset($stockReqNotif) && $stockReqNotif > 0): ?>
                     <span class="badge bg-danger badge-dot ms-auto"><?= $stockReqNotif ?></span>
                 <?php endif; ?>
@@ -148,7 +150,7 @@ $expiredNotif = $db->table('items')
         </li>
         <li class="nav-item">
             <a class="nav-link <?= isActive(['items/expiring-soon']) ?>" href="<?= site_url('items/expiring-soon') ?>">
-                <i class="bi bi-clock-history"></i> Expiring Soon
+                <i class="bi bi-clock-history"></i> Expiring&nbsp;Soon
                 <?php if (isset($expiringNotif) && $expiringNotif > 0): ?>
                     <span class="badge bg-danger badge-dot ms-auto"><?= $expiringNotif ?></span>
                 <?php endif; ?>
@@ -164,7 +166,7 @@ $expiredNotif = $db->table('items')
         </li>
         <li class="nav-item">
             <a class="nav-link <?= isActive(['admin/staff/users']) ?>" href="<?= site_url('admin/staff/users') ?>">
-                <i class="bi bi-people"></i> Staff Management
+                <i class="bi bi-people"></i> Staff&nbsp;Management
             </a>
         </li>
         <li class="nav-item">

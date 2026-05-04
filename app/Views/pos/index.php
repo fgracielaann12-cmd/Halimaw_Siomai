@@ -1206,7 +1206,7 @@ function isActive($paths) {
                     <div class="step-number">1</div>
                     <div class="step-content">
                         <h4>Add Items to Cart</h4>
-                        <p>Click on any product to select it and add it directly to your cart.</p>
+                        <p>Click a product to select size/quantity, then add to cart.</p>
                     </div>
                 </div>
                 <div class="tutorial-step">

@@ -908,7 +908,7 @@ if (!function_exists('getProductSKU')) {
                                 <?php endif; ?>
                             </td>
                             <td><?= $priceDisplay ?></td>
-                            <td>
+                            <td style="white-space: nowrap;">
                                 <?php if ($isLowStock): ?>
                                 <span><strong><?= esc($vItem['qty']) ?></strong> <span class="badge bg-warning text-dark ms-1">Low</span></span><?php if (stripos($item['name'], 'burger patty') !== false && empty($vItem['variation'])): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?>
                                 <?php else: ?>

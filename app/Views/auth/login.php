@@ -294,22 +294,4 @@ input[type="password"]::-ms-clear {
     }, 4000);
 </script>
 </body>
-</html><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const togglePassword = document.querySelector('#togglePassword');
-    const password = document.querySelector('#password');
-    if (togglePassword) {
-        togglePassword.addEventListener('click', function (e) {
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            this.classList.toggle('bi-eye-fill');
-            this.classList.toggle('bi-eye-slash-fill');
-        });
-    }
-    setTimeout(() => {
-        const alertEl = document.querySelector('.alert');
-        if (alertEl) { try { new bootstrap.Alert(alertEl).close(); } catch(e) { alertEl.style.display = 'none'; } }
-    }, 4000);
-</script>
-</body>
 </html>

@@ -891,7 +891,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle"><?= esc($item['name']) ?> <small class="text-muted">(<?= $sz['l'] ?>)</small></td>
                             <td class="text-center align-middle"><?= esc(getSku($item['name'], $sz['s_sku'])) ?></td>
                             <td class="text-center align-middle">₱<?= number_format($sz['p'], 2) ?></td>
-                            <td class="text-center align-middle"><span><?= esc($sz['q']) ?></span> <small class="text-muted"><?= $sz['ql'] ?></small></td>
+                            <td class="text-center align-middle" style="white-space: nowrap;"><span><?= esc($sz['q']) ?></span> <small class="text-muted"><?= $sz['ql'] ?></small></td>
                             <td class="text-center align-middle hide-mobile">
                                 <?php 
                                 $val = $sz['p'] * $sz['q'];
@@ -937,7 +937,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle"><?= esc($item['name']) ?></td>
                             <td class="text-center align-middle"><?= esc(getSku($item['name'])) ?></td>
                             <td class="text-center align-middle">₱<?= number_format($item['price'], 2) ?></td>
-                            <td class="text-center align-middle"><span><?= esc($item['quantity']) ?></span><?php if (stripos($item['name'], 'burger patty') !== false): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?></td>
+                            <td class="text-center align-middle" style="white-space: nowrap;"><span><?= esc($item['quantity']) ?></span><?php if (stripos($item['name'], 'burger patty') !== false): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?></td>
                             <td class="text-center align-middle hide-mobile">
                                 <?php 
                                 $val = $item['price'] * $item['quantity'];

@@ -174,7 +174,7 @@ document.querySelector("#stockRequestForm").addEventListener("submit", async fun
     e.preventDefault();
     const formData = new FormData(this);
 
-    const response = await fetch("<?= base_url('user/submit-stock-request') ?>", {
+    const response = await fetch("<?= site_url('user/submit-stock-request') ?>", {
         method: "POST",
         body: formData
     });

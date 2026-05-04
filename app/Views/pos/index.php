@@ -2142,7 +2142,7 @@ function isActive($paths) {
 
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-                const response = await fetch('<?= base_url("admin/pos/sell") ?>', {
+                const response = await fetch('<?= site_url("admin/pos/sell") ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

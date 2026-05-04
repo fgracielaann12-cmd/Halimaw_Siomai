@@ -322,31 +322,30 @@ function isActive($paths) {
             background: white;
             border-radius: 5px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-            padding: 12px;
+            padding: 15px;
             text-align: center;
             transition: all 0.25s ease;
-            position: relative;
-            width: 100%;
-            margin: 0 auto;
+            cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .pos-item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            border-color: var(--primary);
         }
 
         .pos-item-card img {
             width: 100%;
-            height: auto;
-            aspect-ratio: 1 / 1;
-            flex-grow: 0;
+            aspect-ratio: 1/1;
             object-fit: cover;
-            border-radius: 8px;
-            margin: 0 auto 12px auto;
-            background: transparent;
-        }
-
-        .pos-item-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-radius: 8px !important;
+            margin-bottom: 12px;
         }
 
         .pos-item-card.selected {
@@ -1145,7 +1144,7 @@ function isActive($paths) {
         }
         
         /* Images inside cards */
-        .pos-item-card img, .card img {
+        .card img {
             border-radius: 12px !important;
             border-bottom-left-radius: 0 !important;
             border-bottom-right-radius: 0 !important;

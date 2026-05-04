@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login | Halimaw Siomai</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -120,7 +116,7 @@ body {
 
 .form-control { 
     height: 55px; 
-    border-radius: 12px; 
+    border-radius: 5px; 
     font-size: 15px; 
     border: 1px solid rgba(255,255,255,0.15); 
     padding: 0 25px 0 50px; 
@@ -163,28 +159,6 @@ input[type="password"]::-ms-clear {
     font-size: 20px; 
     cursor: pointer; 
     z-index: 10;
-    transition: color 0.3s;
-}
-.password-toggle:hover {
-    color: #ffffff;
-}
-
-.submit-button { 
-    width: 100%; 
-    padding: 15px; 
-    background: linear-gradient(45deg, #0da1f2, #00d2ff); 
-    color: #fff; 
-    border: none; 
-    border-radius: 12px; 
-    font-weight: 700; 
-    cursor: pointer; 
-    font-size: 16px; 
-    text-transform: uppercase; 
-    letter-spacing: 1px;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-    margin-top: 25px; 
-    box-shadow: 0 6px 15px rgba(13, 161, 242, 0.4);
-    position: relative;
     overflow: hidden;
     animation: fadeInRight 0.5s ease forwards;
     opacity: 0;
@@ -213,7 +187,7 @@ input[type="password"]::-ms-clear {
 }
 
 .alert { 
-    border-radius: 12px; 
+    border-radius: 5px; 
     font-weight: 500; 
     text-align: center; 
     padding: 15px; 
@@ -229,7 +203,43 @@ input[type="password"]::-ms-clear {
 @keyframes fadeInUp { to {opacity: 1; transform: translateY(0);} }
 @keyframes fadeInRight { from {opacity: 0; transform: translateX(-20px);} to {opacity: 1; transform: translateX(0);} }
 @keyframes float { 0% { transform: translateY(0px) scale(1); } 100% { transform: translateY(-30px) scale(1.1); } }
-</style>
+        /* Unified 5px Border Radius for All Buttons System-Wide */
+        button, .btn, .btn.rounded-1, .btn.rounded-1, .btn-add-to-cart, .btn, #checkout-btn, #clear-cart, .submit-button, a.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light {
+            border-radius: 5px !important;
+        }
+    </style>
+    <!-- UNIFIED 5PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 5px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 5px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 5px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -266,232 +276,40 @@ input[type="password"]::-ms-clear {
         </form>
     </div>
 </div>
-=======
-=======
->>>>>>> e1fd03ff317f9ed42bbd79b38ff6499ed96136f3
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Halimaw Siomai</title>
-
-    <!-- Bootstrap CSS & Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
-    body {
-        background: linear-gradient(-45deg, #000428, #004e92, #1e3c72, #6dd5ed);
-        background-size: 300% 300%;
-        animation: gradientBG 6s ease infinite;
-        font-family: 'Poppins', sans-serif;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        margin: 0;
-    }
-
-    @keyframes gradientBG {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-
-    .login-card {
-        width: 100%;
-        max-width: 400px;
-        background: #ffffff;
-        padding: 50px 40px;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        animation: fadeUp 0.45s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    @keyframes fadeUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .logo-container {
-        margin-bottom: 15px;
-    }
-
-    .logo {
-        max-width: 130px;
-        height: auto;
-    }
-
-    .login-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #2c5282;
-        margin-bottom: 5px;
-        text-transform: uppercase;
-        text-align: center;
-        letter-spacing: 0.5px;
-    }
-
-    .login-subtitle {
-        font-size: 0.85rem;
-        color: #858796;
-        margin-bottom: 30px;
-        text-align: center;
-    }
-
-    .login-form {
-        width: 100%;
-    }
-
-    .input-container {
-        position: relative;
-        margin-bottom: 15px;
-        width: 100%;
-    }
-
-    .form-control {
-        height: 45px;
-        border-radius: 25px;
-        font-size: 0.9rem;
-        border: none;
-        padding: 0 20px;
-        background: #e9ecef;
-        color: #333;
-        width: 100%;
-        box-shadow: none;
-    }
-
-    .form-control::placeholder {
-        color: #6c757d;
-    }
-
-<<<<<<< HEAD
-=======
-    input[type="password"]::-ms-reveal,
-    input[type="password"]::-ms-clear {
-        display: none;
-    }
-
->>>>>>> e1fd03ff317f9ed42bbd79b38ff6499ed96136f3
-    .form-control:focus {
-        outline: none;
-        box-shadow: inset 0 0 0 2px #d1d3e2;
-        background: #e2e5e9;
-    }
-
-    .password-icon {
-        position: absolute;
-        right: 20px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6c757d;
-        cursor: pointer;
-        font-size: 1.1rem;
-    }
-
-    .submit-button {
-        width: 100%;
-        padding: 12px;
-        font-weight: 600;
-        background: #2c5282;
-        border: none;
-        color: #fff;
-        border-radius: 25px;
-        transition: 0.3s;
-        margin-top: 10px;
-        font-size: 0.95rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .submit-button:hover {
-        background: #1e3c72;
-    }
-    </style>
-</head>
-<body>
-
-    <div class="login-card">
-
-        <!-- Logo -->
-        <div class="logo-container">
-            <img src="<?= base_url('Images/Inventa.png') ?>" class="logo" alt="Halimaw Siomai Logo">
-        </div>
-
-        <h2 class="login-title">Halimaw Siomai</h2>
-        <p class="login-subtitle">POS Inventory Management System</p>
-
-        <!-- Flash Messages -->
-        <?php if(session()->getFlashdata('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert" style="width: 100%; border-radius: 15px; font-size: 0.85rem; padding: 10px;">
-            <i class="bi bi-exclamation-circle-fill me-2"></i>
-            <?= session()->getFlashdata('error') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 12px;"></button>
-        </div>
-        <?php endif; ?>
-
-        <?php if(session()->getFlashdata('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show text-center" role="alert" style="width: 100%; border-radius: 15px; font-size: 0.85rem; padding: 10px;">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <?= session()->getFlashdata('success') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 12px;"></button>
-        </div>
-        <?php endif; ?>
-
-        <!-- Login Form -->
-        <form method="post" action="<?= base_url('/authenticate') ?>" class="login-form">
-            <?= csrf_field() ?>
-
-            <div class="input-container">
-                <input type="text" name="login" class="form-control" placeholder="User:" required>
-            </div>
-
-            <div class="input-container">
-                <input type="password" name="password" id="password" class="form-control" placeholder="Password:" required>
-                <i class="bi bi-eye password-icon" id="togglePassword"></i>
-            </div>
-
-            <button type="submit" class="submit-button">Log In</button>
-        </form>
-
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Scripts -->
-    <script>
-        // Toggle Password Visibility
-        const togglePassword = document.querySelector('#togglePassword');
-        const password = document.querySelector('#password');
-<<<<<<< HEAD
->>>>>>> d359fb5bd23650a9fe211093a51533f51111cd73
-=======
->>>>>>> e1fd03ff317f9ed42bbd79b38ff6499ed96136f3
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+    if (togglePassword) {
         togglePassword.addEventListener('click', function (e) {
             const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
             password.setAttribute('type', type);
-            this.classList.toggle('bi-eye');
-            this.classList.toggle('bi-eye-slash');
+            this.classList.toggle('bi-eye-fill');
+            this.classList.toggle('bi-eye-slash-fill');
         });
-
-        // Auto-close Alerts
-        setTimeout(() => {
-            const alertEl = document.querySelector('.alert');
-            if (alertEl) new bootstrap.Alert(alertEl).close();
-        }, 4000);
-    </script>
-
+    }
+    setTimeout(() => {
+        const alertEl = document.querySelector('.alert');
+        if (alertEl) { try { new bootstrap.Alert(alertEl).close(); } catch(e) { alertEl.style.display = 'none'; } }
+    }, 4000);
+</script>
+</body>
+</html><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function (e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('bi-eye-fill');
+            this.classList.toggle('bi-eye-slash-fill');
+        });
+    }
+    setTimeout(() => {
+        const alertEl = document.querySelector('.alert');
+        if (alertEl) { try { new bootstrap.Alert(alertEl).close(); } catch(e) { alertEl.style.display = 'none'; } }
+    }, 4000);
+</script>
 </body>
 </html>

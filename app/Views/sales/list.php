@@ -531,6 +531,38 @@
             box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
         }
     </style>
+    <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 12px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn, .btn-export, .btn-add-new-item,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 12px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 12px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+    </style>
 </head>
 <body>
     <?= view('partials/admin_sidebar') ?>

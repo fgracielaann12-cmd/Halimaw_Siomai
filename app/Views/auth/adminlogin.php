@@ -36,7 +36,7 @@
         max-width: 400px;
         background: #ffffff;
         padding: 50px 40px;
-        border-radius: 12px;
+        border-radius: 5px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         animation: fadeUp 0.45s ease;
         display: flex;
@@ -94,7 +94,7 @@
 
     .form-control {
         height: 45px;
-        border-radius: 25px;
+        border-radius: 5px;
         font-size: 0.9rem;
         border: none;
         padding: 0 20px;
@@ -136,7 +136,7 @@
         background: #2c5282;
         border: none;
         color: #fff;
-        border-radius: 25px;
+        border-radius: 5px;
         transition: 0.3s;
         margin-top: 10px;
         font-size: 0.95rem;
@@ -160,6 +160,42 @@
         color: #2c5282;
         text-decoration: underline;
     }
+            /* Unified 5px Border Radius for All Buttons System-Wide */
+        button, .btn, .btn.rounded-1, .btn.rounded-1, .btn-add-to-cart, .btn, #checkout-btn, #clear-cart, .submit-button, a.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light {
+            border-radius: 5px !important;
+        }
+    </style>
+    <!-- UNIFIED 5PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 5px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 5px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 5px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
     </style>
 </head>
 
@@ -177,7 +213,7 @@
 
         <!-- Flash Messages -->
         <?php if (session()->getFlashdata('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert" style="width: 100%; border-radius: 15px; font-size: 0.85rem; padding: 10px;">
+        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert" style="width: 100%; border-radius: 5px; font-size: 0.85rem; padding: 10px;">
             <i class="bi bi-exclamation-circle-fill me-2"></i>
             <?= session()->getFlashdata('error') ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 12px;"></button>
@@ -185,7 +221,7 @@
         <?php endif; ?>
 
         <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show text-center" role="alert" style="width: 100%; border-radius: 15px; font-size: 0.85rem; padding: 10px;">
+        <div class="alert alert-success alert-dismissible fade show text-center" role="alert" style="width: 100%; border-radius: 5px; font-size: 0.85rem; padding: 10px;">
             <i class="bi bi-check-circle-fill me-2"></i>
             <?= session()->getFlashdata('success') ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 12px;"></button>

@@ -25,7 +25,7 @@
             --sidebar-hover: #34495e;
             --sidebar-active: #4e73df;
             --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            --border-radius: 0.65rem;
+            --border-radius: 5px;
         }
 
         * {
@@ -46,7 +46,7 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        .top-navbar {
+        .top-navbar { position: sticky; top: 0; z-index: 1000;
             animation: fadeSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .container > h5, .container > .row:first-of-type > h2, .container > h2:first-of-type, .page-title, .pos-items {
@@ -218,7 +218,7 @@
         body > #mobileMenuToggle { display: none !important; }
 
         /* TOP NAVBAR */
-        .top-navbar {
+        .top-navbar { position: sticky; top: 0; z-index: 1000;
             background: white;
             height: 60px;
             padding: 0 20px;
@@ -247,7 +247,7 @@
         /* FILTER CARD */
         .filter-card {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             padding: 20px;
             margin-bottom: 25px;
@@ -256,7 +256,7 @@
         #searchQuery {
             flex: 1;
             padding: 8px 12px;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             border: 1px solid #ddd;
             font-size: 0.95rem;
         }
@@ -269,7 +269,7 @@
         /* TABLE CARD */
         .table-card {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             overflow: hidden;
             padding: 0;
@@ -300,6 +300,10 @@
             padding: 0.5rem 0.5rem;
         }
 
+        .table-responsive {
+            max-height: 65vh;
+            overflow-y: auto;
+        }
         /* Custom Table Scrollbar */
         .table-responsive::-webkit-scrollbar {
             height: 8px;
@@ -321,8 +325,9 @@
             color: white;
             font-weight: 600;
             position: sticky;
-            top: 0;
-            z-index: 2;
+            top: -1px;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .table tbody tr {
             transition: background 0.2s;
@@ -333,13 +338,13 @@
         .table .badge {
             font-size: 0.75rem;
             padding: 0.4em 0.6em;
-            border-radius: 30px;
+            border-radius: 5px;
             font-weight: 500;
         }
 
         /* ALERTS */
         .alert {
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             font-weight: 500;
             text-align: center;
         }
@@ -348,7 +353,7 @@
         @media (max-width: 991px) {
             .mobile-menu-toggle { display: flex; }
             body > #mobileMenuToggle { display: none !important; }
-            .top-navbar {
+            .top-navbar { position: sticky; top: 0; z-index: 1000;
                 border-radius: 0 !important;
                 margin: 0 0 15px 0 !important;
             }
@@ -388,6 +393,77 @@
             }
         }
     </style>
+    
+    
+    
+    
+    
+    
+    
+    <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 12px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn, .btn-export, .btn-add-new-item,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 12px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 12px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+
+        /* --- UNIFIED TABLE SCROLLING & HEADER FIX --- */
+        .table-responsive, .table-responsive-custom {
+            max-height: 65vh !important;
+            overflow-y: auto !important;
+        }
+        .table-responsive::-webkit-scrollbar, .table-responsive-custom::-webkit-scrollbar {
+            width: 8px; height: 8px;
+        }
+        .table-responsive::-webkit-scrollbar-track, .table-responsive-custom::-webkit-scrollbar-track {
+            background: #f1f1f1; border-radius: 4px; margin: 0 10px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb, .table-responsive-custom::-webkit-scrollbar-thumb {
+            background: #c1c1c1; border-radius: 4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover, .table-responsive-custom::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        /* Sticky Headers */
+        .table thead th, table thead th, .table th {
+            position: sticky !important;
+            top: -1px !important;
+            z-index: 10 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            background-color: var(--primary, #4e73df) !important;
+            color: white !important;
+        }
+        /* Fix dropdown clipping globally */
+        .controls-section {
+            position: relative;
+            z-index: 1050 !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -418,70 +494,10 @@
 
 
         <?php if (!empty($items) || !empty($deletedItems)): ?>
-            <!-- Filter Card -->
-            <div class="filter-card">
-                <div class="filter-row d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3 w-100">
-                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:2.7;">
-                        <label class="form-label mb-0 fw-bold text-nowrap">Search Item:</label>
-                        <div class="position-relative w-100">
-                            <input type="text" id="searchQuery" class="form-control" style="padding-right: 2.2rem;" placeholder="Search by Product ID or Name" oninput="filterAndSort()">
-                            <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3" style="color: #6c757d; opacity: 0.6; pointer-events: none;"></i>
-                        </div>
-                    </div>
-                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1;">
-                        <label class="form-label mb-0 fw-bold text-nowrap">Category:</label>
-                        <div class="dropdown w-100">
-                            <button class="btn btn-outline-secondary dropdown-toggle w-100 d-flex justify-content-between align-items-center bg-white text-dark" type="button" id="categoryFilterBtn" data-bs-toggle="dropdown" aria-expanded="false" style="border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 0.375rem 0.75rem;">
-                                <span id="categoryFilterText">All Categories</span>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="categoryFilterBtn">
-                                <li><a class="dropdown-item active" href="#" onclick="selectDropdown('categoryFilter', 'all', 'All Categories', event)">All Categories</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('categoryFilter', 'food', 'Food', event)">Food</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('categoryFilter', 'non-food', 'Non-Food', event)">Non-Food</a></li>
-                            </ul>
-                            <input type="hidden" id="categoryFilter" value="all">
-                        </div>
-                    </div>
-                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1;">
-                        <label class="form-label mb-0 fw-bold text-nowrap">Sort By:</label>
-                        <div class="dropdown w-100">
-                            <button class="btn btn-outline-secondary dropdown-toggle w-100 d-flex justify-content-between align-items-center bg-white text-dark" type="button" id="sortFilterBtn" data-bs-toggle="dropdown" aria-expanded="false" style="border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 0.375rem 0.75rem;">
-                                <span id="sortFilterText">Latest Deleted</span>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="sortFilterBtn">
-                                <li><a class="dropdown-item active" href="#" onclick="selectDropdown('sortFilter', 'deleted_desc', 'Latest Deleted', event)">Latest Deleted</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'deleted_asc', 'Oldest Deleted', event)">Oldest Deleted</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'name_asc', 'Name (A–Z)', event)">Name (A–Z)</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'name_desc', 'Name (Z–A)', event)">Name (Z–A)</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'quantity_asc', 'Quantity (Low → High)', event)">Quantity (Low → High)</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'quantity_desc', 'Quantity (High → Low)', event)">Quantity (High → Low)</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'date_asc', 'Date (Oldest → Newest)', event)">Date (Oldest → Newest)</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('sortFilter', 'date_desc', 'Date (Newest → Oldest)', event)">Date (Newest → Oldest)</a></li>
-                            </ul>
-                            <input type="hidden" id="sortFilter" value="deleted_desc">
-                        </div>
-                    </div>
-                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2" style="flex:1;">
-                        <label class="form-label mb-0 fw-bold text-nowrap">Delete Type:</label>
-                        <div class="dropdown w-100">
-                            <button class="btn btn-outline-secondary dropdown-toggle w-100 d-flex justify-content-between align-items-center bg-white text-dark" type="button" id="deleteTypeFilterBtn" data-bs-toggle="dropdown" aria-expanded="false" style="border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 0.375rem 0.75rem;">
-                                <span id="deleteTypeFilterText">All Delete Types</span>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="deleteTypeFilterBtn">
-                                <li><a class="dropdown-item active" href="#" onclick="selectDropdown('deleteTypeFilter', 'all', 'All Delete Types', event)">All Delete Types</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('deleteTypeFilter', 'auto', 'Auto Deleted', event)">Auto Deleted</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="selectDropdown('deleteTypeFilter', 'manual', 'Manually Deleted', event)">Manually Deleted</a></li>
-                            </ul>
-                            <input type="hidden" id="deleteTypeFilter" value="all">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Table Card -->
             <div class="table-card">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-bordered table-hover align-middle mb-0">
                         <thead>
                             <tr>
                                 <th>Product ID</th>
@@ -585,53 +601,8 @@ document.addEventListener('DOMContentLoaded', () => {
         filterAndSort();
     };
 
-    // Filter & Sort
-    window.filterAndSort = function() {
-        const query = (document.getElementById('searchQuery').value || '').toLowerCase();
-        const category = document.getElementById('categoryFilter').value;
-        const sort = document.getElementById('sortFilter').value;
-        const deleteType = document.getElementById('deleteTypeFilter').value;
-        const rows = Array.from(document.querySelectorAll('.table tbody tr'));
-
-        rows.forEach(row => {
-            const product = row.children[0].textContent.toLowerCase();
-            const name = row.children[1].textContent.toLowerCase();
-            const cat = row.children[2].textContent.toLowerCase();
-            const type = row.children[7].textContent.toLowerCase();
-            row.style.display = ((product.includes(query) || name.includes(query)) && 
-                (category === 'all' || cat === category) && 
-                (deleteType === 'all' || 
-                 (deleteType === 'auto' && type.includes('auto')) || 
-                 (deleteType === 'manual' && type.includes('manual')))) ? '' : 'none';
-        });
-
-        const visible = rows.filter(r => r.style.display !== 'none');
-        visible.sort((a, b) => {
-            const getVal = (r, i) => r.children[i].textContent.trim().toLowerCase();
-            switch (sort) {
-                case 'name_asc': return getVal(a, 1).localeCompare(getVal(b, 1));
-                case 'name_desc': return getVal(b, 1).localeCompare(getVal(a, 1));
-                case 'quantity_asc': return parseInt(getVal(a, 3) || 0) - parseInt(getVal(b, 3) || 0);
-                case 'quantity_desc': return parseInt(getVal(b, 3) || 0) - parseInt(getVal(a, 3) || 0);
-                case 'date_asc': return new Date(getVal(a, 5)) - new Date(getVal(b, 5));
-                case 'date_desc': return new Date(getVal(b, 5)) - new Date(getVal(a, 5));
-                case 'deleted_asc': return new Date(getVal(a, 10) || 0) - new Date(getVal(b, 10) || 0);
-                case 'deleted_desc':
-                default:
-                    const typeA = getVal(a, 7), typeB = getVal(b, 7);
-                    const dateA = new Date(getVal(a, 10) || 0), dateB = new Date(getVal(b, 10) || 0);
-                    if (typeA.includes('manual') && !typeB.includes('manual')) return -1;
-                    if (!typeA.includes('manual') && typeB.includes('manual')) return 1;
-                    return dateB - dateA;
-            }
-        });
-        const tbody = document.querySelector('.table tbody');
-        visible.forEach(r => tbody.appendChild(r));
-    };
-
-    // Initialize
-    document.getElementById('sortFilter').value = 'deleted_desc';
-    filterAndSort();
+    // Filter & Sort disabled
+    window.filterAndSort = function() { return; };
 });
 </script>
 </body>

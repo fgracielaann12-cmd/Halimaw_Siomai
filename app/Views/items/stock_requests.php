@@ -25,7 +25,7 @@
             --sidebar-hover: #34495e;
             --sidebar-active: #4e73df;
             --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            --border-radius: 0.65rem;
+            --border-radius: 5px;
         }
 
         * {
@@ -46,7 +46,7 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        .top-navbar {
+        .top-navbar { position: sticky; top: 0; z-index: 1000;
             animation: fadeSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .container > h5, .container > .row:first-of-type > h2, .container > h2:first-of-type, .page-title, .pos-items {
@@ -234,7 +234,7 @@
         }
 
         /* TOP NAVBAR */
-        .top-navbar {
+        .top-navbar { position: sticky; top: 0; z-index: 1000;
             background: white;
             height: 60px;
             padding: 0 20px;
@@ -263,7 +263,7 @@
         /* CARDS */
         .card {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             padding: 20px;
             margin-bottom: 20px;
@@ -287,7 +287,7 @@
             padding: 8px 20px;
             font-size: 0.95rem;
             font-weight: 600;
-            border-radius: 50px;
+            border-radius: 5px;
             transition: all 0.2s;
         }
         .btn-back {
@@ -333,7 +333,7 @@
         .table .btn {
             font-size: 0.8rem;
             padding: 4px 10px;
-            border-radius: 30px;
+            border-radius: 5px;
             font-weight: 500;
         }
         .table .btn-icon {
@@ -357,13 +357,13 @@
         .badge {
             font-size: 0.75rem;
             padding: 0.4em 0.6em;
-            border-radius: 30px;
+            border-radius: 5px;
             font-weight: 500;
         }
 
         /* ALERTS */
         .alert {
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             font-weight: 500;
         }
 
@@ -378,7 +378,7 @@
             filter: invert(1);
         }
         .modal-footer .btn {
-            border-radius: 30px;
+            border-radius: 5px;
             font-weight: 600;
         }
 
@@ -387,7 +387,7 @@
             .mobile-menu-toggle { display: block; }
             .mobile-menu-toggle-inline { display: flex; }
             body > #mobileMenuToggle { display: none !important; }
-            .top-navbar {
+            .top-navbar { position: sticky; top: 0; z-index: 1000;
                 border-radius: 0 !important;
                 margin: 0 0 5px 0 !important;
             }
@@ -425,6 +425,77 @@
             .summary-card {
                 margin-bottom: 0 !important;
             }
+        }
+    </style>
+    
+    
+    
+    
+    
+    
+    
+    <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 12px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn, .btn-export, .btn-add-new-item,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 12px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 12px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+
+        /* --- UNIFIED TABLE SCROLLING & HEADER FIX --- */
+        .table-responsive, .table-responsive-custom {
+            max-height: 65vh !important;
+            overflow-y: auto !important;
+        }
+        .table-responsive::-webkit-scrollbar, .table-responsive-custom::-webkit-scrollbar {
+            width: 8px; height: 8px;
+        }
+        .table-responsive::-webkit-scrollbar-track, .table-responsive-custom::-webkit-scrollbar-track {
+            background: #f1f1f1; border-radius: 4px; margin: 0 10px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb, .table-responsive-custom::-webkit-scrollbar-thumb {
+            background: #c1c1c1; border-radius: 4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover, .table-responsive-custom::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        /* Sticky Headers */
+        .table thead th, table thead th, .table th {
+            position: sticky !important;
+            top: -1px !important;
+            z-index: 10 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            background-color: var(--primary, #4e73df) !important;
+            color: white !important;
+        }
+        /* Fix dropdown clipping globally */
+        .controls-section {
+            position: relative;
+            z-index: 1050 !important;
         }
     </style>
 </head>
@@ -491,7 +562,7 @@ $currentPath = $seg1 . '/' . $seg2;
 
         <!-- Table -->
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-bordered table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>ID</th>

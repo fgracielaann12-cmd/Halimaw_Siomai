@@ -26,7 +26,7 @@
             --sidebar-hover: #34495e;
             --sidebar-active: #4e73df;
             --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            --border-radius: 0.35rem;
+            --border-radius: 5px;
         }
 
         * {
@@ -270,7 +270,7 @@
         /* SUMMARY CARD */
         .summary-card {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             padding: 15px;
             margin-bottom: 20px;
@@ -290,7 +290,7 @@
         .table-responsive-custom {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             background: white;
         }
@@ -321,7 +321,7 @@
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 50px;
+            border-radius: 5px;
             transition: all 0.2s;
             margin-bottom: 20px;
             text-decoration: none;
@@ -333,7 +333,7 @@
 
         .form-select, .form-control {
             font-size: 0.9rem;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             border: 1px solid #ddd;
             padding: 6px 10px;
         }
@@ -353,7 +353,7 @@
             min-width: 280px;
             max-width: 480px;
             text-align: center;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             padding: 12px 20px;
             font-size: 0.95rem;
             font-weight: 500;
@@ -380,7 +380,7 @@
             transform: translateX(-50%);
             z-index: 9998;
             padding: 10px 20px;
-            border-radius: 10px;
+            border-radius: 5px;
             font-weight: 500;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             cursor: pointer;
@@ -404,7 +404,7 @@
         /* TABLE */
         .table-card {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             padding: 0;
             margin-bottom: 20px;
@@ -478,7 +478,7 @@
         .badge {
             font-size: 0.75rem;
             padding: 0.4em 0.6em;
-            border-radius: 30px;
+            border-radius: 5px;
             font-weight: 500;
         }
 
@@ -520,6 +520,44 @@
             .profile-role { display: block; font-size: 0.75rem; }
             .top-navbar h5 { font-size: 1rem; }
             .table { min-width: 600px; }
+        }
+        
+        
+            /* Unified 5px Border Radius for All Buttons System-Wide */
+        button, .btn, .btn.rounded-1, .btn.rounded-1, .btn-add-to-cart, .btn, #checkout-btn, #clear-cart, .submit-button, a.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light {
+            border-radius: 5px !important;
+        }
+    </style>
+    <!-- UNIFIED 5PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 5px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 5px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 5px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
         }
     </style>
 </head>

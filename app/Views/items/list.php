@@ -93,6 +93,7 @@
             display: flex;
             flex-direction: column;
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            overflow-y: auto;
         }
 
         #sidebar .nav {
@@ -286,13 +287,21 @@
             .summary-card { padding: 20px; }
         }
 
+        .controls-section {
+            position: relative;
+            z-index: 1050;
+        }
+
         /* Responsive Table */
         .table-responsive-custom {
-            overflow-x: hidden;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 65vh;
             -webkit-overflow-scrolling: touch;
             border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
             background: white;
+            margin-bottom: 30px;
         }
 
         @media (max-width: 991px) {
@@ -455,8 +464,9 @@
             color: white;
             font-weight: 600;
             position: sticky;
-            top: 0;
-            z-index: 2;
+            top: -1px;
+            z-index: 10;
+            box-shadow: 0 1px 0 var(--primary), 0 -1px 0 var(--primary);
         }
         #itemsTable tbody tr {
             transition: background 0.2s;
@@ -800,7 +810,7 @@ function getSku($name, $variation = '') {
                         ];
                         foreach ($sizes as $idx => $sz): 
                         ?>
-                        <tr data-id="<?= $item['id'] ?>" class="<?= ($sz['q'] <= 10) ? 'table-warning' : '' ?>" <?= $idx > 0 ? 'style="border-top:1px dashed #dee2e6;"' : '' ?>>
+                        <tr data-id="<?= $item['id'] ?>" data-low-stock="<?= ($sz['q'] <= 10) ? 'true' : 'false' ?>" <?= $idx > 0 ? 'style="border-top:1px dashed #dee2e6;"' : '' ?>>
                             <td class="text-center align-middle"><?= esc($item['product_id']) ?><?= $sz['s'] ?></td>
                             <td class="text-center align-middle"><?= esc($item['name']) ?> <small class="text-muted">(<?= $sz['l'] ?>)</small></td>
                             <td class="text-center align-middle"><?= esc(getSku($item['name'], $sz['s_sku'])) ?></td>
@@ -846,7 +856,7 @@ function getSku($name, $variation = '') {
                         </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr data-id="<?= $item['id'] ?>" class="<?= $isLowStock ? 'table-warning' : '' ?>">
+                        <tr data-id="<?= $item['id'] ?>" data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>">
                             <td class="text-center align-middle"><?= esc($item['product_id']) ?></td>
                             <td class="text-center align-middle"><?= esc($item['name']) ?></td>
                             <td class="text-center align-middle"><?= esc(getSku($item['name'])) ?></td>
@@ -1087,7 +1097,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (sortValue === "expiring_soon") matchesSortFilter = (statusBadge === "expiring soon" || statusBadge === "expiring today");
             else if (sortValue === "expired") matchesSortFilter = (statusBadge === "expired");
             else if (sortValue === "active") matchesSortFilter = (statusBadge === "active");
-            else if (sortValue === "low_stock") matchesSortFilter = row.classList.contains("table-warning");
+            else if (sortValue === "low_stock") matchesSortFilter = (row.getAttribute("data-low-stock") === "true");
             
             const matchesSearch = name.includes(query) || pid.includes(query);
             const matchesCategory = category === "all" || rowCategory === category;
@@ -1141,7 +1151,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.showLowStockItems = () => {
         let found = 0;
         document.querySelectorAll("#itemsTable tbody tr").forEach(row => {
-            if (row.classList.contains('table-warning')) {
+            if ((row.getAttribute("data-low-stock") === "true")) {
                 row.style.display = "";
                 found++;
             } else row.style.display = "none";

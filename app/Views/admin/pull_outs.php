@@ -25,7 +25,7 @@
             --sidebar-hover: #34495e;
             --sidebar-active: #4e73df;
             --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            --border-radius: 0.65rem;
+            --border-radius: 5px;
         }
 
         * {
@@ -248,7 +248,7 @@
         /* CARDS */
         .card {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             padding: 20px;
             margin-bottom: 20px;
@@ -272,7 +272,7 @@
             font-size: 0.9rem;
             margin: 0;
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             overflow: hidden;
             box-shadow: var(--card-shadow);
         }
@@ -293,7 +293,7 @@
         .table .btn {
             font-size: 0.8rem;
             padding: 4px 10px;
-            border-radius: 30px;
+            border-radius: 5px;
             font-weight: 500;
         }
 
@@ -301,7 +301,7 @@
         .badge {
             font-size: 0.75rem;
             padding: 0.4em 0.6em;
-            border-radius: 30px;
+            border-radius: 5px;
             font-weight: 500;
         }
 
@@ -336,6 +336,42 @@
                 z-index: 999;
             }
             .sidebar-overlay.active { display: block; }
+        }
+            /* Unified 5px Border Radius for All Buttons System-Wide */
+        button, .btn, .btn.rounded-1, .btn.rounded-1, .btn-add-to-cart, .btn, #checkout-btn, #clear-cart, .submit-button, a.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light {
+            border-radius: 5px !important;
+        }
+    </style>
+    <!-- UNIFIED 5PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 5px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 5px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 5px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
         }
     </style>
 </head>

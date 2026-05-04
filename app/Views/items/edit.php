@@ -27,7 +27,7 @@
             --sidebar-hover: #34495e;
             --sidebar-active: #4e73df;
             --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            --border-radius: 0.65rem;
+            --border-radius: 5px;
         }
 
         * {
@@ -224,7 +224,7 @@
         /* CARD */
         .card {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             padding: 30px;
         }
@@ -237,7 +237,7 @@
 
         .form-control, .form-select {
             font-size: 0.95rem;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             border: 1px solid #ddd;
             padding: 8px 12px;
             margin-bottom: 16px;
@@ -253,8 +253,8 @@
         }
 
         /* BUTTONS */
-        .btn-pill {
-            border-radius: 12px;
+        .btn {
+            border-radius: 5px;
             padding: 10px 24px;
             font-weight: 600;
             transition: all 0.2s;
@@ -281,7 +281,7 @@
 
         /* ALERTS */
         .alert {
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             font-weight: 500;
             padding: 12px 16px;
             margin-bottom: 20px;
@@ -329,7 +329,43 @@
 
             .container { padding: 20px 15px; }
             .card { padding: 20px; }
-            .btn-pill { width: 100%; padding: 12px 20px; border-radius: 10px; }
+            .btn { width: 100%; padding: 12px 20px; border-radius: 5px; }
+        }
+            /* Unified 5px Border Radius for All Buttons System-Wide */
+        button, .btn, .btn.rounded-1, .btn.rounded-1, .btn-add-to-cart, .btn, #checkout-btn, #clear-cart, .submit-button, a.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light {
+            border-radius: 5px !important;
+        }
+    </style>
+    <!-- UNIFIED 5PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 5px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 5px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 5px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
         }
     </style>
 </head>
@@ -492,12 +528,12 @@
 
             <div class="d-flex flex-column flex-md-row justify-content-between mt-4 gap-3">
                 <div class="d-flex flex-column flex-md-row gap-3 w-100 w-md-auto">
-                    <a href="<?= base_url('items') ?>" class="btn btn-secondary btn-pill"><i class="bi bi-arrow-left me-2"></i> Back</a>
-                    <a href="<?= base_url('items/delete/' . $item['id']) ?>" class="btn btn-danger btn-pill" onclick="return confirm('Are you sure you want to completely delete this item? This action will move it to the Trash.');">
+                    <a href="<?= base_url('items') ?>" class="btn btn-secondary btn"><i class="bi bi-arrow-left me-2"></i> Back</a>
+                    <a href="<?= base_url('items/delete/' . $item['id']) ?>" class="btn btn-danger btn" onclick="return confirm('Are you sure you want to completely delete this item? This action will move it to the Trash.');">
                         <i class="bi bi-trash me-2"></i> Delete
                     </a>
                 </div>
-                <button type="submit" class="btn btn-update btn-pill w-100 w-md-auto"><i class="bi bi-save me-2"></i> Update Item</button>
+                <button type="submit" class="btn btn-update btn w-100 w-md-auto"><i class="bi bi-save me-2"></i> Update Item</button>
             </div>
         </form>
     </div>

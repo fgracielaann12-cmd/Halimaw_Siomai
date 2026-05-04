@@ -74,7 +74,7 @@ if (!function_exists('getProductSKU')) {
             --sidebar-hover: #34495e;
             --sidebar-active: #4e73df;
             --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            --border-radius: 0.65rem;
+            --border-radius: 5px;
         }
 
         * {
@@ -130,7 +130,10 @@ if (!function_exists('getProductSKU')) {
             display: flex;
             flex-direction: column;
             box-shadow: var(--card-shadow);
+            overflow-y: auto;
         }
+        #sidebar::-webkit-scrollbar { width: 6px; }
+        #sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 5px; }
 
         #sidebar .nav {
             width: 100%;
@@ -377,7 +380,7 @@ if (!function_exists('getProductSKU')) {
 
         .pos-item-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 5px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.06);
             padding: 12px;
             text-align: center;
@@ -463,7 +466,7 @@ if (!function_exists('getProductSKU')) {
             padding: 3px 6px;
             font-size: 0.7rem;
             border: 1px solid #ddd;
-            border-radius: 10px;
+            border-radius: 5px;
             background: #f8f9fa;
             color: var(--dark);
             cursor: pointer;
@@ -482,7 +485,7 @@ if (!function_exists('getProductSKU')) {
             border: none !important;
             padding: 10px !important;
             font-weight: 600 !important;
-            border-radius: var(--border-radius) !important;
+            border-radius: 5px; !important;
             width: 100% !important;
             transition: all 0.2s ease !important;
             margin-top: 8px !important;
@@ -501,7 +504,7 @@ if (!function_exists('getProductSKU')) {
 
         .cart-summary, .checkout-summary {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             box-shadow: var(--card-shadow);
             padding: 20px;
         }
@@ -623,7 +626,7 @@ if (!function_exists('getProductSKU')) {
             border: none;
             padding: 10px;
             font-weight: 600;
-            border-radius: 10px;
+            border-radius: 5px;
             width: 100%;
             margin: 12px 0;
             transition: background 0.2s;
@@ -639,7 +642,7 @@ if (!function_exists('getProductSKU')) {
             border: 1px solid #ddd;
             padding: 10px;
             font-weight: 500;
-            border-radius: 10px;
+            border-radius: 5px;
             width: 100%;
             transition: all 0.2s;
         }
@@ -670,7 +673,7 @@ if (!function_exists('getProductSKU')) {
             justify-content: center;
             padding: 8px 10px;
             border: 1px solid #ddd;
-            border-radius: 30px;
+            border-radius: 5px;
             background: white;
             font-size: 0.75rem;
             cursor: pointer;
@@ -702,7 +705,7 @@ if (!function_exists('getProductSKU')) {
             min-width: 300px;
             max-width: 500px;
             text-align: center;
-            border-radius: var(--border-radius);
+            border-radius: 5px;
             padding: 14px 24px;
             font-size: 0.95rem;
             font-weight: 500;
@@ -759,7 +762,7 @@ if (!function_exists('getProductSKU')) {
 
         .tutorial-content {
             background: white;
-            border-radius: 12px;
+            border-radius: 5px;
             max-width: 600px;
             width: 90%;
             padding: 30px;
@@ -1066,7 +1069,7 @@ if (!function_exists('getProductSKU')) {
             padding: 8px 16px;
             background: white;
             border: 1px solid rgba(0,0,0,.09);
-            border-radius: 10px;
+            border-radius: 5px;
             cursor: pointer;
             outline: none;
             position: relative;
@@ -1121,7 +1124,7 @@ if (!function_exists('getProductSKU')) {
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 10px;
+            border-radius: 5px;
             font-size: 0.95rem;
             font-weight: 600;
             display: flex;
@@ -1143,7 +1146,7 @@ if (!function_exists('getProductSKU')) {
             color: #555;
             border: 1px solid rgba(0,0,0,.09);
             padding: 10px 20px;
-            border-radius: 10px;
+            border-radius: 5px;
             font-size: 0.95rem;
             font-weight: 600;
             display: flex;
@@ -1159,6 +1162,44 @@ if (!function_exists('getProductSKU')) {
         .sm-btn-back:hover {
             background: #f8f8f8;
             border-color: rgba(0,0,0,.2);
+        }
+        
+        
+            /* Unified 5px Border Radius for All Buttons System-Wide */
+        button, .btn, .btn.rounded-1, .btn.rounded-1, .btn-add-to-cart, .btn, #checkout-btn, #clear-cart, .submit-button, a.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light {
+            border-radius: 5px !important;
+        }
+    </style>
+    <!-- UNIFIED 5PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <style>
+        :root {
+            --border-radius: 5px !important;
+        }
+        
+        /* Buttons */
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn,
+        
+        /* Textboxes / Inputs */
+        input, select, textarea, .form-control, .form-select, .custom-input-group,
+        
+        /* Tables & Wrappers */
+        .table, .table-card, .table-responsive, table, .dataTables_wrapper,
+        
+        /* Cards & Misc UI */
+        .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
+        .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
+        
+        /* Bootstrap Overrides */
+        .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
+        .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
+            border-radius: 5px !important;
+        }
+        
+        /* Images inside cards */
+        .pos-item-card img, .card img {
+            border-radius: 5px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
         }
     </style>
 </head>
@@ -1564,7 +1605,7 @@ if (!function_exists('getProductSKU')) {
                             <label for="requestItemModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-box me-1"></i> Select Item
                             </label>
-                            <select id="requestItemModal" class="form-select shadow-sm" required style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                            <select id="requestItemModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
                                     <?php
@@ -1581,9 +1622,9 @@ if (!function_exists('getProductSKU')) {
                                     <?php foreach ($displayRows as $vItem): ?>
                                         <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
                                             <?php if (function_exists('getProductSKU')): ?>
-                                                <?= esc(getProductSKU($item['name'], $vItem['variation'])) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
+                                                <?= esc(getProductSKU($item['name'], $vItem['variation'])) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
                                             <?php else: ?>
-                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
+                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
                                             <?php endif; ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -1594,7 +1635,7 @@ if (!function_exists('getProductSKU')) {
                             <label for="requestActionModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-arrow-left-right me-1"></i> Adjustment Type
                             </label>
-                            <select id="requestActionModal" class="form-select shadow-sm" required style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                            <select id="requestActionModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Select action —</option>
                                 <option value="add">Add Stock</option>
                                 <option value="subtract">Reduce Stock</option>
@@ -1605,14 +1646,14 @@ if (!function_exists('getProductSKU')) {
                                 <i class="bi bi-hash me-1"></i> Quantity
                             </label>
                             <input type="number" id="requestQtyModal" class="form-control shadow-sm" min="1" placeholder="Enter adjustment amount" required
-                                   style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                                   style="border-radius: 5px; padding: 0.6rem 1rem;">
                         </div>
                         <div class="mb-4">
                             <label for="requestReasonModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-journal-text me-1"></i> Reason / Notes
                             </label>
                             <textarea id="requestReasonModal" class="form-control shadow-sm" rows="3" placeholder="e.g., spillage, delivery, inventory correction..." required
-                                      style="border-radius: var(--border-radius); padding: 0.6rem 1rem;"></textarea>
+                                      style="border-radius: 5px; padding: 0.6rem 1rem;"></textarea>
                         </div>
                         <div class="d-grid">
                             <button type="submit" class="btn fw-bold" style="
@@ -1651,7 +1692,7 @@ if (!function_exists('getProductSKU')) {
                             <label for="pullOutItemModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-box me-1"></i> Select Item
                             </label>
-                            <select id="pullOutItemModal" class="form-select shadow-sm" required style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                            <select id="pullOutItemModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
                                     <?php
@@ -1681,7 +1722,7 @@ if (!function_exists('getProductSKU')) {
                             <label for="pullOutReasonModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-exclamation-triangle me-1"></i> Reason
                             </label>
-                            <select id="pullOutReasonModal" class="form-select shadow-sm" required style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                            <select id="pullOutReasonModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Select Reason —</option>
                                 <option value="SPOILED">Spoiled / Expired</option>
                                 <option value="CONTAMINATED">Contaminated</option>
@@ -1694,18 +1735,18 @@ if (!function_exists('getProductSKU')) {
                                 <i class="bi bi-hash me-1"></i> Quantity to Pull-Out
                             </label>
                             <input type="number" id="pullOutQtyModal" class="form-control shadow-sm" min="1" placeholder="Enter amount" required
-                                   style="border-radius: var(--border-radius); padding: 0.6rem 1rem;">
+                                   style="border-radius: 5px; padding: 0.6rem 1rem;">
                         </div>
                         <div class="mb-4">
                             <label for="pullOutNoteModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-journal-text me-1"></i> Additional Notes (Optional)
                             </label>
                             <textarea id="pullOutNoteModal" class="form-control shadow-sm" rows="3" placeholder="Provide extra details..."
-                                      style="border-radius: var(--border-radius); padding: 0.6rem 1rem;"></textarea>
+                                      style="border-radius: 5px; padding: 0.6rem 1rem;"></textarea>
                         </div>
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <button type="button" class="btn btn-light border shadow-sm px-4 fw-semibold" data-bs-dismiss="modal" style="border-radius: var(--border-radius);">Cancel</button>
-                            <button type="submit" class="btn btn-danger shadow-sm px-4 fw-semibold" style="border-radius: var(--border-radius);">
+                            <button type="button" class="btn btn-light border shadow-sm px-4 fw-semibold" data-bs-dismiss="modal" style="border-radius: 5px;">Cancel</button>
+                            <button type="submit" class="btn btn-danger shadow-sm px-4 fw-semibold" style="border-radius: 5px;">
                                 <i class="bi bi-send me-2"></i>Submit Pull-Out
                             </button>
                         </div>

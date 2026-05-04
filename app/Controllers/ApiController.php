@@ -64,6 +64,7 @@ class ApiController extends ResourceController
 
     public function submitOrder()
     {
+        $this->ensureTablesExist();
         $this->response->setHeader('Access-Control-Allow-Origin', '*');
         $this->response->setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
         $this->response->setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -234,6 +235,7 @@ class ApiController extends ResourceController
 
     public function getPendingOrders()
     {
+        $this->ensureTablesExist();
         $this->response->setHeader('Access-Control-Allow-Origin', '*');
         $this->response->setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
         $this->response->setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -260,6 +262,8 @@ class ApiController extends ResourceController
 
     public function confirmOrder()
     {
+        $this->ensureTablesExist();
+
         $this->response->setHeader('Access-Control-Allow-Origin', '*');
         $this->response->setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
         $this->response->setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -283,5 +287,37 @@ class ApiController extends ResourceController
         $orderModel->update($order->id, ['status' => 'Completed']);
 
         return $this->respond(['status' => 'success', 'message' => 'Order confirmed'], 200);
+    }
+
+    private function ensureTablesExist()
+    {
+        $db = \Config\Database::connect();
+        
+        $sql1 = "CREATE TABLE IF NOT EXISTS `online_orders` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `order_id` varchar(50) NOT NULL,
+            `customer_name` varchar(150) NOT NULL,
+            `customer_email` varchar(150) NOT NULL,
+            `customer_phone` varchar(50) NOT NULL,
+            `total_amount` decimal(10,2) NOT NULL,
+            `status` varchar(50) DEFAULT 'Pending',
+            `created_at` datetime NOT NULL,
+            PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+        
+        $sql2 = "CREATE TABLE IF NOT EXISTS `online_order_items` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `order_id` varchar(50) NOT NULL,
+            `product_id` int(11) NOT NULL,
+            `product_name` varchar(150) NOT NULL,
+            `variation` varchar(50) DEFAULT NULL,
+            `quantity` int(11) NOT NULL,
+            `price` decimal(10,2) NOT NULL,
+            `subtotal` decimal(10,2) NOT NULL,
+            PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+
+        $db->query($sql1);
+        $db->query($sql2);
     }
 }

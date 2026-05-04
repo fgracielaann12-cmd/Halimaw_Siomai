@@ -789,7 +789,7 @@
         // 1. Fetch Products
         async function fetchProducts() {
             try {
-                const response = await fetch('<?= base_url("api/products") ?>');
+                const response = await fetch('<?= site_url("api/products") ?>');
                 const json = await response.json();
                 
                 if (json.status === 'success') {

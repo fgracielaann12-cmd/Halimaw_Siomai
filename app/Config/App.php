@@ -23,7 +23,11 @@ class App extends BaseConfig
         parent::__construct();
         if (isset($_SERVER['HTTP_HOST'])) {
             $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http');
-            $this->baseURL = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/Halimaw_Siomai/';
+            $dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+            if ($dir === '/') {
+                $dir = '';
+            }
+            $this->baseURL = $protocol . '://' . $_SERVER['HTTP_HOST'] . $dir . '/';
         }
     }
 

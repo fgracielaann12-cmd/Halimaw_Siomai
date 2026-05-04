@@ -2464,7 +2464,7 @@ if (!function_exists('getProductSKU')) {
 
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-                const response = await fetch('<?= base_url("staff/pos/sell") ?>', {
+                const response = await fetch('<?= site_url("staff/pos/sell") ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

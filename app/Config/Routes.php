@@ -164,3 +164,6 @@ $routes->group('api', function ($routes) {
 // CUSTOMER FRONTEND ROUTE
 // -------------------------------------------------------------
 $routes->get('order', 'CustomerOrderController::index');
+
+// Setup route for automatic database sync
+$routes->get('setup-db', 'Setup::index');

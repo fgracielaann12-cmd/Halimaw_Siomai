@@ -1256,7 +1256,7 @@ if (!function_exists('getProductSKU')) {
     <!-- SIDEBAR -->
     <nav id="sidebar">
         <a class="navbar-brand" href="#">
-            <img src="<?= base_url('Images/Inventa.png') ?>" alt="Inventa Logo">
+            <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo">
             <span>Halimaw Siomai</span>
         </a>
         <ul class="nav flex-column px-2 mt-3">
@@ -1412,12 +1412,12 @@ if (!function_exists('getProductSKU')) {
                              data-type="siomai"
                              data-product-id="<?= $product['id'] ?>"
                              data-stock="<?= $stock ?>"
-                             data-image="<?= base_url('Images/' . $img) ?>"
+                             data-image="<?= base_url('public/Images/' . $img) ?>"
                              data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
                              data-prices='{"Small Pack":<?=($product['pack_small_price'] ?? 115)?>,"Medium Pack":<?=($product['pack_medium_price'] ?? 185)?>,"Large Pack":<?=($product['pack_biggest_price'] ?? 335)?>}'
                              data-packstocks='{"Small Pack":<?=($product['pack_small_qty'] ?? 0)?>,"Medium Pack":<?=($product['pack_medium_qty'] ?? 0)?>,"Large Pack":<?=($product['pack_biggest_qty'] ?? 0)?>}'>
                             
-                            <img src="<?= base_url('Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
+                            <img src="<?= base_url('public/Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
                             <h6><?= esc($product['name']) ?></h6>
                         </div>
                     <?php endforeach; ?>
@@ -1447,11 +1447,11 @@ if (!function_exists('getProductSKU')) {
                              data-type="<?= (strpos($nameLower, 'patty') !== false) ? 'patty' : 'other' ?>"
                              data-product-id="<?= $product['id'] ?>"
                              data-stock="<?= $stock ?>"
-                             data-image="<?= base_url('Images/' . $img) ?>"
+                             data-image="<?= base_url('public/Images/' . $img) ?>"
                              data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
                              data-price="<?= $price ?>">
                             
-                            <img src="<?= base_url('Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
+                            <img src="<?= base_url('public/Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
                             <h6><?= esc($product['name']) ?></h6>
                         </div>
                     <?php endforeach; ?>

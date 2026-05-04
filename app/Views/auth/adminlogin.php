@@ -169,7 +169,7 @@
 
         <!-- Logo -->
         <div class="logo-container">
-            <img src="<?= base_url('Images/Inventa.png') ?>" class="logo" alt="Halimaw Siomai Logo">
+            <img src="<?= base_url('public/Images/Inventa.png') ?>" class="logo" alt="Halimaw Siomai Logo">
         </div>
 
         <h2 class="login-title">Halimaw Siomai</h2>

@@ -658,7 +658,7 @@ if (!function_exists('getProductSKU')) {
     <!-- SIDEBAR -->
     <nav id="sidebar">
         <a class="navbar-brand" href="#">
-            <img src="<?= base_url('Images/Inventa.png') ?>" alt="Inventa Logo">
+            <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo">
             <span>Halimaw Siomai</span>
         </a>
         <ul class="nav flex-column px-2 mt-3">

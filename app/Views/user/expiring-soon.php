@@ -233,7 +233,7 @@
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-3"
                 href="<?= site_url('items') ?>">
-                <img src="<?= base_url('Images/Inventa.png') ?>" alt="Inventa Logo"
+                <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo"
                     style="width: 50px; height: 50px;">
                 <span class="brand-text">Inventa</span>
             </a>

@@ -633,7 +633,7 @@
     <!-- Top Navbar -->
     <nav class="top-navbar">
         <div class="navbar-brand">
-            <img src="<?= base_url('Images/Inventa.png') ?>" alt="Logo" onerror="this.style.display='none'">
+            <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Logo" onerror="this.style.display='none'">
             Halimaw Siomai Online <span style="color: #6c757d; font-weight: 500; margin-left: 5px;">| Menu</span>
         </div>
         <div>
@@ -810,7 +810,7 @@
             grid.innerHTML = '';
 
             products.forEach(product => {
-                const imgPath = product.image ? `<?= base_url('Images/') ?>${product.image}` : `<?= base_url('Images/default-item.png') ?>`;
+                const imgPath = product.image ? `<?= base_url('public/Images/') ?>${product.image}` : `<?= base_url('public/Images/default-item.png') ?>`;
                 
                 let isOutOfStock = false;
                 if (product.isSiomai) {
@@ -826,7 +826,7 @@
                 };
 
                 card.innerHTML = `
-                    <img src="${imgPath}" onerror="this.src='<?= base_url('Images/Inventa.png') ?>'" alt="${product.name}">
+                    <img src="${imgPath}" onerror="this.src='<?= base_url('public/Images/Inventa.png') ?>'" alt="${product.name}">
                     <h6>${product.name}</h6>
                 `;
 
@@ -844,7 +844,7 @@
             document.getElementById('modalQtyInput').value = 1;
 
             // Set Image & Title
-            const imgPath = product.image ? `<?= base_url('Images/') ?>${product.image}` : `<?= base_url('Images/default-item.png') ?>`;
+            const imgPath = product.image ? `<?= base_url('public/Images/') ?>${product.image}` : `<?= base_url('public/Images/default-item.png') ?>`;
             document.getElementById('modalImg').src = imgPath;
             document.getElementById('modalTitle').innerText = product.name;
 
@@ -1054,7 +1054,7 @@
                 // Try to find image and variation from product ID (format: "productId-variationId")
                 const [pId, vId] = item.id.split('-');
                 const product = products.find(p => p.id == pId);
-                const imgPath = (product && product.image) ? `<?= base_url('Images/') ?>${product.image}` : `<?= base_url('Images/default.jpg') ?>`;
+                const imgPath = (product && product.image) ? `<?= base_url('public/Images/') ?>${product.image}` : `<?= base_url('public/Images/default.jpg') ?>`;
                 
                 // Parse name into Base Name and Variation (if any)
                 let baseName = item.name;

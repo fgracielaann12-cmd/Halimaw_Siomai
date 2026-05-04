@@ -1303,12 +1303,12 @@ function isActive($paths) {
                              data-type="siomai"
                              data-product-id="<?= $product['id'] ?>"
                              data-stock="<?= $stock ?>"
-                             data-image="<?= base_url('Images/' . $img) ?>"
+                             data-image="<?= base_url('public/Images/' . $img) ?>"
                              data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
                              data-prices='{"Small Pack":<?=($product['pack_small_price'] ?? 115)?>,"Medium Pack":<?=($product['pack_medium_price'] ?? 185)?>,"Large Pack":<?=($product['pack_biggest_price'] ?? 335)?>}'
                              data-packstocks='{"Small Pack":<?=($product['pack_small_qty'] ?? 0)?>,"Medium Pack":<?=($product['pack_medium_qty'] ?? 0)?>,"Large Pack":<?=($product['pack_biggest_qty'] ?? 0)?>}'>
                             
-                            <img src="<?= base_url('Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
+                            <img src="<?= base_url('public/Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
                             <h6><?= esc($product['name']) ?></h6>
                         </div>
                             <?php endforeach; ?>
@@ -1326,11 +1326,11 @@ function isActive($paths) {
                              data-type="patty"
                              data-product-id="<?= $product['id'] ?>"
                              data-stock="<?= $stock ?>"
-                             data-image="<?= base_url('Images/' . $img) ?>"
+                             data-image="<?= base_url('public/Images/' . $img) ?>"
                              data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
                              data-price="<?= $price ?>">
 
-                            <img src="<?= base_url('Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
+                            <img src="<?= base_url('public/Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
                             <h6><?= esc($product['name']) ?></h6>
                             </div>
                             <?php endforeach; ?>
@@ -1360,11 +1360,11 @@ function isActive($paths) {
                             data-type="other"
                             data-product-id="<?= $product['id'] ?>"
                             data-stock="<?= $stock ?>"
-                            data-image="<?= base_url('Images/' . $img) ?>"
+                            data-image="<?= base_url('public/Images/' . $img) ?>"
                             data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
                             data-price="<?= $price ?>">
 
-                            <img src="<?= base_url('Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
+                            <img src="<?= base_url('public/Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
                             <h6><?= esc($product['name']) ?></h6>
                             </div><?php endforeach; ?>
                     <?php if (empty($siomaiProducts) && empty($pattyProducts) && empty($otherProducts)): ?>

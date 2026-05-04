@@ -154,7 +154,7 @@
 </head>
 <body>
   <div class="register-container">
-    <img src="<?= base_url('Images/Inventa.png') ?>" alt="Inventa Logo" style="display: block; margin: 0 auto 20px auto; max-width: 100px;">
+    <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo" style="display: block; margin: 0 auto 20px auto; max-width: 100px;">
     <h2>Register Account</h2>
 
     <?php if (session()->getFlashdata('error')): ?>

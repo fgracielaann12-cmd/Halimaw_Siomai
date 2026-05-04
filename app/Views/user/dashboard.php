@@ -914,6 +914,9 @@ if (!function_exists('getProductSKU')) {
                                 <?php else: ?>
                                 <?= esc($vItem['qty']) ?>
                                 <?php endif; ?>
+                                <?php if (stripos($item['name'], 'burger patty') !== false && empty($vItem['variation'])): ?>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">(1 pack = 6 pcs)</small>
+                                <?php endif; ?>
                             </td>
                             <td><?= esc($item['category'] ?? '—') ?></td>
                             <td><?= empty($item['expiration_date']) ? '—' : esc($item['expiration_date']) ?></td>

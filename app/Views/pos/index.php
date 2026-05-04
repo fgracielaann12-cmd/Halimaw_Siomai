@@ -1883,10 +1883,14 @@ function isActive($paths) {
             } else {
                 document.getElementById('smStockLabel').textContent = "Left";
                 varRow.style.display = 'none';
-                document.getElementById('smPiecesRow').style.display = 'none';
+                
                 currentModalItem.price = parseFloat(card.dataset.price);
                 if (type === 'patty') {
-                    currentModalItem.packSize = 6;
+                    currentModalItem.packSize = 1;
+                    document.getElementById('smPiecesRow').style.display = 'flex';
+                    document.getElementById('smPieces').textContent = '6 pcs per pack';
+                } else {
+                    document.getElementById('smPiecesRow').style.display = 'none';
                 }
             }
 

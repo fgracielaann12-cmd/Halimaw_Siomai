@@ -940,7 +940,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle">
                                 <span><?= esc($item['quantity']) ?></span>
                                 <?php if (stripos($item['name'], 'burger patty') !== false): ?>
-                                    <small class="text-muted d-block" style="font-size: 0.75rem;">(1 pack = 6 pcs)</small>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">(6)</small>
                                 <?php endif; ?>
                             </td>
                             <td class="text-center align-middle hide-mobile">

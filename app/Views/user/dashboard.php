@@ -915,7 +915,7 @@ if (!function_exists('getProductSKU')) {
                                 <?= esc($vItem['qty']) ?>
                                 <?php endif; ?>
                                 <?php if (stripos($item['name'], 'burger patty') !== false && empty($vItem['variation'])): ?>
-                                    <small class="text-muted d-block" style="font-size: 0.75rem;">(1 pack = 6 pcs)</small>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">(6)</small>
                                 <?php endif; ?>
                             </td>
                             <td><?= esc($item['category'] ?? '—') ?></td>

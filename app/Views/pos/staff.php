@@ -2129,7 +2129,7 @@ if (!function_exists('getProductSKU')) {
                 if (type === 'patty') {
                     currentModalItem.packSize = 1;
                     document.getElementById('smPiecesRow').style.display = 'flex';
-                    document.getElementById('smPieces').textContent = '6 pcs per pack';
+                    document.getElementById('smPieces').textContent = '6 pcs';
                 } else {
                     document.getElementById('smPiecesRow').style.display = 'none';
                 }

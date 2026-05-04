@@ -30,7 +30,11 @@
             padding: 0.75rem 0.75rem !important;
         }
     }
-</style>
+        /* Unified 5px Border Radius for All Buttons System-Wide */
+        button, .btn, .btn.rounded-1, .btn.rounded-1, .btn-add-to-cart, .btn, #checkout-btn, #clear-cart, .submit-button, a.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light {
+            border-radius: 5px !important;
+        }
+    </style>
 
 <div class="container-fluid">
     <div class="d-flex justify-content-start align-items-center mb-4 animated-actions">

@@ -835,28 +835,6 @@ if (!function_exists('getProductSKU')) {
             z-index: 10;
         }
         .close-tutorial:hover { background: #555; }
-
-        .timer-bar {
-            width: 100%;
-            height: 4px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            margin-top: 25px;
-            overflow: hidden;
-        }
-
-        .timer-progress {
-            height: 100%;
-            width: 100%;
-            background: var(--primary);
-            animation: countdown 10s linear forwards;
-        }
-
-        @keyframes countdown {
-            from { width: 100%; }
-            to { width: 0%; }
-        }
-
         /* RESPONSIVE */
         @media (max-width: 991px) {
             .mobile-menu-toggle { display: block; }
@@ -1347,8 +1325,13 @@ if (!function_exists('getProductSKU')) {
                     </div>
                 </div>
             </div>
-            <div class="timer-bar">
-                <div class="timer-progress"></div>
+            <div class="mt-4 text-center">
+                <div class="form-check d-inline-block text-start">
+                    <input class="form-check-input" type="checkbox" id="dontShowTutorialAgain">
+                    <label class="form-check-label text-secondary" for="dontShowTutorialAgain" style="font-size: 0.95rem;">
+                        Don't show this again
+                    </label>
+                </div>
             </div>
         </div>
     </div>
@@ -1360,7 +1343,12 @@ if (!function_exists('getProductSKU')) {
                 <button class="mobile-menu-toggle" id="mobileMenuToggle">
                     <i class="bi bi-list"></i>
                 </button>
-                <h5 class="mb-0"><i class="bi bi-calculator me-2" style="font-size: 1.25rem;"></i>Staff POS</h5>
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="bi bi-calculator me-2" style="font-size: 1.25rem;"></i>Staff POS
+                    <button class="btn btn-light rounded-circle ms-2 shadow-sm d-flex align-items-center justify-content-center" id="showTutorialBtn" title="Help" style="width: 28px; height: 28px; padding: 0;">
+                        <i class="bi bi-question-lg text-secondary" style="font-size: 1.1rem;"></i>
+                    </button>
+                </h5>
             </div>
             <div class="user-profile hide-mobile">
                 <div class="profile-initial" id="profileInitial">
@@ -2071,17 +2059,32 @@ if (!function_exists('getProductSKU')) {
         // POS TUTORIAL FUNCTIONALITY
         const posTutorial = document.getElementById('posTutorial');
         const closeTutorial = document.getElementById('closeTutorial');
+        const showTutorialBtn = document.getElementById('showTutorialBtn');
+        const dontShowCheckbox = document.getElementById('dontShowTutorialAgain');
         
         function showTutorial() {
             posTutorial.classList.add('show');
-            setTimeout(() => {
-                posTutorial.classList.remove('show');
-            }, 10000);
+            if (dontShowCheckbox) {
+                dontShowCheckbox.checked = false; // Reset checkbox state
+            }
         }
+        
         closeTutorial.addEventListener('click', () => {
+            if (dontShowCheckbox && dontShowCheckbox.checked) {
+                localStorage.setItem('hidePosTutorial', 'true');
+            }
             posTutorial.classList.remove('show');
         });
-        showTutorial();
+
+        if (showTutorialBtn) {
+            showTutorialBtn.addEventListener('click', () => {
+                showTutorial();
+            });
+        }
+        
+        if (localStorage.getItem('hidePosTutorial') !== 'true') {
+            showTutorial();
+        }
 
         // POS Functionality
         const cartItems = [];

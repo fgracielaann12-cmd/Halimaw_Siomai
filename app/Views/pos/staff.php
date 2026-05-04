@@ -125,7 +125,7 @@ if (!function_exists('getProductSKU')) {
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1000;
+            z-index: 1050;
             transition: transform 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -255,6 +255,7 @@ if (!function_exists('getProductSKU')) {
         .badge-dot {
             width: 20px !important;
             height: 20px !important;
+    flex-shrink: 0 !important;
             padding: 0 !important;
             border-radius: 50% !important;
             display: flex !important;
@@ -883,7 +884,7 @@ if (!function_exists('getProductSKU')) {
                 width: 100%;
                 height: 100%;
                 background: rgba(0,0,0,0.5);
-                z-index: 999;
+                z-index: 1040;
             }
             .sidebar-overlay.active { display: block; }
 
@@ -1170,14 +1171,15 @@ if (!function_exists('getProductSKU')) {
             border-radius: 5px !important;
         }
     </style>
-    <!-- UNIFIED 5PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    
+    <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
     <style>
         :root {
-            --border-radius: 5px !important;
+            --border-radius: 12px !important;
         }
         
         /* Buttons */
-        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn,
+        button, .btn, .btn-icon, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light, .btn-add-to-cart, .submit-button, a.btn, .chart-filter-btn, .btn-export, .btn-add-new-item,
         
         /* Textboxes / Inputs */
         input, select, textarea, .form-control, .form-select, .custom-input-group,
@@ -1192,14 +1194,57 @@ if (!function_exists('getProductSKU')) {
         /* Bootstrap Overrides */
         .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
         .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
-            border-radius: 5px !important;
+            border-radius: 12px !important;
         }
         
         /* Images inside cards */
         .pos-item-card img, .card img {
-            border-radius: 5px !important;
+            border-radius: 12px !important;
             border-bottom-left-radius: 0 !important;
             border-bottom-right-radius: 0 !important;
+        }
+
+        /* --- UNIFIED TABLE SCROLLING & SIZING FIX --- */
+        .table, table {
+            font-size: 0.95rem !important;
+        }
+        .table th, .table td, table th, table td {
+            padding: 12px 15px !important;
+            vertical-align: middle !important;
+        }
+        @media (max-width: 991px) {
+            .table, table { font-size: 0.9rem !important; }
+            .table th, .table td, table th, table td { padding: 0.75rem 0.5rem !important; }
+        }
+        .table-responsive, .table-responsive-custom {
+            max-height: 65vh !important;
+            overflow-y: auto !important;
+        }
+        .table-responsive::-webkit-scrollbar, .table-responsive-custom::-webkit-scrollbar {
+            width: 8px; height: 8px;
+        }
+        .table-responsive::-webkit-scrollbar-track, .table-responsive-custom::-webkit-scrollbar-track {
+            background: #f1f1f1; border-radius: 4px; margin: 0 10px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb, .table-responsive-custom::-webkit-scrollbar-thumb {
+            background: #c1c1c1; border-radius: 4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover, .table-responsive-custom::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        /* Sticky Headers */
+        .table thead th, table thead th, .table th {
+            position: sticky !important;
+            top: -1px !important;
+            z-index: 10 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            background-color: var(--primary, #4e73df) !important;
+            color: white !important;
+        }
+        /* Fix dropdown clipping globally */
+        .controls-section {
+            position: relative;
+            z-index: 10 !important;
         }
     </style>
 </head>

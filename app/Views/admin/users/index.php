@@ -1,4 +1,4 @@
-﻿<?= $this->extend('templates/header') ?>
+<?= $this->extend('templates/header') ?>
 <?= $this->section('content') ?>
 
 <h1>Staff Management</h1>
@@ -12,7 +12,7 @@
             <th>Email</th>
             <th>Role</th>
             <th>Password</th>
-            <th>Actions</th>
+            <th class="text-center">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -23,7 +23,7 @@
             <td><?= esc($user['email']) ?></td>
             <td><?= esc($user['role']) ?></td>
             <td style="word-break: break-all; font-size: 12px;"><?= esc($user['password']) ?></td>
-            <td>
+            <td class="text-center">
                 <a href="<?= base_url('admin/users/edit/'.$user['id']) ?>" class="btn btn-sm btn-warning">Edit</a>
                 <a href="<?= base_url('admin/users/delete/'.$user['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
             </td>

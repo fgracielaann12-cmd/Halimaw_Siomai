@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -133,10 +133,10 @@
                 <tr>
                     <th>#</th>
                     <th>Item ID</th>
-                    <th>Action</th>
+                    <th class="text-center">Action</th>
                     <th>Quantity</th>
                     <th>Reason</th>
-                    <th>Status</th>
+                    <th class="text-center">Status</th>
                     <th>Date</th>
                 </tr>
             </thead>
@@ -146,10 +146,10 @@
                         <tr>
                             <td><?= $index + 1 ?></td>
                             <td><?= esc($r['item_id']) ?></td>
-                            <td><?= ucfirst($r['action']) ?></td>
+                            <td class="text-center"><?= ucfirst($r['action']) ?></td>
                             <td><?= esc($r['quantity']) ?></td>
                             <td><?= esc($r['reason']) ?></td>
-                            <td>
+                            <td class="text-center">
                                 <?php if ($r['status'] === 'pending'): ?>
                                     <span class="badge bg-warning text-dark">Pending</span>
                                 <?php elseif ($r['status'] === 'approved'): ?>

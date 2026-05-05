@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -582,10 +582,10 @@ $currentPath = $seg1 . '/' . $seg2;
                         <th>User</th>
                         <th>Item</th>
                         <th>Quantity</th>
-                        <th>Action</th>
+                        <th class="text-center">Action</th>
                         <th>Reason</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -599,7 +599,7 @@ $currentPath = $seg1 . '/' . $seg2;
                             <small class="text-muted">Batch: <?= esc($r['item_date'] ?? 'N/A') ?> | Exp: <?= empty($r['item_exp']) ? 'N/A' : esc($r['item_exp']) ?></small>
                         </td>
                         <td><?= $r['quantity'] ?></td>
-                        <td>
+                        <td class="text-center">
                             <?php
                             $actionType = strtolower(trim($r['action'] ?? 'add'));
                             if ($actionType === 'subtract') {
@@ -620,9 +620,9 @@ $currentPath = $seg1 . '/' . $seg2;
                                 echo '<span class="badge bg-warning text-dark">Pending</span>';
                             ?>
                         </td>
-                        <td>
+                        <td class="text-center">
                             <?php if ($status === 'pending'): ?>
-                                <div class="d-flex flex-nowrap">
+                                <div class="d-flex flex-nowrap justify-content-center">
                                     <button class="btn btn-success btn-sm btn-icon me-1" data-bs-toggle="modal"
                                         data-bs-target="#approveModal" data-id="<?= $r['id'] ?>" title="Approve">
                                         <i class="bi bi-check-lg"></i>

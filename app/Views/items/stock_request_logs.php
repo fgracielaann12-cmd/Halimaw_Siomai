@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -432,7 +432,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Action</th>
+                        <th class="text-center">Action</th>
                         <th>Message</th>
                         <th>Performed By</th>
                         <th>Date</th>
@@ -443,7 +443,7 @@
                         <?php foreach ($logs as $log): ?>
                         <tr>
                             <td><?= $log['request_id'] ?></td>
-                            <td>
+                            <td class="text-center">
                                 <?php if ($log['action'] === 'approved'): ?>
                                     <span class="badge bg-success">Approved</span>
                                 <?php elseif ($log['action'] === 'rejected'): ?>

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (!function_exists('getProductSKU')) {
     function getProductSKU($name, $variation) {
         $n = strtolower($name);
@@ -529,6 +529,39 @@ if (!function_exists('getProductSKU')) {
             border-radius: 12px !important;
             border-bottom-left-radius: 0 !important;
             border-bottom-right-radius: 0 !important;
+        }
+
+        /* --- COLORED SHADOWS FOR SUMMARY CARDS --- */
+        .summary-card.border-success {
+            box-shadow: 0 8px 20px rgba(28, 200, 138, 0.15) !important;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .summary-card.border-danger {
+            box-shadow: 0 8px 20px rgba(231, 74, 59, 0.15) !important;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .summary-card.border-warning {
+            box-shadow: 0 8px 20px rgba(246, 194, 62, 0.15) !important;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .summary-card.border-orange {
+            box-shadow: 0 8px 20px rgba(255, 152, 0, 0.15) !important;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .summary-card:hover {
+            transform: translateY(-3px);
+        }
+        .summary-card.border-success:hover {
+            box-shadow: 0 12px 25px rgba(28, 200, 138, 0.25) !important;
+        }
+        .summary-card.border-danger:hover {
+            box-shadow: 0 12px 25px rgba(231, 74, 59, 0.25) !important;
+        }
+        .summary-card.border-warning:hover {
+            box-shadow: 0 12px 25px rgba(246, 194, 62, 0.25) !important;
+        }
+        .summary-card.border-orange:hover {
+            box-shadow: 0 12px 25px rgba(255, 152, 0, 0.25) !important;
         }
 
         /* --- UNIFIED TABLE SCROLLING & SIZING FIX --- */

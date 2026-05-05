@@ -11,11 +11,18 @@ class PullOutModel extends Model
 
     protected $allowedFields = [
         'product_id',
+        'variation',
         'quantity',
+        'unit_cost',
+        'total_loss',
         'pull_out_reason',
+        'category',
         'reason_note',
+        'image_path',
         'reported_by',
         'date_reported',
+        'approved_by',
+        'approved_at',
         'status'
     ];
 

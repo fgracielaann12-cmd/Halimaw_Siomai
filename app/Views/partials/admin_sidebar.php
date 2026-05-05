@@ -64,12 +64,37 @@ $expiredNotif = $db->table('items')
     font-weight: 700 !important;
 }
 
+/* SIDEBAR LOGO & BRAND STYLING */
+#sidebar .navbar-brand {
+    padding: 1.25rem 0.75rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+}
+
+#sidebar .navbar-brand img {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px !important;
+    background-color: #f8f9fa;
+    padding: 3px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 /* Prevent text wrapping overlapping issues in sidebar navigation */
 
 
 
         #sidebar .nav-link {
-            color: var(--sidebar-text);
+            color: var(--sidebar-text, #d1d5db);
             padding: 0.75rem 1.25rem;
             margin: 0.25rem 1rem;
             border-radius: 0.4rem;
@@ -83,6 +108,47 @@ $expiredNotif = $db->table('items')
             white-space: normal; line-height: 1.2;
             overflow: hidden;
             width: calc(100% - 2rem);
+        }
+
+        #sidebar .nav-link:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background-color: var(--sidebar-hover, #34495e);
+            color: white;
+            text-decoration: none;
+        }
+
+        @keyframes navGlow {
+            0% { box-shadow: 0 0 5px rgba(78,115,223,0.3); filter: brightness(1); }
+            50% { box-shadow: 0 0 15px rgba(78,115,223,0.9); filter: brightness(1.2); }
+            100% { box-shadow: 0 0 5px rgba(78,115,223,0.3); filter: brightness(1); }
+        }
+
+        #sidebar .nav-link.active {
+            background: linear-gradient(90deg, var(--sidebar-hover, #34495e), var(--sidebar-active, #4e73df));
+            color: white;
+            font-weight: 500;
+            border-radius: 0.4rem;
+            animation: navGlow 2s infinite ease-in-out;
+            text-decoration: none;
+            white-space: normal; line-height: 1.2;
+            overflow: hidden;
+            width: calc(100% - 2rem);
+        }
+
+        #sidebar .nav-link.active:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            filter: brightness(1.15);
+        }
+
+        .nav-link.text-danger {
+            color: #ff6b6b !important;
+        }
+
+        .nav-link.text-danger:hover {
+            background: rgba(231, 74, 59, 0.15);
+            color: var(--danger, #e74a3b) !important;
         }
         /* Unified 5px Border Radius for All Buttons System-Wide */
         button, .btn, .btn.rounded-1, .btn.rounded-1, .btn-add-to-cart, .btn, #checkout-btn, #clear-cart, .submit-button, a.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .btn-outline-primary, .btn-outline-secondary, .btn-outline-dark, .btn-outline-light {
@@ -146,6 +212,11 @@ $expiredNotif = $db->table('items')
         <li class="nav-item">
             <a class="nav-link <?= isActive(['admin/pull-outs']) ?>" href="<?= site_url('admin/pull-outs') ?>">
                 <i class="bi bi-trash3"></i> Pull-Outs
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <?= isActive(['admin/returns']) ?>" href="<?= site_url('admin/returns') ?>">
+                <i class="bi bi-arrow-return-left"></i> Customer Returns
             </a>
         </li>
         <li class="nav-item">

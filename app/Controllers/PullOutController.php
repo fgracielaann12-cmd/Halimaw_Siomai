@@ -10,11 +10,13 @@ class PullOutController extends BaseController
 {
     protected $pullOutModel;
     protected $itemModel;
+    protected $itemLogModel;
 
     public function __construct()
     {
         $this->pullOutModel = new PullOutModel();
         $this->itemModel    = new ItemModel();
+        $this->itemLogModel = new \App\Models\ItemLogModel();
     }
 
     // --- STAFF API ---
@@ -22,21 +24,50 @@ class PullOutController extends BaseController
     {
         $request = service('request');
 
-        $productId     = $request->getPost('product_id');
-        $quantity      = $request->getPost('quantity');
-        $pullOutReason = $request->getPost('pull_out_reason');
-        $reasonNote    = $request->getPost('reason_note');
-        $userId        = session()->get('user_id');
+        $itemId    = $request->getPost('item_id');
+        $variation = $request->getPost('variation');
+        $quantity  = (int)$request->getPost('quantity');
+        $reason    = $request->getPost('reason');
+        $category  = $request->getPost('category');
+        $note      = $request->getPost('note');
+        $userId    = session()->get('user_id');
 
-        if (!$productId || !$quantity || !$pullOutReason) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Product, Quantity, and Reason are required.']);
+        if (!$itemId || !$quantity || !$reason || !$category) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Item, Quantity, Reason, and Category are required.']);
+        }
+
+        $item = $this->itemModel->find($itemId);
+        if (!$item) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Item not found.']);
+        }
+
+        // Determine unit cost
+        $unitCost = $item['price'];
+        if ($variation === 'small' && isset($item['pack_small_price'])) $unitCost = $item['pack_small_price'];
+        if ($variation === 'medium' && isset($item['pack_medium_price'])) $unitCost = $item['pack_medium_price'];
+        if ($variation === 'large' && isset($item['pack_biggest_price'])) $unitCost = $item['pack_biggest_price'];
+
+        $totalLoss = $unitCost * $quantity;
+
+        // Handle Image Upload
+        $imagePath = null;
+        $file = $this->request->getFile('image');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/pullouts', $newName);
+            $imagePath = 'uploads/pullouts/' . $newName;
         }
 
         $data = [
-            'product_id'      => $productId,
+            'product_id'      => $itemId, // Maps to items.id
+            'variation'       => $variation,
             'quantity'        => $quantity,
-            'pull_out_reason' => $pullOutReason,
-            'reason_note'     => $reasonNote,
+            'unit_cost'       => $unitCost,
+            'total_loss'      => $totalLoss,
+            'pull_out_reason' => $reason,
+            'category'        => $category,
+            'reason_note'     => $note,
+            'image_path'      => $imagePath,
             'reported_by'     => $userId,
             'status'          => 'PENDING'
         ];
@@ -79,16 +110,36 @@ class PullOutController extends BaseController
             return redirect()->back()->with('error', 'Product not found.');
         }
 
-        if ($item['quantity'] < $pullOut['quantity']) {
+        $variation = $pullOut['variation'];
+        $qtyCol = 'quantity';
+        if ($variation === 'small') $qtyCol = 'pack_small_qty';
+        if ($variation === 'medium') $qtyCol = 'pack_medium_qty';
+        if ($variation === 'large') $qtyCol = 'pack_biggest_qty';
+
+        if (!isset($item[$qtyCol]) || $item[$qtyCol] < $pullOut['quantity']) {
             return redirect()->back()->with('error', 'Insufficient stock to approve this pull-out.');
         }
 
         // Deduct inventory
-        $newQty = $item['quantity'] - $pullOut['quantity'];
-        $this->itemModel->update($item['id'], ['quantity' => $newQty]);
+        $newQty = $item[$qtyCol] - $pullOut['quantity'];
+        $this->itemModel->update($item['id'], [$qtyCol => $newQty]);
+
+        // Log the change
+        $oldData = json_encode([$qtyCol => $item[$qtyCol]]);
+        $newData = json_encode([$qtyCol => $newQty]);
+        $this->itemLogModel->insert([
+            'item_id'    => $item['id'],
+            'old_data'   => $oldData,
+            'new_data'   => $newData,
+            'updated_by' => 'Admin (Pull-Out Approved ID: '.$id.')'
+        ]);
 
         // Mark as approved
-        $this->pullOutModel->update($id, ['status' => 'APPROVED']);
+        $this->pullOutModel->update($id, [
+            'status' => 'APPROVED',
+            'approved_by' => session()->get('user_id'),
+            'approved_at' => date('Y-m-d H:i:s')
+        ]);
 
         return redirect()->back()->with('success', 'Pull-out request approved and inventory deducted.');
     }
@@ -101,7 +152,11 @@ class PullOutController extends BaseController
         }
 
         // Mark as rejected
-        $this->pullOutModel->update($id, ['status' => 'REJECTED']);
+        $this->pullOutModel->update($id, [
+            'status' => 'REJECTED',
+            'approved_by' => session()->get('user_id'),
+            'approved_at' => date('Y-m-d H:i:s')
+        ]);
 
         return redirect()->back()->with('success', 'Pull-out request rejected.');
     }

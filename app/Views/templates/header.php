@@ -575,6 +575,7 @@
                 </button>
                 <h5><i class="bi bi-people me-2"></i><?= $title ?? 'Staff Management' ?></h5>
             </div>
+            <?= $this->renderSection('header_actions') ?>
         </div>
         <?= $this->renderSection('content') ?>
     </div>

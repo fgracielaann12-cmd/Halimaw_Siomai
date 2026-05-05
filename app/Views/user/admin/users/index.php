@@ -36,12 +36,14 @@
         }
     </style>
 
+<?= $this->section('header_actions') ?>
+    <a href="<?= site_url('admin/staff/users/create') ?>" class="btn btn-primary shadow-sm px-4 py-2 fw-semibold" style="transition: all 0.3s ease; border-radius: 8px !important;">
+        <i class="bi bi-person-plus-fill me-2"></i> Add Staff
+    </a>
+<?= $this->endSection() ?>
+
 <div class="container-fluid">
-    <div class="d-flex justify-content-start align-items-center mb-4 animated-actions">
-        <a href="<?= site_url('admin/staff/users/create') ?>" class="btn btn-primary shadow-sm px-4 py-2 fw-semibold" style="transition: all 0.3s ease; border-radius: 5px;">
-            <i class="bi bi-person-plus-fill me-2"></i> Add Staff
-        </a>
-    </div>
+
 
     <!-- Flash Messages -->
     <?php if (session()->getFlashdata('success')): ?>

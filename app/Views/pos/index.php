@@ -1251,11 +1251,11 @@ function isActive($paths) {
                 </button>
                 <h5 class="mb-0 d-flex align-items-center">
                     <i class="bi bi-calculator me-2" style="font-size: 1.25rem;"></i>Admin POS
-                    <button class="btn btn-light rounded-circle ms-2 shadow-sm d-flex align-items-center justify-content-center" id="showTutorialBtn" title="Help" style="width: 28px; height: 28px; padding: 0;">
-                        <i class="bi bi-question-lg text-secondary" style="font-size: 1.1rem;"></i>
-                    </button>
                 </h5>
             </div>
+            <button class="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center" id="showTutorialBtn" title="Help" style="width: 32px; height: 32px; padding: 0;">
+                <i class="bi bi-question-lg text-secondary" style="font-size: 1.2rem;"></i>
+            </button>
         </div>
         <!-- Flash Messages -->
         <?php if (session()->getFlashdata('success')): ?>

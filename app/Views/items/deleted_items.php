@@ -496,7 +496,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="container-fluid px-4">
         <!-- Flash Message -->
         <?php if (session()->getFlashdata('success')): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">

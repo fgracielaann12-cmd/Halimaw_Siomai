@@ -481,6 +481,9 @@
             </button>
             <h5 class="mb-0"><i class="bi bi-shield-lock me-2" style="font-size: 1.25rem;"></i>Audit Logs</h5>
         </div>
+        <a href="<?= base_url('items/export-logs-csv') ?>" class="btn btn-primary shadow-sm px-3 py-2 fw-semibold" style="transition: all 0.3s ease; border-radius: 8px !important; font-size: 0.9rem;">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Logs (CSV)
+        </a>
     </div>
 
     <div class="container-fluid">
@@ -492,12 +495,7 @@
             </div>
         <?php endif; ?>
 
-        <!-- Action Buttons -->
-        <div class="d-flex justify-content-start align-items-center mb-4 animated-actions">
-            <a href="<?= base_url('items/export-logs-csv') ?>" class="btn btn-primary-custom shadow-sm px-4 py-2 fw-semibold" style="transition: all 0.3s ease; border-radius: 5px;">
-                <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Logs (CSV)
-            </a>
-        </div>
+
 
         <!-- Table -->
         <div class="table-card">

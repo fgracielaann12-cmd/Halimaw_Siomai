@@ -143,21 +143,26 @@ if (!function_exists('getProductSKU')) {
             min-width: 0;
         }
         #sidebar .navbar-brand {
-            padding: 1.25rem 1rem;
-            font-size: 1.25rem;
-            font-weight: 700;
+            padding: 1.25rem 0.75rem;
+            font-size: 1.15rem;
+            font-weight: 800;
             color: white;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            justify-content: center;
+            gap: 0.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
         }
         #sidebar .navbar-brand img {
-            width: 52px;
-            height: 52px;
-            border-radius: 8px;
-            background-color: #f0f2f5;
-            padding: 2px;
+            width: 45px;
+            height: 45px;
+            border-radius: 10px !important;
+            background-color: #f8f9fa;
+            padding: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
 
@@ -683,6 +688,11 @@ if (!function_exists('getProductSKU')) {
                     <i class="bi bi-trash3"></i> Pull-Outs
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#returnModal">
+                    <i class="bi bi-arrow-return-left"></i> Customer Returns
+                </a>
+            </li>
             <li class="nav-item mt-3 mb-2">
                 <hr style="border-top: 1px solid rgba(255,255,255,0.3); opacity: 1; margin: 0 1.5rem;">
             </li>
@@ -1107,6 +1117,123 @@ if (!function_exists('getProductSKU')) {
             </div>
         </div>
     </div>
+    </div>
+
+    <!-- CUSTOMER RETURN MODAL -->
+    <div class="modal fade" id="returnModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+                <div class="modal-header bg-gradient bg-primary text-white p-4 border-0 position-relative">
+                    <h5 class="modal-title fw-bold fs-4"><i class="bi bi-arrow-return-left me-2"></i>Process Customer Return</h5>
+                    <button type="button" class="btn-close btn-close-white position-absolute top-50 end-0 translate-middle-y me-4" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <form id="returnFormModal">
+                        <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" id="returnCsrf">
+                        
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-receipt me-1 text-primary"></i> Transaction ID
+                                </label>
+                                <input type="text" class="form-control form-control-lg shadow-sm" id="returnTransactionId" placeholder="e.g. TXN-12345" required style="border-radius: 8px;">
+                                <small class="text-muted mt-1 d-block"><i class="bi bi-info-circle me-1"></i>Required to validate the purchase</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-box me-1 text-primary"></i> Item Returned
+                                </label>
+                                <select class="form-select form-select-lg shadow-sm" id="returnItemModal" required style="border-radius: 8px;">
+                                    <option value="" disabled selected>Search for product...</option>
+                                    <?php if(isset($items) && !empty($items)): ?>
+                                        <?php foreach($items as $item): ?>
+                                            <!-- Normal Items -->
+                                            <option value="<?= esc($item['id']) ?>"><?= esc($item['name']) ?></option>
+                                            
+                                            <!-- Siomai Variations -->
+                                            <?php if(stripos($item['name'], 'siomai') !== false): ?>
+                                                <option value="<?= esc($item['id']) ?>" data-variation="Small Pack"><?= esc($item['name']) ?> - Small Pack</option>
+                                                <option value="<?= esc($item['id']) ?>" data-variation="Medium Pack"><?= esc($item['name']) ?> - Medium Pack</option>
+                                                <option value="<?= esc($item['id']) ?>" data-variation="Large Pack"><?= esc($item['name']) ?> - Large Pack</option>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-123 me-1 text-primary"></i> Quantity Returned
+                                </label>
+                                <div class="input-group input-group-lg shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-hash text-muted"></i></span>
+                                    <input type="number" class="form-control border-start-0 ps-0" id="returnQtyModal" min="1" placeholder="0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-chat-left-text me-1 text-primary"></i> Reason for Return
+                                </label>
+                                <select class="form-select form-select-lg shadow-sm" id="returnReasonModal" required style="border-radius: 8px;">
+                                    <option value="" disabled selected>Select a reason...</option>
+                                    <option value="Wrong Item Served">Wrong Item Served</option>
+                                    <option value="Customer Changed Mind">Customer Changed Mind</option>
+                                    <option value="Item Damaged / Bad Quality">Item Damaged / Bad Quality</option>
+                                    <option value="Foreign Object Found">Foreign Object Found</option>
+                                    <option value="Under-cooked / Spoilage">Under-cooked / Spoilage</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- PROOF OF EVIDENCE -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-camera me-1 text-primary"></i> Proof of Evidence (Optional)
+                            </label>
+                            <input type="file" class="form-control form-control-lg shadow-sm" id="returnEvidenceModal" accept="image/*,video/*" style="border-radius: 8px;">
+                            <small class="text-muted mt-1 d-block"><i class="bi bi-info-circle me-1"></i>Attach photo or video showing the item's condition.</small>
+                        </div>
+
+                        <!-- CONDITION EVALUATION -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-dark mb-3 d-block">
+                                <i class="bi bi-check-circle me-1"></i> Item Condition Evaluation
+                            </label>
+                            
+                            <div class="d-flex flex-column gap-3">
+                                <!-- Restockable Option -->
+                                <div class="form-check p-3 rounded shadow-sm border border-success" style="background-color: #f0fdf4;">
+                                    <input class="form-check-input ms-2" type="radio" name="returnCondition" id="condRestockable" value="RESTOCKABLE" required style="transform: scale(1.3);">
+                                    <label class="form-check-label ms-3 w-100" for="condRestockable" style="cursor:pointer;">
+                                        <div class="fw-bold text-success" style="font-size: 1.1rem;">RESTOCKABLE</div>
+                                        <small class="text-muted">Item is in perfect condition, safe for consumption, and can be resold immediately.</small>
+                                    </label>
+                                </div>
+                                
+                                <!-- Non-Restockable Option -->
+                                <div class="form-check p-3 rounded shadow-sm border border-danger" style="background-color: #fef2f2;">
+                                    <input class="form-check-input ms-2" type="radio" name="returnCondition" id="condNonRestockable" value="NON-RESTOCKABLE" required style="transform: scale(1.3);">
+                                    <label class="form-check-label ms-3 w-100" for="condNonRestockable" style="cursor:pointer;">
+                                        <div class="fw-bold text-danger" style="font-size: 1.1rem;">NON-RESTOCKABLE (Waste)</div>
+                                        <small class="text-muted">Item is compromised, spoiled, damaged, or unsafe. This will automatically generate a <strong class="text-danger">Pull-Out Request</strong>.</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light border shadow-sm px-4 fw-semibold" data-bs-dismiss="modal" style="border-radius: 5px;">Cancel</button>
+                            <button type="submit" class="btn btn-primary shadow-sm px-4 fw-semibold" style="border-radius: 5px;">
+                                <i class="bi bi-send me-2"></i>Process Return
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1143,6 +1270,26 @@ if (!function_exists('getProductSKU')) {
                 theme: 'bootstrap-5',
                 dropdownParent: $('#pullOutModal'),
                 width: '100%',
+                minimumResultsForSearch: Infinity
+            });
+        }
+        
+        if ($('#returnItemModal').length) {
+            $('#returnItemModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%'
+            });
+        }
+
+        if ($('#returnReasonModal').length) {
+            $('#returnReasonModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: Infinity
+            });
+        }
                 minimumResultsForSearch: Infinity
             });
         }
@@ -1414,6 +1561,76 @@ if (!function_exists('getProductSKU')) {
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Pull-Out';
+                }
+            });
+        // ✅ RETURNS SUBMISSION
+        const returnForm = document.getElementById("returnFormModal");
+        if (returnForm) {
+            returnForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const submitBtn = returnForm.querySelector("button[type='submit']");
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass me-2"></i>Processing...';
+
+                const selectElement = document.getElementById("returnItemModal");
+                const itemId = selectElement.value;
+                const variation = selectElement.options[selectElement.selectedIndex].getAttribute("data-variation");
+                
+                const transactionId = document.getElementById("returnTransactionId").value.trim();
+                const quantity = parseInt(document.getElementById("returnQtyModal").value) || 0;
+                const reason = document.getElementById("returnReasonModal").value;
+                const evidenceFile = document.getElementById("returnEvidenceModal").files[0];
+                
+                let condition = "";
+                const condRadios = document.getElementsByName("returnCondition");
+                for (let i=0; i<condRadios.length; i++) {
+                    if (condRadios[i].checked) {
+                        condition = condRadios[i].value;
+                        break;
+                    }
+                }
+
+                if (!transactionId || !itemId || !quantity || !reason || !condition) {
+                    alert("Please fill all required fields correctly.");
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Process Return';
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("transaction_id", transactionId);
+                formData.append("item_id", itemId);
+                if(variation) formData.append("variation", variation);
+                formData.append("quantity", quantity);
+                formData.append("reason", reason);
+                formData.append("return_condition", condition);
+                if(evidenceFile) formData.append("evidence_file", evidenceFile);
+
+                try {
+                    const response = await fetch("<?= site_url('user/submit-return') ?>", {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            "X-CSRF-TOKEN": document.getElementById("returnCsrf").value
+                        },
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.status === 'success' || data.success) {
+                        alert("Return processed successfully: " + (data.message || ''));
+                        returnForm.reset();
+                        bootstrap.Modal.getInstance(document.getElementById("returnModal")).hide();
+                    } else {
+                        alert("Error: " + (data.message || 'Failed'));
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Process Return';
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("A network error occurred. Please check console.");
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Process Return';
                 }
             });
         }

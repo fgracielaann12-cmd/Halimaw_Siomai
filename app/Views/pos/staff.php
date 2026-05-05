@@ -145,22 +145,27 @@ if (!function_exists('getProductSKU')) {
         }
 
         #sidebar .navbar-brand {
-            padding: 1.25rem 1rem;
-            font-size: 1.25rem;
-            font-weight: 700;
+            padding: 1.25rem 0.75rem;
+            font-size: 1.15rem;
+            font-weight: 800;
             color: white;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            justify-content: center;
+            gap: 0.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
         }
 
         #sidebar .navbar-brand img {
-            width: 52px;
-            height: 52px;
-            border-radius: 8px;
-            background-color: #f0f2f5;
-            padding: 2px;
+            width: 45px;
+            height: 45px;
+            border-radius: 10px !important;
+            background-color: #f8f9fa;
+            padding: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
 
@@ -1278,6 +1283,11 @@ if (!function_exists('getProductSKU')) {
                     <i class="bi bi-trash3"></i> Pull-Outs
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#returnModal">
+                    <i class="bi bi-arrow-return-left"></i> Customer Returns
+                </a>
+            </li>
 
             <li class="nav-item mt-3 mb-2">
                 <hr style="border-top: 1px solid rgba(255,255,255,0.3); opacity: 1; margin: 0 1.5rem;">
@@ -1345,12 +1355,12 @@ if (!function_exists('getProductSKU')) {
                 </button>
                 <h5 class="mb-0 d-flex align-items-center">
                     <i class="bi bi-calculator me-2" style="font-size: 1.25rem;"></i>Staff POS
-                    <button class="btn btn-light rounded-circle ms-2 shadow-sm d-flex align-items-center justify-content-center" id="showTutorialBtn" title="Help" style="width: 28px; height: 28px; padding: 0;">
-                        <i class="bi bi-question-lg text-secondary" style="font-size: 1.1rem;"></i>
-                    </button>
                 </h5>
             </div>
-            <div class="user-profile hide-mobile">
+            <div class="user-profile hide-mobile d-flex align-items-center gap-3">
+                <button class="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center" id="showTutorialBtn" title="Help" style="width: 32px; height: 32px; padding: 0;">
+                    <i class="bi bi-question-lg text-secondary" style="font-size: 1.2rem;"></i>
+                </button>
                 <div class="profile-initial" id="profileInitial">
                     <?php 
                     $username = session()->get('username') ?? 'User';
@@ -1821,12 +1831,19 @@ if (!function_exists('getProductSKU')) {
                             <label for="pullOutReasonModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-exclamation-triangle me-1"></i> Reason
                             </label>
-                            <select id="pullOutReasonModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
-                                <option value="">— Select Reason —</option>
-                                <option value="SPOILED">Spoiled / Expired</option>
-                                <option value="CONTAMINATED">Contaminated</option>
-                                <option value="DAMAGED_PACKAGING">Damaged Packaging</option>
-                                <option value="CUSTOMER_RETURN">Customer Return</option>
+                            <input type="text" id="pullOutReasonModal" class="form-control shadow-sm" required placeholder="e.g. Expired, Spoiled, Damaged, Customer Return" style="border-radius: 5px; padding: 0.6rem 1rem;">
+                        </div>
+                        <div class="mb-4">
+                            <label for="pullOutCategoryModal" class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-tags me-1"></i> Category
+                            </label>
+                            <select id="pullOutCategoryModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
+                                <option value="">— Select Category —</option>
+                                <option value="Expiry">Expiry</option>
+                                <option value="Handling Error">Handling Error</option>
+                                <option value="Storage Issue">Storage Issue</option>
+                                <option value="Quality Issue">Quality Issue</option>
+                                <option value="Customer Return">Customer Return</option>
                             </select>
                         </div>
                         <div class="mb-4">
@@ -1843,10 +1860,143 @@ if (!function_exists('getProductSKU')) {
                             <textarea id="pullOutNoteModal" class="form-control shadow-sm" rows="3" placeholder="Provide extra details..."
                                       style="border-radius: 5px; padding: 0.6rem 1rem;"></textarea>
                         </div>
+                        <div class="mb-4">
+                            <label for="pullOutImageModal" class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-image me-1"></i> Upload Proof (Optional)
+                            </label>
+                            <input type="file" id="pullOutImageModal" class="form-control shadow-sm" accept="image/*" style="border-radius: 5px; padding: 0.6rem 1rem;">
+                        </div>
                         <div class="d-flex justify-content-end gap-2 mt-4">
                             <button type="button" class="btn btn-light border shadow-sm px-4 fw-semibold" data-bs-dismiss="modal" style="border-radius: 5px;">Cancel</button>
                             <button type="submit" class="btn btn-danger shadow-sm px-4 fw-semibold" style="border-radius: 5px;">
                                 <i class="bi bi-send me-2"></i>Submit Pull-Out
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ Customer Return Modal -->
+    <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header p-3 border-0 position-relative" style="background-color: #2c3e50; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h5 class="modal-title fw-semibold text-white w-100 text-center" id="returnModalLabel" style="font-size: 1.15rem;">
+                        <i class="bi bi-arrow-return-left me-2"></i>Process Customer Return
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white position-absolute top-50 end-0 translate-middle-y me-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 bg-white">
+                    <form id="returnFormModal">
+                        <?= csrf_field() ?>
+                        
+                        <div class="mb-4">
+                            <label for="returnTransactionId" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                <i class="bi bi-receipt me-1"></i> Transaction ID
+                            </label>
+                            <input type="text" id="returnTransactionId" class="form-control form-control-lg" required placeholder="Enter Transaction ID (e.g. TXN-12345)" style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="returnItemModal" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                <i class="bi bi-box me-1"></i> Select Item
+                            </label>
+                            <select id="returnItemModal" class="form-select form-select-lg" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                                <option value="" disabled selected>— Choose an item —</option>
+                                <?php foreach ($items as $item): ?>
+                                    <?php
+                                        $isSiomai = stripos($item['name'], 'siomai') !== false;
+                                        $displayRows = [];
+                                        if ($isSiomai) {
+                                            $displayRows[] = ['variation' => 'S', 'pack_name' => 'Small Pack', 'id_suffix' => '-S'];
+                                            $displayRows[] = ['variation' => 'M', 'pack_name' => 'Medium Pack', 'id_suffix' => '-M'];
+                                            $displayRows[] = ['variation' => 'L', 'pack_name' => 'Large Pack', 'id_suffix' => '-L'];
+                                        } else {
+                                            $displayRows[] = ['variation' => null, 'pack_name' => '', 'id_suffix' => ''];
+                                        }
+                                    ?>
+                                    <?php foreach ($displayRows as $vItem): ?>
+                                        <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
+                                            <?php if (function_exists('getProductSKU')): ?>
+                                                <?= esc(getProductSKU($item['name'], $vItem['variation'])) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
+                                            <?php else: ?>
+                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
+                                            <?php endif; ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label for="returnQtyModal" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                    <i class="bi bi-hash me-1"></i> Quantity
+                                </label>
+                                <input type="number" id="returnQtyModal" class="form-control form-control-lg" min="1" placeholder="Enter amount" required
+                                       style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="returnReasonModal" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> Reason for Return
+                                </label>
+                                <select id="returnReasonModal" class="form-select form-select-lg" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                                    <option value="" disabled selected>— Select Reason —</option>
+                                    <option value="Wrong Order">Wrong Order</option>
+                                    <option value="Change of Mind">Change of Mind</option>
+                                    <option value="Quality Issue">Quality Issue</option>
+                                    <option value="Damaged Item">Damaged Item</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- PROOF OF EVIDENCE -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                <i class="bi bi-camera me-1 text-primary"></i> Proof of Evidence (Optional)
+                            </label>
+                            <input type="file" class="form-control form-control-lg" id="returnEvidenceModal" accept="image/*,video/*" style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                            <small class="text-muted mt-1 d-block" style="font-size: 0.85rem;"><i class="bi bi-info-circle me-1"></i>Attach photo or video showing the item's condition.</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark mb-3 d-block" style="font-size: 0.95rem;">
+                                <i class="bi bi-check-circle me-1"></i> Item Condition Evaluation
+                            </label>
+                            
+                            <div class="d-flex flex-column gap-3">
+                                <!-- Restockable Option -->
+                                <div class="form-check p-3 rounded" style="background-color: #f8fff9; border: 1px solid #28a745;">
+                                    <input class="form-check-input ms-2 mt-2" type="radio" name="returnCondition" id="condRestockable" value="RESTOCKABLE" required style="transform: scale(1.3);">
+                                    <label class="form-check-label ms-3 w-100" for="condRestockable" style="cursor:pointer;">
+                                        <div class="fw-bold text-success" style="font-size: 1.05rem;">RESTOCKABLE</div>
+                                        <small class="text-muted">Item is in perfect condition, safe for consumption, and can be resold immediately.</small>
+                                    </label>
+                                </div>
+                                
+                                <!-- Non-Restockable Option -->
+                                <div class="form-check p-3 rounded" style="background-color: #fff8f8; border: 1px solid #dc3545;">
+                                    <input class="form-check-input ms-2 mt-2" type="radio" name="returnCondition" id="condNonRestockable" value="NON-RESTOCKABLE" required style="transform: scale(1.3);">
+                                    <label class="form-check-label ms-3 w-100" for="condNonRestockable" style="cursor:pointer;">
+                                        <div class="fw-bold text-danger" style="font-size: 1.05rem;">NON-RESTOCKABLE (Waste)</div>
+                                        <small class="text-muted">Item is compromised, spoiled, damaged, or unsafe. This will automatically generate a <strong class="text-danger">Pull-Out Request</strong>.</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-3 mt-3">
+                            <style>
+                                .btn-return-cancel { transition: all 0.2s ease-in-out; }
+                                .btn-return-cancel:hover { background-color: #d1d5db !important; border-color: #d1d5db !important; }
+                                .btn-return-process { transition: all 0.2s ease-in-out; }
+                                .btn-return-process:hover { background-color: #1e40af !important; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; }
+                            </style>
+                            <button type="button" class="btn btn-light px-4 py-2 fw-bold btn-return-cancel" data-bs-dismiss="modal" style="border-radius: 10px !important; border: 1px solid #e2e8f0; background-color: #f8fafc; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4 py-2 fw-bold btn-return-process" style="border-radius: 10px !important; background-color: #1d4ed8; border: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                <i class="bi bi-send me-1"></i> Process Return
                             </button>
                         </div>
                     </form>
@@ -1889,6 +2039,23 @@ if (!function_exists('getProductSKU')) {
             $('#pullOutReasonModal').select2({
                 theme: 'bootstrap-5',
                 dropdownParent: $('#pullOutModal'),
+                width: '100%',
+                minimumResultsForSearch: Infinity
+            });
+        }
+
+        if ($('#returnItemModal').length) {
+            $('#returnItemModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%'
+            });
+        }
+
+        if ($('#returnReasonModal').length) {
+            $('#returnReasonModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
                 width: '100%',
                 minimumResultsForSearch: Infinity
             });
@@ -2010,33 +2177,34 @@ if (!function_exists('getProductSKU')) {
                 const itemId = pullOutItemSelect.value;
                 const variation = pullOutItemSelect.options[pullOutItemSelect.selectedIndex].getAttribute("data-variation");
                 const reason = document.getElementById("pullOutReasonModal").value;
+                const category = document.getElementById("pullOutCategoryModal").value;
                 const quantity = parseInt(document.getElementById("pullOutQtyModal").value) || 0;
                 let note = document.getElementById("pullOutNoteModal").value.trim();
+                const imageFile = document.getElementById("pullOutImageModal").files[0];
 
-                if (variation) {
-                    note = `[Variation: ${variation}] ` + note;
-                }
-
-                if (!itemId || !reason || !quantity) {
+                if (!itemId || !reason || !category || !quantity) {
                     alert("Please fill all required fields.");
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Pull-Out';
                     return;
                 }
 
+                const formData = new FormData();
+                formData.append('item_id', itemId);
+                if (variation) formData.append('variation', variation.toLowerCase());
+                formData.append('quantity', quantity);
+                formData.append('reason', reason);
+                formData.append('category', category);
+                formData.append('note', note);
+                if (imageFile) formData.append('image', imageFile);
+
                 try {
                     const response = await fetch("<?= site_url('user/submit-pull-out') ?>", {
                         method: "POST",
                         headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
                             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
                         },
-                        body: new URLSearchParams({
-                            item_id: itemId,
-                            reason: reason,
-                            quantity: quantity,
-                            note: note
-                        })
+                        body: formData
                     });
                     const result = await response.json();
                     if (result.success) {
@@ -2052,6 +2220,77 @@ if (!function_exists('getProductSKU')) {
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Pull-Out';
+                }
+            });
+        }
+        // ✅ RETURNS SUBMISSION
+        const returnForm = document.getElementById("returnFormModal");
+        if (returnForm) {
+            returnForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const submitBtn = returnForm.querySelector("button[type='submit']");
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass me-2"></i>Processing...';
+
+                const selectElement = document.getElementById("returnItemModal");
+                const itemId = selectElement.value;
+                const variation = selectElement.options[selectElement.selectedIndex].getAttribute("data-variation");
+                
+                const transactionId = document.getElementById("returnTransactionId").value.trim();
+                const quantity = parseInt(document.getElementById("returnQtyModal").value) || 0;
+                const reason = document.getElementById("returnReasonModal").value;
+                const evidenceFile = document.getElementById("returnEvidenceModal").files[0];
+                
+                let condition = "";
+                const condRadios = document.getElementsByName("returnCondition");
+                for (let i=0; i<condRadios.length; i++) {
+                    if (condRadios[i].checked) {
+                        condition = condRadios[i].value;
+                        break;
+                    }
+                }
+
+                if (!transactionId || !itemId || !quantity || !reason || !condition) {
+                    alert("Please fill all required fields correctly.");
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Process Return';
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("transaction_id", transactionId);
+                formData.append("item_id", itemId);
+                if(variation) formData.append("variation", variation);
+                formData.append("quantity", quantity);
+                formData.append("reason", reason);
+                formData.append("return_condition", condition);
+                if(evidenceFile) formData.append("evidence_file", evidenceFile);
+
+                try {
+                    const response = await fetch("<?= site_url('user/submit-return') ?>", {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            "X-CSRF-TOKEN": document.querySelector('input[name="<?= csrf_token() ?>"]').value
+                        },
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.status === 'success' || data.success) {
+                        alert("Return processed successfully: " + (data.message || ''));
+                        returnForm.reset();
+                        bootstrap.Modal.getInstance(document.getElementById("returnModal")).hide();
+                    } else {
+                        alert("Error: " + (data.message || 'Failed'));
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Process Return';
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("A network error occurred. Please check console.");
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Process Return';
                 }
             });
         }

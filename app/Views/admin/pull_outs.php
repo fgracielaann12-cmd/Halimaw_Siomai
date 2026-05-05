@@ -461,31 +461,41 @@
         $pendingCount = 0;
         $approvedCount = 0;
         $rejectedCount = 0;
+        $totalLoss = 0;
         foreach ($pullOuts as $p) {
             if ($p['status'] === 'PENDING') $pendingCount++;
-            elseif ($p['status'] === 'APPROVED') $approvedCount++;
+            elseif ($p['status'] === 'APPROVED') {
+                $approvedCount++;
+                $totalLoss += $p['total_loss'];
+            }
             elseif ($p['status'] === 'REJECTED') $rejectedCount++;
         }
         ?>
 
         <!-- Summary Cards -->
         <div class="row text-center mb-4">
-            <div class="col-md-4 mb-3">
+            <div class="col-md-3 mb-3">
                 <div class="card border-start border-warning border-4">
                     <h5 class="text-warning">Pending</h5>
                     <h3><?= $pendingCount ?></h3>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-3 mb-3">
                 <div class="card border-start border-success border-4">
                     <h5 class="text-success">Approved</h5>
                     <h3><?= $approvedCount ?></h3>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-3 mb-3">
                 <div class="card border-start border-danger border-4">
                     <h5 class="text-danger">Rejected</h5>
                     <h3><?= $rejectedCount ?></h3>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-start border-dark border-4" style="background: #f8f9fa;">
+                    <h5 class="text-dark">Total Loss (Approved)</h5>
+                    <h3 class="text-danger">₱<?= number_format($totalLoss, 2) ?></h3>
                 </div>
             </div>
         </div>
@@ -499,8 +509,9 @@
                         <th>Reporter</th>
                         <th>Item</th>
                         <th>Qty</th>
-                        <th>Reason</th>
-                        <th>Notes</th>
+                        <th>Loss</th>
+                        <th>Reason / Category</th>
+                        <th>Proof</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -515,19 +526,37 @@
                     <tr>
                         <td><?= date('M d, Y h:i A', strtotime($r['date_reported'])) ?></td>
                         <td><?= esc($r['reporter_name'] ?? 'Unknown') ?></td>
-                        <td><a href="<?= site_url('items/edit/' . $r['product_id']) ?>" class="text-decoration-none fw-semibold"><?= esc($r['product_sku']) ?> - <?= esc($r['product_name']) ?></a></td>
+                        <td>
+                            <a href="<?= site_url('items/edit/' . $r['product_id']) ?>" class="text-decoration-none fw-semibold"><?= esc($r['product_sku']) ?> - <?= esc($r['product_name']) ?></a>
+                            <?php if(!empty($r['variation'])): ?>
+                                <br><small class="text-muted text-uppercase fw-bold"><?= esc($r['variation']) ?></small>
+                            <?php endif; ?>
+                        </td>
                         <td><strong><?= $r['quantity'] ?></strong></td>
+                        <td class="text-danger fw-semibold">₱<?= number_format($r['total_loss'], 2) ?></td>
                         <td>
                             <?php
                             $reason = $r['pull_out_reason'];
-                            if ($reason === 'SPOILED') echo '<span class="badge bg-danger">Spoiled</span>';
+                            if ($reason === 'SPOILED' || stripos($reason, 'spoil') !== false) echo '<span class="badge bg-danger">Spoiled</span>';
                             elseif ($reason === 'CONTAMINATED') echo '<span class="badge bg-warning text-dark">Contaminated</span>';
                             elseif ($reason === 'DAMAGED_PACKAGING') echo '<span class="badge bg-secondary">Damaged Pkg</span>';
                             elseif ($reason === 'CUSTOMER_RETURN') echo '<span class="badge bg-info text-dark">Customer Return</span>';
                             else echo '<span class="badge bg-dark">' . esc($reason) . '</span>';
                             ?>
+                            <br><small class="text-muted fw-semibold mt-1 d-block"><?= esc($r['category'] ?? 'Uncategorized') ?></small>
+                            <?php if(!empty($r['reason_note'])): ?>
+                                <small class="text-muted fst-italic">"<?= esc($r['reason_note']) ?>"</small>
+                            <?php endif; ?>
                         </td>
-                        <td class="text-start"><small><?= esc($r['reason_note'] ?? '—') ?></small></td>
+                        <td>
+                            <?php if(!empty($r['image_path'])): ?>
+                                <a href="<?= base_url($r['image_path']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-image"></i> View
+                                </a>
+                            <?php else: ?>
+                                <span class="text-muted"><small>No image</small></span>
+                            <?php endif; ?>
+                        </td>
                         <td>
                             <?php
                             $status = $r['status'];
@@ -543,7 +572,7 @@
                                 <button class="btn btn-danger btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#rejectModal"
                                     data-id="<?= $r['id'] ?>">Reject</button>
                             <?php else: ?>
-                                <span class="text-muted">—</span>
+                                <span class="text-muted"><small>Processed</small></span>
                             <?php endif; ?>
                         </td>
                     </tr>

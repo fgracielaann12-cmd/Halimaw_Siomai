@@ -81,6 +81,9 @@ $routes->group('admin', function ($routes) {
     $routes->post('approve-pull-out/(:num)', 'PullOutController::approve/$1');
     $routes->post('reject-pull-out/(:num)', 'PullOutController::reject/$1');
 
+    // Customer Returns
+    $routes->get('returns', 'ReturnsController::index');
+
     // Admin POS
     $routes->get('pos', 'PosController::adminIndex');
     $routes->post('pos/sell', 'PosController::sell');
@@ -92,6 +95,9 @@ $routes->group('admin', function ($routes) {
         // Staff POS
         $routes->get('pos', 'PosController::staffIndex');
         $routes->post('pos/sell', 'PosController::sell');  // ✅ THIS IS CORRECT
+
+        // Customer Returns Submission
+        $routes->post('returns/submit', 'ReturnsController::submit');
 
         // User Management
         $routes->get('users', 'UserManagement::index');

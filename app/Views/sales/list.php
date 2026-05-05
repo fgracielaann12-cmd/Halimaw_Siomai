@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1160,5 +1160,6 @@
         createSparkline('sparklineOrders', metricsOrders, '#f59e0b', 'rgba(245, 158, 11, 0.2)');
     });
     </script>
+<script src="<?= base_url('js/table-pagination.js') ?>"></script>
 </body>
 </html>

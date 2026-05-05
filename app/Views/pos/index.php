@@ -1,4 +1,4 @@
-<?php 
+﻿<?php 
 $currentPath = uri_string(); 
 
 function isActive($paths) {
@@ -2295,5 +2295,6 @@ function isActive($paths) {
         });
     });
     </script>
+<script src="<?= base_url('js/table-pagination.js') ?>"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -131,6 +131,7 @@
         <a href="<?= base_url('items/upload') ?>" class="btn btn-secondary mt-3">Back to Upload</a>
     </div>
 
+<script src="<?= base_url('js/table-pagination.js') ?>"></script>
 </body>
 
 </html>

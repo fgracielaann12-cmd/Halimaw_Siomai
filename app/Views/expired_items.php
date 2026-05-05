@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <title>Expired Items</title>
@@ -114,5 +114,6 @@
             </tbody>
         </tab e>
     <?php endif; ?>
+<script src="<?= base_url('js/table-pagination.js') ?>"></script>
 </body>
 </html>

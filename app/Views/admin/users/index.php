@@ -1,4 +1,4 @@
-<?= $this->extend('templates/header') ?>
+﻿<?= $this->extend('templates/header') ?>
 <?= $this->section('content') ?>
 
 <h1>Staff Management</h1>

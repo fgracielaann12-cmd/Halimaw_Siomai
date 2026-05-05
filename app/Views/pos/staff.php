@@ -1,4 +1,4 @@
-<?php 
+﻿<?php 
 $currentPath = uri_string(); 
 
 function isActive($paths) {
@@ -2717,5 +2717,6 @@ if (!function_exists('getProductSKU')) {
         fetchOnlineOrders(); // Initial fetch
     });
     </script>
+<script src="<?= base_url('js/table-pagination.js') ?>"></script>
 </body>
 </html>

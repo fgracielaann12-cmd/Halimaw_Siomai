@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!function_exists('getProductSKU')) {
     function getProductSKU($name, $variation) {
         $n = strtolower($name);
@@ -1637,6 +1637,7 @@ if (!function_exists('getProductSKU')) {
 
     });
     </script>
+<script src="<?= base_url('js/table-pagination.js') ?>"></script>
 </body>
 </html>
 

@@ -1,4 +1,4 @@
-<?php 
+﻿<?php 
 $currentPath = uri_string(); 
 
 function isActive($paths) {
@@ -1310,7 +1310,7 @@ if (!function_exists('getProductSKU')) {
                     <div class="step-number">1</div>
                     <div class="step-content">
                         <h4>Add Items to Cart</h4>
-                        <p>Click on any product to add it directly to cart.</p>
+                        <p>Click a product to select size/quantity, then add to cart.</p>
                     </div>
                 </div>
                 <div class="tutorial-step">
@@ -2956,5 +2956,6 @@ if (!function_exists('getProductSKU')) {
         fetchOnlineOrders(); // Initial fetch
     });
     </script>
+<script src="<?= base_url('js/table-pagination.js') ?>"></script>
 </body>
 </html>

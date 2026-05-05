@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -505,6 +505,7 @@
   </script>
 
 
+<script src="<?= base_url('js/table-pagination.js') ?>"></script>
 </body>
 
 </html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <title>Items List</title>
@@ -136,5 +136,6 @@
     </tbody>
 </table>
 
+<script src="<?= base_url('js/table-pagination.js') ?>"></script>
 </body>
 </html>

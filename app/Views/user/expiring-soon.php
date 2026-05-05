@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -361,6 +361,7 @@
         document.getElementById('searchQuery').addEventListener('input', searchItems);
     </script>
 
+<script src="<?= base_url('js/table-pagination.js') ?>"></script>
 </body>
 
 </html>

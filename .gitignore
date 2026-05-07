@@ -297,3 +297,6 @@ nbproject/
 *.tmp
 *.temp
 *.log
+
+writable/debugbar/*
+writable/session/*

@@ -348,6 +348,8 @@ if (!function_exists('getProductSKU')) {
             justify-content: center;
             flex-shrink: 0;
             transition: all 0.2s;
+            position: relative;
+            z-index: 1100;
         }
 
         .mobile-menu-toggle:hover {

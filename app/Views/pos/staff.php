@@ -1353,7 +1353,7 @@ if (!function_exists('getProductSKU')) {
 
     <div class="main-content">
         <!-- TOP NAVBAR WITH USER PROFILE -->
-        <div class="top-navbar" style="padding-left: 20px;">
+        <div class="top-navbar">
             <div class="d-flex align-items-center gap-3">
                 <button class="mobile-menu-toggle" id="mobileMenuToggle">
                     <i class="bi bi-list"></i>

@@ -348,7 +348,9 @@ if (!function_exists('getProductSKU')) {
             justify-content: center;
             flex-shrink: 0;
             transition: all 0.2s;
-            position: relative;
+            position: fixed;
+            top: 15px;
+            left: 15px;
             z-index: 1100;
         }
 
@@ -361,6 +363,7 @@ if (!function_exists('getProductSKU')) {
             .top-navbar {
                 border-radius: 0 !important;
                 margin: 0 0 15px 0 !important;
+                padding-left: 70px !important;
             }
         }
 

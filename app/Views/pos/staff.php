@@ -1,4 +1,4 @@
-﻿<?php 
+<?php 
 $currentPath = uri_string(); 
 
 function isActive($paths) {
@@ -1260,8 +1260,29 @@ if (!function_exists('getProductSKU')) {
 </head>
 
 <body>
+    <script>
+    function HalimawToggleSidebar() {
+        console.log("HalimawToggleSidebar triggered");
+        var sb = document.getElementById('sidebar');
+        var ov = document.getElementById('sidebarOverlay');
+        if (!sb || !ov) {
+            console.error("Sidebar elements missing!", {sb, ov});
+            return;
+        }
+        sb.classList.toggle('active');
+        ov.classList.toggle('active');
+        document.body.style.overflow = sb.classList.contains('active') ? 'hidden' : '';
+    }
+    function HalimawCloseSidebar() {
+        var sb = document.getElementById('sidebar');
+        var ov = document.getElementById('sidebarOverlay');
+        if (sb) sb.classList.remove('active');
+        if (ov) ov.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    </script>
     <!-- Mobile Menu Toggle was moved to header -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="HalimawCloseSidebar()"></div>
 
     <!-- SIDEBAR -->
     <nav id="sidebar">
@@ -1358,7 +1379,7 @@ if (!function_exists('getProductSKU')) {
         <!-- TOP NAVBAR WITH USER PROFILE -->
         <div class="top-navbar">
             <div class="d-flex align-items-center gap-3">
-                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="HalimawToggleSidebar()" style="pointer-events: auto !important; cursor: pointer !important; z-index: 99999 !important;">
                     <i class="bi bi-list"></i>
                 </button>
                 <h5 class="mb-0 d-flex align-items-center">

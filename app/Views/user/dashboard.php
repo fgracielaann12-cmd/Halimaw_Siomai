@@ -323,6 +323,10 @@ if (!function_exists('getProductSKU')) {
             justify-content: center;
             flex-shrink: 0;
             transition: all 0.2s;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
         }
         .mobile-menu-toggle:hover {
             background: var(--sidebar-hover);
@@ -479,10 +483,6 @@ if (!function_exists('getProductSKU')) {
         @media (max-width: 991px) {
             .mobile-menu-toggle { 
                 display: flex;
-                position: fixed;
-                top: 15px;
-                left: 15px;
-                z-index: 1100;
             }
 
             #sidebar .nav {

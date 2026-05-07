@@ -1340,9 +1340,6 @@ if (!function_exists('getProductSKU')) {
                 minimumResultsForSearch: Infinity
             });
         }
-                minimumResultsForSearch: Infinity
-            });
-        }
         
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('sidebar');

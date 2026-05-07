@@ -293,6 +293,9 @@ if (!function_exists('getProductSKU')) {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
         .top-navbar h5 {
             margin: 0;
@@ -847,8 +850,8 @@ if (!function_exists('getProductSKU')) {
         .close-tutorial:hover { background: #555; }
         /* RESPONSIVE */
         @media (max-width: 991px) {
-            .mobile-menu-toggle { display: block; }
-            #sidebar { transform: translateX(-100%); width: 280px; }
+            .mobile-menu-toggle { display: flex !important; }
+            #sidebar { transform: translateX(-100%); width: 280px; position: fixed; top: 0; left: 0; height: 100vh; z-index: 1050; }
 
         #sidebar .nav {
             width: 100%;

@@ -257,6 +257,7 @@ if (!function_exists('getProductSKU')) {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
         }
         .top-navbar h5 {
             margin: 0;
@@ -323,6 +324,9 @@ if (!function_exists('getProductSKU')) {
         @media (max-width: 991px) {
             .mobile-menu-toggle {
                 display: flex;
+            }
+            .hide-mobile {
+                display: none !important;
             }
         }
 
@@ -481,7 +485,7 @@ if (!function_exists('getProductSKU')) {
             
             .main-content { margin-left: 0; width: 100%; }
             .top-navbar { 
-                position: sticky; 
+                position: relative; 
                 top: 0; 
                 z-index: 1000; 
                 border-radius: 0; 

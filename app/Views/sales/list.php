@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -268,22 +268,32 @@
         }
 
         /* BUTTONS */
-        .btn-export {
+        .btn-export,
+        .btn-transaction {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 8px 20px;
+            padding: 12px 24px;
             font-size: 0.95rem;
             font-weight: 600;
-            background: var(--success);
             color: white;
             border: none;
-            border-radius: 50px;
+            border-radius: 16px;
             transition: all 0.2s;
-            margin-bottom: 20px;
+            text-decoration: none;
+        }
+        .btn-export {
+            background: var(--success);
+        }
+        .btn-transaction {
+            background: var(--primary);
         }
         .btn-export:hover {
             background: #16a369;
+            transform: translateY(-2px);
+        }
+        .btn-transaction:hover {
+            background: #3a5fc7;
             transform: translateY(-2px);
         }
 
@@ -535,10 +545,10 @@
     
     
     
-    <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <!-- UNIFIED 16PX SYSTEM-WIDE RADIUS OVERRIDE -->
     <style>
         :root {
-            --border-radius: 12px !important;
+            --border-radius: 16px !important;
         }
         
         /* Buttons */
@@ -557,7 +567,12 @@
         /* Bootstrap Overrides */
         .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
         .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
-            border-radius: 12px !important;
+            border-radius: 16px !important;
+        }
+
+        /* Specific Button Padding */
+        button, .btn, .btn-export {
+            padding: 12px 24px !important;
         }
         
         /* Images inside cards */
@@ -788,10 +803,10 @@
             </div>
 
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3 animated-actions">
-                <a href="<?= site_url('items/export-sales-csv') ?>" class="btn-export w-100 w-md-auto mb-0">
+                <a href="<?= site_url('items/export-sales-csv') ?>" class="btn-export w-100 w-md-auto mb-0" style="flex: 1 !important;">
                     <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export to CSV
                 </a>
-                <a href="<?= site_url('admin/sales/transactions') ?>" class="btn btn-primary w-100 w-md-auto" style="border-radius: 50px; padding: 8px 20px; font-weight: 600;">
+                <a href="<?= site_url('admin/sales/transactions') ?>" class="btn-transaction w-100 w-md-auto mb-0" style="flex: 1 !important;">
                     <i class="bi bi-clock-history me-1"></i> Transaction History
                 </a>
             </div>

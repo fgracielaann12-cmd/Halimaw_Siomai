@@ -354,7 +354,7 @@ if (!function_exists('getProductSKU')) {
             position: fixed;
             top: 15px;
             left: 15px;
-            z-index: 1100;
+            z-index: 99999;
         }
 
         .mobile-menu-toggle:hover {
@@ -1260,29 +1260,13 @@ if (!function_exists('getProductSKU')) {
 </head>
 
 <body>
-    <script>
-    function HalimawToggleSidebar() {
-        console.log("HalimawToggleSidebar triggered");
-        var sb = document.getElementById('sidebar');
-        var ov = document.getElementById('sidebarOverlay');
-        if (!sb || !ov) {
-            console.error("Sidebar elements missing!", {sb, ov});
-            return;
-        }
-        sb.classList.toggle('active');
-        ov.classList.toggle('active');
-        document.body.style.overflow = sb.classList.contains('active') ? 'hidden' : '';
-    }
-    function HalimawCloseSidebar() {
-        var sb = document.getElementById('sidebar');
-        var ov = document.getElementById('sidebarOverlay');
-        if (sb) sb.classList.remove('active');
-        if (ov) ov.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-    </script>
     <!-- Mobile Menu Toggle was moved to header -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="HalimawCloseSidebar()"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Standalone hamburger button - outside navbar to avoid stacking context issues -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="bi bi-list"></i>
+    </button>
 
     <!-- SIDEBAR -->
     <nav id="sidebar">
@@ -1379,9 +1363,6 @@ if (!function_exists('getProductSKU')) {
         <!-- TOP NAVBAR WITH USER PROFILE -->
         <div class="top-navbar">
             <div class="d-flex align-items-center gap-3">
-                <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="HalimawToggleSidebar()" style="pointer-events: auto !important; cursor: pointer !important; z-index: 99999 !important;">
-                    <i class="bi bi-list"></i>
-                </button>
                 <h5 class="mb-0 d-flex align-items-center">
                     <i class="bi bi-calculator me-2" style="font-size: 1.25rem;"></i>Staff POS
                 </h5>
@@ -2039,6 +2020,41 @@ if (!function_exists('getProductSKU')) {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
     document.addEventListener("DOMContentLoaded", () => {
+        // --- MOBILE MENU TOGGLE ---
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        
+        function toggleSidebar() {
+            if (!sidebar || !sidebarOverlay) return;
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+
+        function closeSidebar() {
+            if (sidebar) sidebar.classList.remove('active');
+            if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleSidebar();
+            });
+        }
+
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', closeSidebar);
+        }
+
+        document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 991) closeSidebar();
+            });
+        });
+
         if ($('#requestItemModal').length) {
             $('#requestItemModal').select2({
                 theme: 'bootstrap-5',
@@ -2090,49 +2106,6 @@ if (!function_exists('getProductSKU')) {
             });
         }
 
-        // Mobile menu toggle
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const navLinks = document.querySelectorAll('#sidebar .nav-link');
-        
-        if (mobileMenuToggle) {
-            mobileMenuToggle.addEventListener('click', () => {
-                const isActive = sidebar.classList.contains('active');
-                if (!isActive) {
-                    sidebar.classList.add('active');
-                    sidebarOverlay.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                    // removed arrow
-                } else {
-                    sidebar.classList.remove('active');
-                    sidebarOverlay.classList.remove('active');
-                    document.body.style.overflow = '';
-                    // removed arrow
-                }
-            });
-        }
-        
-        function closeSidebar() {
-            sidebar.classList.remove('active');
-            sidebarOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-            if (mobileMenuToggle) {
-                // removed arrow
-            }
-        }
-
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', closeSidebar);
-        }
-        
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 991) {
-                    closeSidebar();
-                }
-            });
-        });
 
         // ✅ STOCK REQUEST SUBMISSION
         const stockRequestForm = document.getElementById("stockRequestFormModal");

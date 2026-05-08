@@ -635,27 +635,6 @@ if (!function_exists('getProductSKU')) {
     </style>
 </head>
 <body>
-    <script>
-    function HalimawToggleSidebar() {
-        console.log("HalimawToggleSidebar triggered");
-        var sb = document.getElementById('sidebar');
-        var ov = document.getElementById('sidebarOverlay');
-        if (!sb || !ov) {
-            console.error("Sidebar elements missing!", {sb, ov});
-            return;
-        }
-        sb.classList.toggle('active');
-        ov.classList.toggle('active');
-        document.body.style.overflow = sb.classList.contains('active') ? 'hidden' : '';
-    }
-    function HalimawCloseSidebar() {
-        var sb = document.getElementById('sidebar');
-        var ov = document.getElementById('sidebarOverlay');
-        if (sb) sb.classList.remove('active');
-        if (ov) ov.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-    </script>
     <?php
     $totalVariationItems = 0;
     $expandedLowStock = 0;
@@ -738,7 +717,44 @@ if (!function_exists('getProductSKU')) {
     }
     ?>
 
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="HalimawCloseSidebar()"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Standalone hamburger button - outside navbar to avoid stacking context issues -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="window._toggleUserSidebar && window._toggleUserSidebar(event)">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Immediate robust sidebar toggle script -->
+    <script>
+    (function() {
+        window._toggleUserSidebar = function(e) {
+            if (e) e.stopPropagation();
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebarOverlay');
+            if (!sidebar || !overlay) return;
+            var isOpen = sidebar.classList.contains('active');
+            if (isOpen) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            } else {
+                sidebar.classList.add('active');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        };
+        // Close on overlay click
+        var overlay = document.getElementById('sidebarOverlay');
+        if (overlay) {
+            overlay.onclick = function() {
+                var sidebar = document.getElementById('sidebar');
+                if (sidebar) sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            };
+        }
+    })();
+    </script>
 
     <!-- SIDEBAR -->
     <nav id="sidebar">
@@ -788,9 +804,6 @@ if (!function_exists('getProductSKU')) {
         <!-- TOP NAVBAR WITH USER PROFILE -->
         <div class="top-navbar">
             <div class="d-flex align-items-center gap-3">
-                <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="HalimawToggleSidebar()" style="pointer-events: auto !important; cursor: pointer !important; z-index: 99999 !important;">
-                    <i class="bi bi-list"></i>
-                </button>
                 <h5 class="mb-0"><i class="bi bi-person-badge me-2" style="font-size: 1.25rem;"></i>Staff Dashboard</h5>
             </div>
             <div class="user-profile">
@@ -1320,6 +1333,17 @@ if (!function_exists('getProductSKU')) {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
     document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 991) {
+                    var sidebar = document.getElementById('sidebar');
+                    var overlay = document.getElementById('sidebarOverlay');
+                    if (sidebar) sidebar.classList.remove('active');
+                    if (overlay) overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
         if ($('#requestItemModal').length) {
             $('#requestItemModal').select2({
                 theme: 'bootstrap-5',
@@ -1370,46 +1394,7 @@ if (!function_exists('getProductSKU')) {
                 minimumResultsForSearch: Infinity
             });
         }
-        
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        if (mobileMenuToggle) {
-            mobileMenuToggle.addEventListener('click', () => {
-                const isActive = sidebar.classList.contains('active');
-                if (!isActive) {
-                    sidebar.classList.add('active');
-                    sidebarOverlay.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                    // removed arrow
-                } else {
-                    sidebar.classList.remove('active');
-                    sidebarOverlay.classList.remove('active');
-                    document.body.style.overflow = '';
-                    // removed arrow
-                }
-            });
-        }
-        
-        function closeSidebar() {
-            sidebar.classList.remove('active');
-            sidebarOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-            if (mobileMenuToggle) {
-                // removed arrow
-            }
-        }
 
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', closeSidebar);
-        }
-        document.querySelectorAll('#sidebar .nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 991) {
-                    closeSidebar();
-                }
-            });
-        });
 
         // 🔄 CUSTOM DROPDOWN LOGIC
         window.selectCategory = (value, text, event) => {

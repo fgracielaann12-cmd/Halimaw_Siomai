@@ -547,11 +547,11 @@
 
                 <!-- Product Image Upload -->
                 <div class="file-upload-container mt-3" id="imageDropArea" style="cursor: pointer; position: relative; padding: 0;">
-                    <label for="product_image" class="file-upload-label" style="cursor: pointer; display: block; padding: 30px;">
+                    <div class="file-upload-label" style="cursor: pointer; display: block; padding: 30px;">
                         Drag & Drop Product Image here or <br>
                         <span style="text-decoration: underline;">Click to Browse</span><br>
                         <small class="text-muted">(JPG, PNG, WEBP)</small>
-                    </label>
+                    </div>
                     <input type="file" name="product_image" id="product_image" accept=".jpg, .jpeg, .png, .webp" style="display:none;">
                     <div id="imagePreviewContainer" style="display:none; margin-bottom: 15px; position: relative;">
                         <img id="imagePreview" src="" style="max-width:100%; max-height:150px; object-fit:contain; border-radius:8px; border: 1px solid #ddd; padding: 3px; background: white;">
@@ -574,10 +574,10 @@
             <form id="uploadForm" method="post" action="<?= base_url('/items/bulk-upload') ?>" enctype="multipart/form-data">
                 <?= csrf_field() ?>
                 <div class="file-upload-container" id="dropArea">
-                    <label for="bulk_file" class="file-upload-label">
+                    <div class="file-upload-label">
                         Drag & Drop CSV here or <br>
                         <span style="text-decoration: underline;">Click to Browse</span>
-                    </label>
+                    </div>
                     <input type="file" name="bulk_file" id="bulk_file" accept=".csv" style="display:none;">
                     <div id="fileNameDisplay" class="file-name-display">
                         <span id="fileName"></span>

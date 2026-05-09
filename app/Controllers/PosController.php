@@ -19,9 +19,16 @@ class PosController extends BaseController
 
     public function adminIndex()
     {
+        // Fix Bug 2: Explicitly fetch regular items and variations
         $products = $this->productModel
-            ->where('quantity >', 0)
+            ->groupStart()
+                ->where('quantity >', 0)
+                ->orWhere('pack_small_qty >', 0)
+                ->orWhere('pack_medium_qty >', 0)
+                ->orWhere('pack_biggest_qty >', 0)
+            ->groupEnd()
             ->where('status !=', 'expired')
+            ->where('status !=', 'manually deleted')
             ->orderBy('name', 'ASC')
             ->findAll();
 
@@ -39,8 +46,14 @@ class PosController extends BaseController
     public function staffIndex()
     {
         $products = $this->productModel
-            ->where('quantity >', 0)
+            ->groupStart()
+                ->where('quantity >', 0)
+                ->orWhere('pack_small_qty >', 0)
+                ->orWhere('pack_medium_qty >', 0)
+                ->orWhere('pack_biggest_qty >', 0)
+            ->groupEnd()
             ->where('status !=', 'expired')
+            ->where('status !=', 'manually deleted')
             ->orderBy('name', 'ASC')
             ->findAll();
 
@@ -54,6 +67,7 @@ class PosController extends BaseController
 
         $items = $this->productModel
             ->where('status !=', 'expired')
+            ->where('status !=', 'manually deleted')
             ->orderBy('name', 'ASC')
             ->findAll();
 
@@ -66,8 +80,33 @@ class PosController extends BaseController
         $variationsMap = [];
 
         foreach ($products as $product) {
-            // Detect if this is a size variation (e.g., P001-S)
-            if (preg_match('/^(.*?)-([A-Za-z0-9]+)$/', $product['product_id'], $matches)) {
+            $isVariation = (isset($product['is_variation_child']) && $product['is_variation_child'] == 1);
+            $groupId = $product['variation_group_id'] ?? null;
+
+            if ($isVariation && $groupId) {
+                // Use explicit variation grouping
+                if (!isset($variationsMap[$groupId])) {
+                    $variationsMap[$groupId] = [
+                        'baseName' => preg_replace('/\s*(Small|Medium|Large|Extra Large|XL|XXL)$/i', '', $product['name']),
+                        'category' => $product['category'] ?? '',
+                        'image' => $product['image'] ?? 'default.jpg',
+                        'image_path' => $product['image_path'] ?? null,
+                        'expiration_date' => $product['expiration_date'] ?? null,
+                        'totalStock' => 0,
+                        'variations' => []
+                    ];
+                }
+                
+                $variationsMap[$groupId]['totalStock'] += (int) $product['quantity'];
+                $variationsMap[$groupId]['variations'][] = [
+                    'label' => $product['variation_label'] ?? $this->extractLabel($product['name']),
+                    'price' => (float) $product['price'],
+                    'stock' => (int) $product['quantity'],
+                    'product_id' => $product['product_id'],
+                    'id' => $product['id']
+                ];
+            } else if (preg_match('/^(.*?)-([A-Za-z0-9]+)$/', $product['product_id'], $matches)) {
+                // Fallback for legacy regex-based variations
                 $baseId = $matches[1];
                 $suffix = $matches[2];
                 
@@ -75,9 +114,6 @@ class PosController extends BaseController
                 $label = $suffix;
                 
                 if (preg_match('/^(.*?)\s+(Small|Medium|Large|Extra Large|XL|XXL)$/i', $product['name'], $nameMatches)) {
-                    $baseName = trim($nameMatches[1]);
-                    $label = trim($nameMatches[2]);
-                } elseif (preg_match('/^(.*?)\s*\((Small|Medium|Large|Extra Large|XL|XXL)\)$/i', $product['name'], $nameMatches)) {
                     $baseName = trim($nameMatches[1]);
                     $label = trim($nameMatches[2]);
                 }
@@ -103,6 +139,7 @@ class PosController extends BaseController
                     'id' => $product['id']
                 ];
             } else {
+                // Regular item
                 $grouped[$product['product_id']] = $product;
             }
         }
@@ -124,6 +161,13 @@ class PosController extends BaseController
         }
 
         return array_values($grouped);
+    }
+
+    private function extractLabel($name) {
+        if (preg_match('/\s*(Small|Medium|Large|Extra Large|XL|XXL)$/i', $name, $matches)) {
+            return trim($matches[1]);
+        }
+        return 'Regular';
     }
 
 public function sell()

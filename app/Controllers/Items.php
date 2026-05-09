@@ -483,11 +483,11 @@ class Items extends BaseController
             $ext = $imageFile->getClientExtension();
             $newName = $base_product_id . '.' . $ext;
             // Create folder if not exists
-            if (!is_dir(FCPATH . 'uploads/products')) {
-                mkdir(FCPATH . 'uploads/products', 0777, true);
+            if (!is_dir(FCPATH . 'public/uploads/products')) {
+                mkdir(FCPATH . 'public/uploads/products', 0777, true);
             }
-            $imageFile->move(FCPATH . 'uploads/products', $newName, true);
-            $imagePath = 'uploads/products/' . $newName;
+            $imageFile->move(FCPATH . 'public/uploads/products', $newName, true);
+            $imagePath = 'public/uploads/products/' . $newName;
         }
 
         $enable_variations = $this->request->getPost('enable_variations');
@@ -549,6 +549,7 @@ class Items extends BaseController
                 'status' => 'active',
                 'image_path' => $imagePath,
                 'created_at' => date('Y-m-d H:i:s'),
+                'is_variation_child' => 0,
             ];
             if ($itemModel->insert($data) === false) {
                 $errorMsg = !empty($itemModel->errors()) ? implode(', ', $itemModel->errors()) : 'Database error (missing column or constraint)';

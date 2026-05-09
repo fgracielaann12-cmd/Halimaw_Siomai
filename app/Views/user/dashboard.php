@@ -1001,7 +1001,7 @@ if (!function_exists('getProductSKU')) {
                         <?php foreach ($displayRows as $vItem): ?>
                         <?php
                             $isLowStock = $vItem['qty'] <= 10;
-                            $priceDisplay = !empty($vItem['price']) ? '₱' . number_format((float)$vItem['price'], 2) : '<span class="text-muted">—</span>';
+                            $priceDisplay = !empty($vItem['price']) ? '&#8369;' . number_format((float)$vItem['price'], 2) : '<span class="text-muted">—</span>';
                         ?>
                         <tr class="text-center" data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>" data-id="<?= $item['id'] ?>">
                             <td><?= esc($item['product_id']) ?><?= $vItem['id_suffix'] ?></td>

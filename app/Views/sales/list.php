@@ -654,7 +654,7 @@
                         </div>
                         <div class="metric-content">
                             <div class="metric-title">Daily Sales</div>
-                            <div class="metric-value">₱<?= number_format($metricsData['daily']['value'] ?? 0, 2) ?></div>
+                            <div class="metric-value">&#8369;<?= number_format($metricsData['daily']['value'] ?? 0, 2) ?></div>
                             <div>
                                 <?php $gDaily = $metricsData['daily']['growth'] ?? 0; ?>
                                 <span class="metric-growth <?= $gDaily >= 0 ? 'positive' : 'negative' ?>">
@@ -676,7 +676,7 @@
                         </div>
                         <div class="metric-content">
                             <div class="metric-title">Weekly Sales</div>
-                            <div class="metric-value">₱<?= number_format($metricsData['weekly']['value'] ?? 0, 2) ?></div>
+                            <div class="metric-value">&#8369;<?= number_format($metricsData['weekly']['value'] ?? 0, 2) ?></div>
                             <div>
                                 <?php $gWeekly = $metricsData['weekly']['growth'] ?? 0; ?>
                                 <span class="metric-growth <?= $gWeekly >= 0 ? 'positive' : 'negative' ?>">
@@ -698,7 +698,7 @@
                         </div>
                         <div class="metric-content">
                             <div class="metric-title">Monthly Sales</div>
-                            <div class="metric-value">₱<?= number_format($metricsData['monthly']['value'] ?? 0, 2) ?></div>
+                            <div class="metric-value">&#8369;<?= number_format($metricsData['monthly']['value'] ?? 0, 2) ?></div>
                             <div>
                                 <?php $gMonthly = $metricsData['monthly']['growth'] ?? 0; ?>
                                 <span class="metric-growth <?= $gMonthly >= 0 ? 'positive' : 'negative' ?>">
@@ -850,8 +850,8 @@
                                 <td><?= esc($sale->user_name) ?></td>
                                 <td><?= esc($sale->pack ?? '-') ?></td>
                                 <td><?= esc($sale->quantity) ?></td>
-                                <td>₱<?= number_format($sale->price, 2) ?></td>
-                                <td class="total-price <?= $isRecent ? 'fw-bold text-success' : '' ?>">₱<?= number_format($sale->total, 2) ?></td>
+                                <td>&#8369;<?= number_format($sale->price, 2) ?></td>
+                                <td class="total-price <?= $isRecent ? 'fw-bold text-success' : '' ?>">&#8369;<?= number_format($sale->total, 2) ?></td>
                                 <td><?= esc($sale->created_at) ?></td>
                             </tr>
                             <?php endforeach; ?>
@@ -985,7 +985,7 @@
                 data: {
                     labels: trendDates.length ? trendDates : ['No Data'],
                     datasets: [{
-                        label: 'Total Sales (₱)',
+                        label: 'Total Sales (&#8369;)',
                         data: trendValues.length ? trendValues : [0],
                         backgroundColor: gradient,
                         borderColor: '#3b82f6',
@@ -999,10 +999,10 @@
                     responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        y: { beginAtZero: true, border: { display: false }, grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false }, ticks: { callback: value => '₱' + value.toLocaleString(), color: '#6b7280', font: { size: 11, family: "'Poppins', sans-serif" } } },
+                        y: { beginAtZero: true, border: { display: false }, grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false }, ticks: { callback: value => '&#8369;' + value.toLocaleString(), color: '#6b7280', font: { size: 11, family: "'Poppins', sans-serif" } } },
                         x: { grid: { display: false, drawBorder: false }, ticks: { color: '#6b7280', font: { size: 11, family: "'Poppins', sans-serif" } } }
                     },
-                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1f2937', titleFont: { size: 13, family: "'Poppins', sans-serif" }, bodyFont: { size: 13, family: "'Poppins', sans-serif", weight: 'bold' }, padding: 12, cornerRadius: 8, displayColors: false, callbacks: { label: function(context) { return '₱ ' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2}); } } } }
+                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1f2937', titleFont: { size: 13, family: "'Poppins', sans-serif" }, bodyFont: { size: 13, family: "'Poppins', sans-serif", weight: 'bold' }, padding: 12, cornerRadius: 8, displayColors: false, callbacks: { label: function(context) { return '&#8369; ' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2}); } } } }
                 }
             });
         }
@@ -1017,7 +1017,7 @@
                     labels: topItemsData.map(i => i.name),
                     datasets: [
                         {
-                            label: 'Total Sales (₱)',
+                            label: 'Total Sales (&#8369;)',
                             data: topItemsData.map(i => i.total_value),
                             backgroundColor: 'rgba(78, 115, 223, 0.8)',
                             borderColor: 'rgba(78, 115, 223, 1)',
@@ -1047,7 +1047,7 @@
                             beginAtZero: true, 
                             border: { display: false }, 
                             grid: { color: 'rgba(0,0,0,0.04)' },
-                            ticks: { callback: value => '₱' + value.toLocaleString() } 
+                            ticks: { callback: value => '&#8369;' + value.toLocaleString() } 
                         },
                         y1: {
                             type: 'linear',
@@ -1064,7 +1064,7 @@
                             callbacks: {
                                 label: function(context) { 
                                     if(context.datasetIndex === 0) {
-                                    return 'Total Sales: ₱ ' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2}); 
+                                    return 'Total Sales: &#8369; ' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2}); 
                                     } else {
                                         return 'Quantity: ' + context.parsed.y;
                                     }
@@ -1090,9 +1090,9 @@
                 mainChart.options.scales.y.ticks.callback = value => value.toLocaleString();
                 mainChart.options.plugins.tooltip.callbacks.label = function(context) { return context.parsed.y.toLocaleString(); };
             } else {
-                mainChart.data.datasets[0].label = 'Total Sales (₱)';
-                mainChart.options.scales.y.ticks.callback = value => '₱' + value.toLocaleString();
-                mainChart.options.plugins.tooltip.callbacks.label = function(context) { return '₱ ' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2}); };
+                mainChart.data.datasets[0].label = 'Total Sales (&#8369;)';
+                mainChart.options.scales.y.ticks.callback = value => '&#8369;' + value.toLocaleString();
+                mainChart.options.plugins.tooltip.callbacks.label = function(context) { return '&#8369; ' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2}); };
             }
             mainChart.update();
         };

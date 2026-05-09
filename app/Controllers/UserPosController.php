@@ -17,12 +17,87 @@ class UserPosController extends BaseController
     }
 
     public function index()
-{
-    $data['products'] = $this->productModel
-        ->where('status !=', 'expired')
-        ->findAll();
-    return view('pos/user', $data); // points to app/Views/pos/user.php
-}
+    {
+        $products = $this->productModel
+            ->where('status !=', 'expired')
+            ->findAll();
+
+        $data['products'] = $this->groupProductsForPos($products);
+        
+        return view('pos/user', $data);
+    }
+
+    private function groupProductsForPos($products)
+    {
+        $grouped = [];
+        $variationsMap = [];
+
+        foreach ($products as $product) {
+            $isSiomai = stripos($product['name'] ?? '', 'siomai') !== false;
+            
+            if ($isSiomai) {
+                $grouped[$product['product_id']] = $product;
+                continue;
+            }
+
+            if (preg_match('/^(.*?)-([A-Za-z0-9]+)$/', $product['product_id'], $matches)) {
+                $baseId = $matches[1];
+                $suffix = $matches[2];
+                
+                $baseName = $product['name'];
+                $label = $suffix;
+                
+                if (preg_match('/^(.*?)\s+(Small|Medium|Large|Extra Large|XL|XXL)$/i', $product['name'], $nameMatches)) {
+                    $baseName = trim($nameMatches[1]);
+                    $label = trim($nameMatches[2]);
+                } elseif (preg_match('/^(.*?)\s*\((Small|Medium|Large|Extra Large|XL|XXL)\)$/i', $product['name'], $nameMatches)) {
+                    $baseName = trim($nameMatches[1]);
+                    $label = trim($nameMatches[2]);
+                }
+
+                if (!isset($variationsMap[$baseId])) {
+                    $variationsMap[$baseId] = [
+                        'baseName' => $baseName,
+                        'category' => $product['category'] ?? '',
+                        'image' => $product['image'] ?? 'default.jpg',
+                        'image_path' => $product['image_path'] ?? null,
+                        'expiration_date' => $product['expiration_date'] ?? null,
+                        'totalStock' => 0,
+                        'variations' => []
+                    ];
+                }
+                
+                $variationsMap[$baseId]['totalStock'] += (int) $product['quantity'];
+                $variationsMap[$baseId]['variations'][] = [
+                    'label' => $label,
+                    'price' => (float) $product['price'],
+                    'stock' => (int) $product['quantity'],
+                    'product_id' => $product['product_id'],
+                    'id' => $product['id']
+                ];
+            } else {
+                $grouped[$product['product_id']] = $product;
+            }
+        }
+
+        foreach ($variationsMap as $baseId => $groupData) {
+            $grouped[$baseId] = [
+                'id' => $groupData['variations'][0]['id'] ?? 0, 
+                'product_id' => $baseId,
+                'name' => $groupData['baseName'],
+                'category' => $groupData['category'],
+                'image' => $groupData['image'],
+                'image_path' => $groupData['image_path'],
+                'expiration_date' => $groupData['expiration_date'],
+                'quantity' => $groupData['totalStock'],
+                'price' => $groupData['variations'][0]['price'] ?? 0,
+                'is_custom_variation' => true,
+                'custom_variations' => json_encode($groupData['variations'])
+            ];
+        }
+
+        return array_values($grouped);
+    }
 
 
     public function sell()

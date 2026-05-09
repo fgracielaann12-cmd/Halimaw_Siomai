@@ -1456,6 +1456,8 @@ if (!function_exists('getProductSKU')) {
                         $isLowStock = $stock <= 10;
                         $nameLower = strtolower($product['name']);
                         $price = $product['price'] ?? 0;
+                        
+                        $isCustomVar = !empty($product['is_custom_variation']);
 
                         // 🔥 SET CORRECT PRICE FOR KEY ITEMS
                         if (strpos($nameLower, 'burger patty') !== false) {
@@ -1467,16 +1469,25 @@ if (!function_exists('getProductSKU')) {
                         } elseif (strpos($nameLower, 'toyomansi') !== false) {
                             $price = 65.00;
                         }
+                        
+                        $itemType = 'other';
+                        if (strpos($nameLower, 'patty') !== false) {
+                            $itemType = 'patty';
+                        }
+                        if ($isCustomVar) {
+                            $itemType = 'custom_variation';
+                        }
                     ?>
                         <div class="pos-item-card <?= $stock <= 0 ? 'out-of-stock' : '' ?>"
                              onclick="openShopeeModal(this)"
                              data-name="<?= esc($product['name']) ?>"
-                             data-type="<?= (strpos($nameLower, 'patty') !== false) ? 'patty' : 'other' ?>"
+                             data-type="<?= $itemType ?>"
                              data-product-id="<?= $product['id'] ?>"
                              data-stock="<?= $stock ?>"
                              data-image="<?= $imgSrc ?>"
                              data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
-                             data-price="<?= $price ?>">
+                             data-price="<?= $price ?>"
+                             <?= $isCustomVar ? "data-variations='" . esc($product['custom_variations']) . "'" : "" ?>>
                             
                             <img src="<?= $imgSrc ?>" alt="<?= esc($product['name']) ?>">
                             <h6><?= esc($product['name']) ?></h6>
@@ -2431,6 +2442,54 @@ if (!function_exists('getProductSKU')) {
                     currentModalItem.stock = 0;
                     document.getElementById('smPiecesRow').style.display = 'none';
                 }
+            } else if (type === 'custom_variation') {
+                document.getElementById('smStockLabel').textContent = "Left";
+                varRow.style.display = 'flex';
+                
+                const customVars = JSON.parse(card.dataset.variations || '[]');
+                let first = true;
+                
+                for (const v of customVars) {
+                    const btn = document.createElement('button');
+                    btn.textContent = v.label;
+                    
+                    if(v.stock <= 0) {
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                        btn.disabled = true;
+                    }
+                    
+                    if (first && v.stock > 0) {
+                        btn.classList.add('active');
+                        currentModalItem.pack = v.label;
+                        currentModalItem.price = parseFloat(v.price);
+                        currentModalItem.stock = parseInt(v.stock);
+                        currentModalItem.packSize = 1;
+                        currentModalItem.productId = parseInt(v.id);
+                        document.getElementById('smStock').textContent = v.stock + " left";
+                        first = false;
+                    }
+                    
+                    btn.onclick = () => {
+                        varContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        currentModalItem.pack = v.label;
+                        currentModalItem.price = parseFloat(v.price);
+                        currentModalItem.stock = parseInt(v.stock);
+                        currentModalItem.packSize = 1;
+                        currentModalItem.productId = parseInt(v.id);
+                        document.getElementById('smStock').textContent = v.stock + " left";
+                        document.getElementById('smQtyInput').value = 1;
+                        updateSmPriceDisplay();
+                    };
+                    varContainer.appendChild(btn);
+                }
+                
+                if (first) {
+                    document.getElementById('smStock').textContent = "0 left";
+                    currentModalItem.stock = 0;
+                }
+                document.getElementById('smPiecesRow').style.display = 'none';
             } else {
                 document.getElementById('smStockLabel').textContent = "Left";
                 varRow.style.display = 'none';

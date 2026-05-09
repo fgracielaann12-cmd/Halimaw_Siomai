@@ -50,7 +50,7 @@ The system supports multiple user roles, managed through various authentication 
 ### 5.2. Point of Sale (POS)
 - **Controllers:** `PosController.php` (Admin & Staff), `UserPosController.php` (Users)
 - **Routes:** `/admin/pos`, `/admin/staff/pos`, `/user/pos`
-- **Features:** Processing of sales, cart management, and checkout. Records data into `TransactionModel` and `SalesModel`.
+- **Features:** Processing of sales, cart management, checkout, and **dynamic size variation grouping** (groups size variants like "Small", "Medium" under a single parent item card dynamically based on `product_id` suffix logic). Records data into `TransactionModel` and `SalesModel`.
 
 ### 5.3. Inventory Management
 - **Controller:** `Items.php`

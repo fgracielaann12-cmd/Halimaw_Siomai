@@ -151,6 +151,12 @@
             z-index: 10 !important;
         }
     </style>
+
+    <script>
+        // The user is on the login page. This sets a hard flag globally.
+        // Any cached dashboard page will immediately self-destruct if this is set.
+        localStorage.setItem('auth_status', 'logged_out');
+    </script>
 </head>
 <body>
   <div class="register-container">

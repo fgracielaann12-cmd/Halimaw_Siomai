@@ -17,6 +17,11 @@ class Auth extends Controller
 
     public function login()
     {
+        if (session()->get('isLoggedIn') || session()->get('logged_in')) {
+            return session()->get('role') === 'admin' 
+                ? redirect()->to('/admin/dashboard') 
+                : redirect()->to('/user/dashboard');
+        }
         return view('auth/login');
     }
 
@@ -54,7 +59,10 @@ class Auth extends Controller
 
     public function logout()
     {
-        session()->destroy();
+        $session = session();
+        $session->remove(['isLoggedIn', 'logged_in', 'user_id', 'username', 'email', 'role']);
+        $session->destroy();
+        $_SESSION = [];
         return redirect()->to('/login')->with('success', '👋 Logged out successfully.');
     }
 

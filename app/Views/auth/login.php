@@ -156,6 +156,12 @@
             background: #1e3c72;
         }
     </style>
+
+    <script>
+        // The user is on the login page. This sets a hard flag globally.
+        // Any cached dashboard page will immediately self-destruct if this is set.
+        localStorage.setItem('auth_status', 'logged_out');
+    </script>
 </head>
 
 <body>
@@ -203,7 +209,7 @@
                 <i class="bi bi-eye password-icon" id="togglePassword"></i>
             </div>
 
-            <button type="submit" class="submit-button">LOG IN</button>
+            <button type="submit" class="submit-button" onclick="localStorage.setItem('auth_status', 'active');">LOG IN</button>
         </form>
 
     </div>

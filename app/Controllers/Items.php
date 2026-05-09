@@ -452,10 +452,13 @@ class Items extends BaseController
         $rules = [
             'product_id' => 'required',
             'name' => 'required|min_length[2]',
-            'quantity' => 'required|numeric|greater_than[0]',
-            'price' => 'required|numeric|greater_than_equal_to[0]',
             'category' => 'required'
         ];
+
+        if ($this->request->getPost('enable_variations') !== '1') {
+            $rules['quantity'] = 'required|numeric|greater_than[0]';
+            $rules['price'] = 'required|numeric|greater_than_equal_to[0]';
+        }
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
@@ -464,30 +467,87 @@ class Items extends BaseController
         $category = $this->request->getPost('category');
         $subcategory = $this->request->getPost('subcategory');
         $expiration_date = $this->request->getPost('expiration_date');
+        $expiration_date = !empty($expiration_date) ? date('Y-m-d', strtotime($expiration_date)) : null;
 
         $auto_delete = 0;
         if (strtolower($category) === 'food' || strtolower($subcategory) === 'expirable') {
             $auto_delete = 1;
         }
 
-        $data = [
-            'product_id' => $this->request->getPost('product_id'),
-            'name' => $this->request->getPost('name'),
-            'quantity' => $this->request->getPost('quantity'),
-            'price' => $this->request->getPost('price') ?? 0.00,
-            'barcode' => '',
-            'expiration_date' => $expiration_date ?: null,
-            'category' => $category,
-            'subcategory' => $subcategory ?: null,
-            'auto_delete' => $auto_delete,
-            'status' => 'active',
-            'pack_small_qty' => $this->request->getPost('pack_small_qty') ?: 0,
-            'pack_medium_qty' => $this->request->getPost('pack_medium_qty') ?: 0,
-            'pack_biggest_qty' => $this->request->getPost('pack_biggest_qty') ?: 0,
-            'created_at' => date('Y-m-d H:i:s'),
-        ];
+        $base_product_id = $this->request->getPost('product_id');
+        $base_sku = $this->request->getPost('sku');
 
-        $itemModel->insert($data);
+        $imageFile = $this->request->getFile('product_image');
+        $imagePath = null;
+        if ($imageFile && $imageFile->isValid() && !$imageFile->hasMoved()) {
+            $ext = $imageFile->getClientExtension();
+            $newName = $base_product_id . '.' . $ext;
+            // Create folder if not exists
+            if (!is_dir(FCPATH . 'uploads/products')) {
+                mkdir(FCPATH . 'uploads/products', 0777, true);
+            }
+            $imageFile->move(FCPATH . 'uploads/products', $newName, true);
+            $imagePath = 'uploads/products/' . $newName;
+        }
+
+        $enable_variations = $this->request->getPost('enable_variations');
+
+        if ($enable_variations === '1') {
+            $labels = $this->request->getPost('var_label');
+            $suffixes = $this->request->getPost('var_sku_suffix');
+            $prices = $this->request->getPost('var_price');
+            $quantities = $this->request->getPost('var_quantity');
+
+            if ($labels) {
+                foreach ($labels as $index => $label) {
+                    $suffix = trim($suffixes[$index] ?? '');
+                    $var_product_id = $base_product_id . $suffix;
+                    $var_sku = $base_sku . $suffix;
+                    $var_price = trim($prices[$index] ?? '');
+                    if ($var_price === '') $var_price = $this->request->getPost('price') ?? 0.00;
+                    
+                    if ($itemModel->where('product_id', $var_product_id)->first()) {
+                        continue; // Skip if already exists
+                    }
+                    
+                    $data = [
+                        'product_id' => $var_product_id,
+                        'sku' => $var_sku,
+                        'name' => trim($this->request->getPost('name') . ' ' . $label),
+                        'quantity' => $quantities[$index] ?? 0,
+                        'price' => $var_price,
+                        'barcode' => '',
+                        'expiration_date' => $expiration_date,
+                        'category' => $category,
+                        'subcategory' => $subcategory ?: null,
+                        'auto_delete' => $auto_delete,
+                        'status' => 'active',
+                        'image_path' => $imagePath,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ];
+                    $itemModel->insert($data);
+                }
+            }
+        } else {
+            $qty = $this->request->getPost('quantity') ?? 0;
+            $data = [
+                'product_id' => $base_product_id,
+                'sku' => $base_sku,
+                'name' => $this->request->getPost('name'),
+                'quantity' => $qty,
+                'price' => $this->request->getPost('price') ?? 0.00,
+                'barcode' => '',
+                'expiration_date' => $expiration_date,
+                'category' => $category,
+                'subcategory' => $subcategory ?: null,
+                'auto_delete' => $auto_delete,
+                'status' => 'active',
+                'image_path' => $imagePath,
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+            $itemModel->insert($data);
+        }
+
         return redirect()->to('/items')->with('success', 'Item added successfully!');
     }
 
@@ -531,20 +591,24 @@ class Items extends BaseController
         $errors = [];
 
         foreach ($rows as $index => $row) {
-            if (count($row) < 4) {
-                $errors[] = "Row " . ($index + 2) . ": Not enough columns (expected at least 4).";
-                continue;
-            }
-
             $product_id = trim($row[0] ?? '');
             $name = trim($row[1] ?? '');
-            $quantity = (int) ($row[2] ?? 0);
-            $expiration_date = trim($row[3] ?? '');
-            $category = trim($row[4] ?? '');
-            $subcategory = trim($row[5] ?? '');
+            $sku = trim($row[2] ?? '');
+            
+            $priceStr = trim($row[3] ?? '');
+            $priceStr = str_replace(['₱', ',', ' '], '', $priceStr);
+            $price = (float) $priceStr;
+            
+            $quantityStr = trim($row[4] ?? '');
+            $quantity = $quantityStr === '' ? 0 : (int) $quantityStr;
+            
+            $category = trim($row[5] ?? '');
+            $expiration_date = trim($row[6] ?? '');
+            $auto_delete_val = trim($row[7] ?? '0');
+            $image_path = trim($row[8] ?? '');
 
-            if ($product_id === '' || $name === '' || $quantity <= 0) {
-                $errors[] = "Row " . ($index + 2) . ": Missing Product ID, Name, or invalid Quantity.";
+            if ($product_id === '' || $name === '' || $quantityStr === '') {
+                $errors[] = "Row " . ($index + 2) . ": Missing Product ID, Name, or Quantity.";
                 continue;
             }
 
@@ -553,16 +617,7 @@ class Items extends BaseController
                 continue;
             }
 
-            $auto_delete = 0;
-            if (strtolower($category) === 'food') {
-                $auto_delete = 1;
-            } elseif (strtolower($category) === 'non-food' && strtolower($subcategory) === 'expirable') {
-                $auto_delete = 1;
-            }
-
-            if (strtolower($category) === 'non-food' && strtolower($subcategory) === 'non-expirable') {
-                $expiration_date = null;
-            }
+            $auto_delete = ($auto_delete_val == '1' || strtolower($auto_delete_val) == 'yes') ? 1 : 0;
 
             if ($expiration_date !== '' && !strtotime($expiration_date)) {
                 $errors[] = "Row " . ($index + 2) . ": Invalid expiration date format.";
@@ -572,14 +627,16 @@ class Items extends BaseController
             $data = [
                 'product_id' => $product_id,
                 'name' => $name,
+                'sku' => $sku,
                 'quantity' => $quantity,
-                'price' => 0.00,
+                'price' => $price,
                 'barcode' => '',
                 'expiration_date' => $expiration_date ?: null,
                 'category' => $category,
-                'subcategory' => in_array(strtolower($subcategory), ['expirable', 'non-expirable']) ? $subcategory : null,
+                'subcategory' => null,
                 'auto_delete' => $auto_delete,
                 'status' => 'active',
+                'image_path' => $image_path ?: null,
                 'created_at' => date('Y-m-d H:i:s'),
             ];
 
@@ -623,8 +680,8 @@ class Items extends BaseController
         $rules = [
             'product_id' => 'required',
             'name' => 'required|min_length[2]',
-            'quantity' => 'required|numeric|greater_than[0]',
-            'price' => 'required|decimal|greater_than_equal_to[0]',
+            'quantity' => 'required|numeric|greater_than_equal_to[0]',
+            'price' => 'required|numeric|greater_than_equal_to[0]',
             'category' => 'required',
         ];
 
@@ -641,23 +698,64 @@ class Items extends BaseController
         $logModel = new ItemLogModel();
         $oldData = $model->find($id);
 
+        $size = $this->request->getPost('size') ?: $this->request->getGet('size');
+
+        $prodId = $this->request->getPost('product_id');
+        $name = $this->request->getPost('name');
+
+        if ($size) {
+            $prodId = preg_replace('/-S|-M|-L$/i', '', $prodId);
+            $name = preg_replace('/\s*\(Small\)|\s*\(Medium\)|\s*\(Large\)$/i', '', $name);
+        }
+
         $newData = [
-            'product_id' => $this->request->getPost('product_id'),
-            'name' => $this->request->getPost('name'),
-            'quantity' => $this->request->getPost('quantity'),
-            'price' => $this->request->getPost('price'),
+            'product_id' => $prodId,
+            'name' => $name,
             'expiration_date' => $this->request->getPost('expiration_date') ?: null,
             'barcode' => $this->request->getPost('barcode'),
             'category' => $this->request->getPost('category'),
             'subcategory' => $this->request->getPost('subcategory') ?: null,
             'auto_delete' => $this->request->getPost('auto_delete') ? 1 : 0,
-            'pack_small_qty' => $this->request->getPost('pack_small_qty') ?: 0,
-            'pack_small_price' => $this->request->getPost('pack_small_price') ?: 115,
-            'pack_medium_qty' => $this->request->getPost('pack_medium_qty') ?: 0,
-            'pack_medium_price' => $this->request->getPost('pack_medium_price') ?: 185,
-            'pack_biggest_qty' => $this->request->getPost('pack_biggest_qty') ?: 0,
-            'pack_biggest_price' => $this->request->getPost('pack_biggest_price') ?: 335,
         ];
+
+        if ($size) {
+            $qty = $this->request->getPost('quantity');
+            $prc = $this->request->getPost('price');
+
+            if ($size === 'small') {
+                $newData['pack_small_qty'] = $qty;
+                $newData['pack_small_price'] = $prc;
+                $newData['pack_medium_qty'] = $oldData['pack_medium_qty'] ?? 0;
+                $newData['pack_medium_price'] = $oldData['pack_medium_price'] ?? 185;
+                $newData['pack_biggest_qty'] = $oldData['pack_biggest_qty'] ?? 0;
+                $newData['pack_biggest_price'] = $oldData['pack_biggest_price'] ?? 335;
+            } elseif ($size === 'medium') {
+                $newData['pack_medium_qty'] = $qty;
+                $newData['pack_medium_price'] = $prc;
+                $newData['pack_small_qty'] = $oldData['pack_small_qty'] ?? 0;
+                $newData['pack_small_price'] = $oldData['pack_small_price'] ?? 115;
+                $newData['pack_biggest_qty'] = $oldData['pack_biggest_qty'] ?? 0;
+                $newData['pack_biggest_price'] = $oldData['pack_biggest_price'] ?? 335;
+            } elseif ($size === 'large') {
+                $newData['pack_biggest_qty'] = $qty;
+                $newData['pack_biggest_price'] = $prc;
+                $newData['pack_small_qty'] = $oldData['pack_small_qty'] ?? 0;
+                $newData['pack_small_price'] = $oldData['pack_small_price'] ?? 115;
+                $newData['pack_medium_qty'] = $oldData['pack_medium_qty'] ?? 0;
+                $newData['pack_medium_price'] = $oldData['pack_medium_price'] ?? 185;
+            }
+            $newData['quantity'] = $oldData['quantity'] ?? 0;
+            $newData['price'] = $oldData['price'] ?? 0.00;
+        } else {
+            $newData['quantity'] = $this->request->getPost('quantity');
+            $newData['price'] = $this->request->getPost('price');
+            $newData['pack_small_qty'] = $this->request->getPost('pack_small_qty') ?: 0;
+            $newData['pack_small_price'] = $this->request->getPost('pack_small_price') ?: 115;
+            $newData['pack_medium_qty'] = $this->request->getPost('pack_medium_qty') ?: 0;
+            $newData['pack_medium_price'] = $this->request->getPost('pack_medium_price') ?: 185;
+            $newData['pack_biggest_qty'] = $this->request->getPost('pack_biggest_qty') ?: 0;
+            $newData['pack_biggest_price'] = $this->request->getPost('pack_biggest_price') ?: 335;
+        }
 
         $model->update($id, $newData);
 

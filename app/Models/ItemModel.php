@@ -10,6 +10,8 @@ class ItemModel extends Model
     protected $allowedFields = [
         'product_id',
         'name',
+        'sku',
+        'image_path',
         'quantity',
         'price',
         'expiration_date',

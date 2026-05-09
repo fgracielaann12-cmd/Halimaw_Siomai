@@ -74,7 +74,7 @@
             margin: 0;
             padding: 0;
             display: flex;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* SIDEBAR */
@@ -198,6 +198,9 @@
 
         /* TOP NAVBAR */
         .top-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
             background: white;
             height: 60px;
             padding: 0 20px;

@@ -1,4 +1,4 @@
-﻿<?php 
+<?php 
 $currentPath = uri_string(); 
 
 function isActive($paths) {
@@ -94,7 +94,7 @@ function isActive($paths) {
             margin: 0;
             padding: 0;
             display: flex;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* SIDEBAR */

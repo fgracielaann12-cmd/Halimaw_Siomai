@@ -106,7 +106,7 @@ public function sell()
                 throw new \Exception("Incomplete cart item data");
             }
 
-            $productId = (int) $item['product_id'];
+            $productIdRaw = $item['product_id'];
             $displayQty = (int) $item['qty'];
             $price = (float) $item['price'];
             $type = $item['type'] ?? 'other';
@@ -115,10 +115,19 @@ public function sell()
                 $price = $price * 1.12;
             }
 
-            $product = $itemModel->find($productId);
-            if (!$product) {
-                throw new \Exception("Product ID {$productId} not found");
+            $product = null;
+            if (is_numeric($productIdRaw)) {
+                $product = $itemModel->find((int)$productIdRaw);
             }
+            if (!$product) {
+                $product = $itemModel->where('product_id', $productIdRaw)->first();
+            }
+
+            if (!$product) {
+                throw new \Exception("Product ID {$productIdRaw} not found");
+            }
+
+            $realId = $product['id'];
 
             // 🔑 CALCULATE REAL QUANTITY TO DEDUCT AND WHICH COLUMN TO DEDUCT FROM
             $deductQty = $displayQty;
@@ -153,7 +162,7 @@ public function sell()
             $saleData = [
                 'transaction_id' => $transactionId,
                 'user_id'        => $userId,
-                'product_id'     => $productId,
+                'product_id'     => $realId,
                 'quantity'       => $displayQty, // This now reflects raw count of packs!
                 'pack'           => $item['pack'] ?? ($type === 'patty' ? '6pcs' : null),
                 'price'          => $price,
@@ -164,16 +173,16 @@ public function sell()
             ];
 
             if (!$this->salesModel->insert($saleData)) {
-                throw new \Exception("Failed to record sale for item: " . ($product['name'] ?? $productId));
+                throw new \Exception("Failed to record sale for item: " . ($product['name'] ?? $productIdRaw));
             }
 
             // Deduct from inventory
             $newStock = $currentStock - $deductQty;
             
-            log_message('info', "Deducting Stock: Product ID {$productId}, Name: {$product['name']}, Column: {$stockColumn}, Old: {$currentStock}, Deduct: {$deductQty}, New: {$newStock}");
+            log_message('info', "Deducting Stock: Product ID {$realId} (Raw: {$productIdRaw}), Name: {$product['name']}, Column: {$stockColumn}, Old: {$currentStock}, Deduct: {$deductQty}, New: {$newStock}");
 
-            if (!$itemModel->update($productId, [$stockColumn => $newStock])) {
-                throw new \Exception("Failed to update inventory for: " . ($product['name'] ?? $productId));
+            if (!$itemModel->update($realId, [$stockColumn => $newStock])) {
+                throw new \Exception("Failed to update inventory for: " . ($product['name'] ?? $productIdRaw));
             }
         }
 

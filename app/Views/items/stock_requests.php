@@ -75,7 +75,7 @@
             margin: 0;
             padding: 0;
             display: flex;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* SIDEBAR */

@@ -113,7 +113,7 @@ if (!function_exists('getProductSKU')) {
             margin: 0;
             padding: 0;
             display: flex;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* SIDEBAR — MATCHES DASHBOARD EXACTLY */

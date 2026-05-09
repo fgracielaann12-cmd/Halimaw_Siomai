@@ -910,6 +910,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Run on initial page load to ensure correct state
+    enableVariations.checked = false;
+    variationsSection.style.display = 'none';
     toggleMainFormFieldsRequired();
 });
 </script>

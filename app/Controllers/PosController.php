@@ -66,14 +66,6 @@ class PosController extends BaseController
         $variationsMap = [];
 
         foreach ($products as $product) {
-            $isSiomai = stripos($product['name'] ?? '', 'siomai') !== false;
-            
-            // Siomai already has its own pack logic handling, skip grouping them here
-            if ($isSiomai) {
-                $grouped[$product['product_id']] = $product;
-                continue;
-            }
-
             // Detect if this is a size variation (e.g., P001-S)
             if (preg_match('/^(.*?)-([A-Za-z0-9]+)$/', $product['product_id'], $matches)) {
                 $baseId = $matches[1];

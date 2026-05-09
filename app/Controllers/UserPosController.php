@@ -33,13 +33,8 @@ class UserPosController extends BaseController
         $variationsMap = [];
 
         foreach ($products as $product) {
-            $isSiomai = stripos($product['name'] ?? '', 'siomai') !== false;
+            // Remove the isSiomai skip to allow grouping siomai variations
             
-            if ($isSiomai) {
-                $grouped[$product['product_id']] = $product;
-                continue;
-            }
-
             if (preg_match('/^(.*?)-([A-Za-z0-9]+)$/', $product['product_id'], $matches)) {
                 $baseId = $matches[1];
                 $suffix = $matches[2];
@@ -116,7 +111,14 @@ class UserPosController extends BaseController
 
         try {
             foreach ($cart as $item) {
-                $product = $this->productModel->like('name', $item['name'], 'both')->first();
+                // Use ID if available, otherwise fallback to name-based lookup
+                $product = null;
+                if (isset($item['product_id']) && is_numeric($item['product_id'])) {
+                    $product = $this->productModel->find((int)$item['product_id']);
+                }
+                if (!$product) {
+                    $product = $this->productModel->like('name', $item['name'], 'both')->first();
+                }
 
                 if (!$product) {
                     throw new \Exception("Product not found: ".$item['name']);

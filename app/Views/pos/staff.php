@@ -1417,7 +1417,12 @@ if (!function_exists('getProductSKU')) {
                         if (($product['quantity'] ?? 0) <= 0) continue;
 
                         $nameLower = strtolower($product['name']);
-                        $isSiomai = strpos($nameLower, 'siomai') !== false;
+                        $isCustomVar = !empty($product['is_custom_variation']);
+                        $hasPackPrices = (!empty($product['pack_small_price']) && $product['pack_small_price'] > 0);
+                        
+                        // Fix Bug 1: Only show siomai pack options if it actually has pack data (Legacy system)
+                        // Fix Bug 2: Move grouped variations to 'other' to use the custom_variation modal
+                        $isSiomai = (strpos($nameLower, 'siomai') !== false && $hasPackPrices && !$isCustomVar);
 
                         if ($isSiomai) {
                             $siomaiItems[] = $product;

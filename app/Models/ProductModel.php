@@ -23,6 +23,9 @@ class ProductModel extends Model
         'price',              // ← For non-siomai items
         'price_12',           // ← For siomai packs
         'price_20',
-        'price_40'
+        'price_40',
+        'is_variation_child',
+        'variation_group_id',
+        'variation_label'
     ];
 }

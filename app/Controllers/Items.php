@@ -524,6 +524,8 @@ class Items extends BaseController
                         'status' => 'active',
                         'image_path' => $imagePath,
                         'created_at' => date('Y-m-d H:i:s'),
+                        'is_variation_child' => 1,
+                        'variation_group_id' => $base_product_id
                     ];
                     if ($itemModel->insert($data) === false) {
                         $errorMsg = !empty($itemModel->errors()) ? implode(', ', $itemModel->errors()) : 'Database error (missing column or constraint)';

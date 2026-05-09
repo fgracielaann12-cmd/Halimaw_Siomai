@@ -352,11 +352,14 @@ if (!function_exists('getProductSKU')) {
             flex-shrink: 0;
             transition: all 0.2s;
             position: fixed;
-            top: 15px;
+            top: 9px;
             left: 15px;
             z-index: 99999;
         }
 
+        .sidebar-overlay.active ~ .mobile-menu-toggle {
+            display: none !important;
+        }
         .mobile-menu-toggle:hover {
             background: var(--sidebar-hover);
         }

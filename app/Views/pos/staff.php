@@ -1429,7 +1429,7 @@ if (!function_exists('getProductSKU')) {
                     // Display siomai items first
                     foreach ($siomaiItems as $product):
                         $nameLower = strtolower($product['name']);
-                        $img = $product['image'] ?? 'default.jpg';
+                        $imgSrc = !empty($product['image_path']) ? base_url($product['image_path']) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
                         $stock = (int) ($product['quantity'] ?? 0);
                         $isLowStock = $stock <= 10;
                         ?>
@@ -1439,19 +1439,19 @@ if (!function_exists('getProductSKU')) {
                              data-type="siomai"
                              data-product-id="<?= $product['id'] ?>"
                              data-stock="<?= $stock ?>"
-                             data-image="<?= base_url('public/Images/' . $img) ?>"
+                             data-image="<?= $imgSrc ?>"
                              data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
                              data-prices='{"Small Pack":<?=($product['pack_small_price'] ?? 115)?>,"Medium Pack":<?=($product['pack_medium_price'] ?? 185)?>,"Large Pack":<?=($product['pack_biggest_price'] ?? 335)?>}'
                              data-packstocks='{"Small Pack":<?=($product['pack_small_qty'] ?? 0)?>,"Medium Pack":<?=($product['pack_medium_qty'] ?? 0)?>,"Large Pack":<?=($product['pack_biggest_qty'] ?? 0)?>}'>
                             
-                            <img src="<?= base_url('public/Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
+                            <img src="<?= $imgSrc ?>" alt="<?= esc($product['name']) ?>">
                             <h6><?= esc($product['name']) ?></h6>
                         </div>
                     <?php endforeach; ?>
 
                     <!-- Then display other items (no dropdowns) -->
                     <?php foreach ($otherItems as $product):
-                        $img = $product['image'] ?? 'default.jpg';
+                        $imgSrc = !empty($product['image_path']) ? base_url($product['image_path']) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
                         $stock = (int) ($product['quantity'] ?? 0);
                         $isLowStock = $stock <= 10;
                         $nameLower = strtolower($product['name']);
@@ -1474,11 +1474,11 @@ if (!function_exists('getProductSKU')) {
                              data-type="<?= (strpos($nameLower, 'patty') !== false) ? 'patty' : 'other' ?>"
                              data-product-id="<?= $product['id'] ?>"
                              data-stock="<?= $stock ?>"
-                             data-image="<?= base_url('public/Images/' . $img) ?>"
+                             data-image="<?= $imgSrc ?>"
                              data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
                              data-price="<?= $price ?>">
                             
-                            <img src="<?= base_url('public/Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
+                            <img src="<?= $imgSrc ?>" alt="<?= esc($product['name']) ?>">
                             <h6><?= esc($product['name']) ?></h6>
                         </div>
                     <?php endforeach; ?>

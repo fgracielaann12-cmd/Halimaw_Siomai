@@ -61,6 +61,7 @@ The system supports multiple user roles, managed through various authentication 
   - Tracking of expired and expiring-soon items.
   - Logging of item activities.
   - CSV Export capabilities (`export-logs-csv`, `export-sales-csv`).
+  - **Item Variation Support:** Tracks child variations (e.g., sizes or sub-options) using `is_variation_child` (boolean), `variation_group_id` (parent ID reference), and `variation_label` (human-readable label).
 
 ### 5.4. Sales and Transactions
 - **Controller:** `SalesController.php`

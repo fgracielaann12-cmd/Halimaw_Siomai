@@ -111,9 +111,10 @@ class ReturnsController extends BaseController
         if ($condition === 'RESTOCKABLE') {
             // Restock logic
             $qtyCol = 'quantity';
-            if ($variation === 'small') $qtyCol = 'pack_small_qty';
-            if ($variation === 'medium') $qtyCol = 'pack_medium_qty';
-            if ($variation === 'large') $qtyCol = 'pack_biggest_qty';
+            $varLower = strtolower($variation ?? '');
+            if (strpos($varLower, 'small') !== false) $qtyCol = 'pack_small_qty';
+            if (strpos($varLower, 'medium') !== false) $qtyCol = 'pack_medium_qty';
+            if (strpos($varLower, 'large') !== false) $qtyCol = 'pack_biggest_qty';
 
             $newQty = $item[$qtyCol] + $quantity;
             $this->itemModel->update($item['id'], [$qtyCol => $newQty]);
@@ -130,9 +131,10 @@ class ReturnsController extends BaseController
             $actionTaken = 'PULL_OUT';
             
             $unitCost = $item['price'];
-            if ($variation === 'small' && isset($item['pack_small_price'])) $unitCost = $item['pack_small_price'];
-            if ($variation === 'medium' && isset($item['pack_medium_price'])) $unitCost = $item['pack_medium_price'];
-            if ($variation === 'large' && isset($item['pack_biggest_price'])) $unitCost = $item['pack_biggest_price'];
+            $varLower = strtolower($variation ?? '');
+            if (strpos($varLower, 'small') !== false && isset($item['pack_small_price'])) $unitCost = $item['pack_small_price'];
+            if (strpos($varLower, 'medium') !== false && isset($item['pack_medium_price'])) $unitCost = $item['pack_medium_price'];
+            if (strpos($varLower, 'large') !== false && isset($item['pack_biggest_price'])) $unitCost = $item['pack_biggest_price'];
 
             $totalLoss = $unitCost * $quantity;
 

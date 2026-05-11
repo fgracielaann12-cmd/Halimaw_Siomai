@@ -446,7 +446,7 @@ class Items extends BaseController
         $product_id = $this->request->getPost('product_id');
 
         if ($itemModel->where('product_id', $product_id)->first()) {
-            return redirect()->back()->with('error', 'Product ID already exists. Please use a unique one.');
+            return redirect()->to('/items/add')->with('error', 'Product ID already exists. Please use a unique one.');
         }
 
         $rules = [
@@ -461,7 +461,7 @@ class Items extends BaseController
         }
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->to('/items/add')->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $category = $this->request->getPost('category');
@@ -529,7 +529,7 @@ class Items extends BaseController
                     ];
                     if ($itemModel->insert($data) === false) {
                         $errorMsg = !empty($itemModel->errors()) ? implode(', ', $itemModel->errors()) : 'Database error (missing column or constraint)';
-                        return redirect()->back()->withInput()->with('error', 'Failed to add variation: ' . $errorMsg);
+                        return redirect()->to('/items/add')->withInput()->with('error', 'Failed to add variation: ' . $errorMsg);
                     }
                 }
             }
@@ -553,7 +553,7 @@ class Items extends BaseController
             ];
             if ($itemModel->insert($data) === false) {
                 $errorMsg = !empty($itemModel->errors()) ? implode(', ', $itemModel->errors()) : 'Database error (missing column or constraint)';
-                return redirect()->back()->withInput()->with('error', 'Failed to add item: ' . $errorMsg);
+                return redirect()->to('/items/add')->withInput()->with('error', 'Failed to add item: ' . $errorMsg);
             }
         }
 
@@ -568,11 +568,11 @@ class Items extends BaseController
         $file = $this->request->getFile('bulk_file');
 
         if (!$file || !$file->isValid() || $file->hasMoved()) {
-            return redirect()->back()->with('error', 'No valid CSV file uploaded.');
+            return redirect()->to('/items/add')->with('error', 'No valid CSV file uploaded.');
         }
 
         if ($file->getClientExtension() !== 'csv') {
-            return redirect()->back()->with('error', 'Only CSV files are allowed for bulk upload.');
+            return redirect()->to('/items/add')->with('error', 'Only CSV files are allowed for bulk upload.');
         }
 
         $path = $file->getTempName();
@@ -587,7 +587,7 @@ class Items extends BaseController
         }
 
         if (empty($rows)) {
-            return redirect()->back()->with('error', 'Uploaded file is empty.');
+            return redirect()->to('/items/add')->with('error', 'Uploaded file is empty.');
         }
 
         $header = $rows[0];
@@ -666,7 +666,7 @@ class Items extends BaseController
         }
 
         return !empty($errors)
-            ? redirect()->back()->with('error', $msg)
+            ? redirect()->to('/items/add')->with('error', $msg)
             : redirect()->to('/items')->with('success', $msg);
     }
 
@@ -700,7 +700,7 @@ class Items extends BaseController
         }
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->to('/items/edit/' . $id)->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $model = new ItemModel();

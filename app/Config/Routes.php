@@ -49,6 +49,9 @@ $routes->group('user', function ($routes) {
     // Pull-Outs
     $routes->post('submit-pull-out', 'PullOutController::submit');
 
+    // Customer Returns
+    $routes->post('submit-return', 'ReturnsController::submit');
+
     // FAQs
     $routes->get('dashboard/faqs', 'UserDashboard::faqs');
     $routes->get('get-faqs', 'UserRequestController::getFAQs');
@@ -132,6 +135,10 @@ $routes->group('items', function ($routes) {
 
     // ✅ BULK UPLOAD ROUTE (ADDED)
     $routes->post('bulk-upload', 'Items::bulkUpload');
+
+    // 🔄 Fallback for missing referer issues on failed form submits
+    $routes->get('store', function() { return redirect()->to('/items/add'); });
+    $routes->get('bulk-upload', function() { return redirect()->to('/items/add'); });
 
     // Export routes
     $routes->get('export-sales-csv', 'Items::exportSalesCsv');

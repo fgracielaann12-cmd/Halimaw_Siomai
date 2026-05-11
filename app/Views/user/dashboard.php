@@ -1633,10 +1633,11 @@ if (!function_exists('getProductSKU')) {
                             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
                         },
                         body: new URLSearchParams({
-                            product_id: itemId,
-                            pull_out_reason: reason,
+                            item_id: itemId,
+                            variation: variation || "",
+                            reason: reason,
                             quantity: quantity,
-                            reason_note: note
+                            note: note
                         })
                     });
                     const result = await response.json();

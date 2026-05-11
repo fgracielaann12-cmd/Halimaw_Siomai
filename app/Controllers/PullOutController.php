@@ -28,12 +28,12 @@ class PullOutController extends BaseController
         $variation = $request->getPost('variation');
         $quantity  = (int)$request->getPost('quantity');
         $reason    = $request->getPost('reason');
-        $category  = $request->getPost('category');
+        $category  = $request->getPost('category') ?? 'Food Waste';
         $note      = $request->getPost('note');
         $userId    = session()->get('user_id');
 
-        if (!$itemId || !$quantity || !$reason || !$category) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Item, Quantity, Reason, and Category are required.']);
+        if (!$itemId || !$quantity || !$reason) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Item, Quantity, and Reason are required.']);
         }
 
         $item = $this->itemModel->find($itemId);
@@ -43,9 +43,10 @@ class PullOutController extends BaseController
 
         // Determine unit cost
         $unitCost = $item['price'];
-        if ($variation === 'small' && isset($item['pack_small_price'])) $unitCost = $item['pack_small_price'];
-        if ($variation === 'medium' && isset($item['pack_medium_price'])) $unitCost = $item['pack_medium_price'];
-        if ($variation === 'large' && isset($item['pack_biggest_price'])) $unitCost = $item['pack_biggest_price'];
+        $varLower = strtolower($variation ?? '');
+        if ((strpos($varLower, 'small') !== false) && isset($item['pack_small_price'])) $unitCost = $item['pack_small_price'];
+        if ((strpos($varLower, 'medium') !== false) && isset($item['pack_medium_price'])) $unitCost = $item['pack_medium_price'];
+        if ((strpos($varLower, 'large') !== false) && isset($item['pack_biggest_price'])) $unitCost = $item['pack_biggest_price'];
 
         $totalLoss = $unitCost * $quantity;
 

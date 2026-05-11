@@ -795,7 +795,7 @@ function getSku($name, $variation = '') {
             <div class="col-6 col-md-3">
                 <div class="summary-card text-center border-start border-primary border-4">
                     <h6 class="text-muted">Total Stock Value</h6>
-                    <h3 class="fw-bold text-primary" id="totalStockValue">&#8369;<?= number_format($totalValue, 2) ?></h3>
+                    <h3 class="fw-bold text-primary" id="totalStockValue">₱<?= number_format($totalValue, 2) ?></h3>
                 </div>
             </div>
             <div class="col-6 col-md-3">
@@ -952,7 +952,7 @@ document.addEventListener("DOMContentLoaded", () => {
             labels: topSalesData.map(i => i.name),
             datasets: [
                 {
-                    label: 'Total Sales (&#8369;)',
+                    label: 'Total Sales (₱)',
                     data: topSalesData.map(i => i.total_value),
                     backgroundColor: 'rgba(78, 115, 223, 0.8)',
                     borderColor: 'rgba(78, 115, 223, 1)',
@@ -970,7 +970,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     display: true,
                     position: 'left',
                     beginAtZero: true, 
-                    ticks: { callback: value => '&#8369;' + value.toLocaleString() } 
+                    ticks: { callback: value => '₱' + value.toLocaleString() } 
                 },
                 x: { grid: { display: false } }
             },
@@ -979,7 +979,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 tooltip: {
                     callbacks: {
                         label: function(context) { 
-                            return 'Sales: &#8369; ' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2}); 
+                            return 'Sales: ₱ ' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2}); 
                         }
                     }
                 }
@@ -996,7 +996,7 @@ document.addEventListener("DOMContentLoaded", () => {
             itemsData = data.items;
 
             // Update Total Value
-            document.getElementById('totalStockValue').innerText = '&#8369;' + parseFloat(data.totalValue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('totalStockValue').innerText = '₱' + parseFloat(data.totalValue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             document.getElementById('totalItems').innerText = itemsData.length;
 
             let lowStockCount = 0;

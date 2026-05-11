@@ -478,7 +478,7 @@
                                             <span class="text-muted">No</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="text-end fw-bold text-success">&#8369;<?= number_format($txn->total_amount, 2) ?></td>
+                                    <td class="text-end fw-bold text-success">₱<?= number_format($txn->total_amount, 2) ?></td>
                                     <td class="pe-3 text-end text-muted"><?= date('M d, Y h:i A', strtotime($txn->created_at)) ?></td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -595,8 +595,8 @@
                                 <td class="ps-4 fw-bold text-dark">${item.product_name || 'Unknown Product'}</td>
                                 <td>${pack}</td>
                                 <td>${item.quantity}</td>
-                                <td>&#8369;${parseFloat(item.price).toFixed(2)}</td>
-                                <td class="text-end pe-4 fw-bold text-success">&#8369;${parseFloat(item.total).toFixed(2)}</td>
+                                <td>₱${parseFloat(item.price).toFixed(2)}</td>
+                                <td class="text-end pe-4 fw-bold text-success">₱${parseFloat(item.total).toFixed(2)}</td>
                             </tr>
                         `;
                     });

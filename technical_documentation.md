@@ -6,7 +6,7 @@
 - **Framework:** CodeIgniter 4
 - **Language:** PHP 8.1+
 - **Database:** MySQL / MariaDB (MySQLi driver)
-- **Frontend Stack:** HTML, CSS (Vanilla), JavaScript, Bootstrap (assumed based on standard CI4 apps), PHP (Views)
+- **Frontend Stack:** HTML, CSS (Vanilla), JavaScript, Bootstrap 5.3, Bootstrap Icons
 - **Key Libraries:** `phpoffice/phpspreadsheet` (for CSV/Excel exports)
 
 ## 2. System Architecture
@@ -37,52 +37,62 @@ The system also includes a `Setup` controller (`/setup-db`) for database synchro
 
 The system supports multiple user roles, managed through various authentication controllers and route groups:
 
-1. **Admin:** Full access to the system. Can manage inventory, view all sales, handle stock requests, manage users, and access the Admin POS.
-2. **Staff:** A sub-group of Admin. Has access to the Staff POS, customer returns submission, and specific dashboards.
-3. **User (Franchisee / Regular Staff):** Has limited access. Can view their dashboard, request stock adjustments, submit pull-outs, and use the User POS.
+1. **Admin:** Full access to the system. Can manage inventory, view all sales, handle stock requests, manage users/staff, and access the Admin POS.
+2. **Staff:** Managed via the `UserManagement` controller. Has access to the Staff POS, customer returns submission, and a dedicated staff-level dashboard. Terminologically, "Staff" is the primary operational role created by Admins.
+3. **User (Franchisee / Regular Staff):** Has limited access. Primarily uses the `UserDashboard`. Can request stock adjustments, submit pull-outs, and use the User POS.
 
 ## 5. Core Modules & Features
 
-### 5.1. Authentication
+### 5.1. Authentication & Security
 - **Controllers:** `Auth.php`, `AdminAuth.php`, `UserAuth.php`
-- **Features:** Login, Registration, Logout, and Session Management.
+- **Filters:** `AuthFilter.php`, `AdminAuthFilter.php`, `RoleFilter.php`
+- **Features:** 
+    - Login, Registration, Logout, and Session Management.
+    - **Back Button Protection:** Prevents viewing sensitive data after logout using `Cache-Control` headers and JS `enforceClientAuth`.
+    - **Role-Based Access Control (RBAC):** Enforced via filters and route groups.
 
 ### 5.2. Point of Sale (POS)
 - **Controllers:** `PosController.php` (Admin & Staff), `UserPosController.php` (Users)
 - **Routes:** `/admin/pos`, `/admin/staff/pos`, `/user/pos`
-- **Features:** Processing of sales, cart management, checkout, and **dynamic size variation grouping** (groups size variants like "Small", "Medium" under a single parent item card dynamically based on `product_id` suffix logic). Records data into `TransactionModel` and `SalesModel`.
+- **Features:** Processing of sales, cart management, checkout, and **dynamic size variation grouping**. Records data into `TransactionModel` and `SalesModel`.
 
 ### 5.3. Inventory Management
 - **Controller:** `Items.php`
 - **Models:** `ItemModel`, `ProductModel`, `ItemLogModel`, `DeletedItemModel`
 - **Features:** 
   - Add, Edit, Delete (Soft and Permanent) items.
-  - Bulk upload functionality.
-  - Tracking of expired and expiring-soon items.
+  - Bulk upload functionality (CSV/Excel support).
+  - Tracking of expired and expiring-soon items with auto-delete logic.
   - Logging of item activities.
-  - CSV Export capabilities (`export-logs-csv`, `export-sales-csv`).
-  - **Item Variation Support:** Tracks child variations (e.g., sizes or sub-options) using `is_variation_child` (boolean), `variation_group_id` (parent ID reference), and `variation_label` (human-readable label).
+  - CSV Export capabilities.
+  - **Item Variation Support:** Tracks child variations (e.g., sizes) using `is_variation_child` and `variation_group_id`.
 
 ### 5.4. Sales and Transactions
 - **Controller:** `SalesController.php`
 - **Models:** `SalesModel`, `TransactionModel`
-- **Features:** Viewing overall sales, detailed transaction history, and breakdown of items per transaction.
+- **Features:** Viewing overall sales, detailed transaction history, and notification badges for unviewed sales.
 
-### 5.5. Stock Requests & Pull-outs
+### 5.5. Stock Requests, Pull-outs & Returns
 - **Controllers:** `AdminRequests.php`, `UserRequestController.php`, `PullOutController.php`, `ReturnsController.php`
 - **Models:** `StockRequestModel`, `StockRequestLogModel`, `PullOutModel`, `ReturnModel`
 - **Features:** 
-  - Users can request stock adjustments.
-  - Admins can approve or reject stock requests.
+  - Users can request stock adjustments with reasons.
+  - Admins can approve or reject stock requests/pull-outs.
   - Handling of food waste (pull-outs) and customer returns.
 
-### 5.6. External API (Online Ordering)
-- **Controller:** `ApiController.php`
-- **Routes Group:** `/api/*`
-- **Models:** `OnlineOrderModel`, `OnlineOrderItemModel`
-- **Features:** Exposes endpoints for an external platform to fetch products, submit orders, view pending orders, and confirm orders. It handles CORS preflight requests.
+### 5.6. External API & Customer Frontend
+- **Controller:** `ApiController.php`, `CustomerOrderController.php`
+- **Routes Group:** `/api/*`, `/order`
+- **Features:** 
+    - Stateless API for external online ordering platforms (Fetch products, submit orders).
+    - Lightweight customer-facing order view (`/order`).
 
-## 6. Routing (app/Config/Routes.php)
+## 6. UI & User Experience
+- **Unified Radius:** The system implements a unified `12px` border-radius across all UI elements (cards, buttons, inputs) for a modern, consistent look.
+- **Mobile Responsive:** Features a mobile menu toggle (hamburger menu) and sidebar overlay for smaller screens.
+- **Sticky Headers:** Tables use sticky headers for better data visibility during scrolling.
+
+## 7. Routing (app/Config/Routes.php)
 The application utilizes explicit routing groups for better security and organization:
 - `user/*`: Routes for regular users.
 - `admin/*`: Routes for administrators.
@@ -92,11 +102,8 @@ The application utilizes explicit routing groups for better security and organiz
 
 *Note: Auto-routing is explicitly disabled (`$routes->setAutoRoute(false);`) as a security best practice.*
 
-## 7. Email Configuration
-The system uses Gmail SMTP for dispatching emails (configured in `.env`):
-- **Protocol:** `smtp`
-- **SMTP Host:** `smtp.gmail.com`
-- **SMTP Port:** `465` (SSL)
-
 ## 8. Deployment and Maintenance Tools
-The root directory contains several utility PHP scripts (e.g., `update_badge_dot.php`, `update_sticky_navbar.php`) which appear to be custom migration or find-and-replace scripts used during development to update UI elements across multiple view files simultaneously.
+- **Cron Controller:** Handles periodic automated tasks such as `checkExpiry` to update item statuses.
+- **Setup Controller:** Accessible via `/setup-db` for initializing or syncing database schema.
+- **Utility Scripts:** The root directory contains several utility PHP scripts (e.g., `update_badge_dot.php`, `update_sticky_navbar.php`) used as custom migration or find-and-replace scripts to update UI elements system-wide.
+- **Email Configuration:** Gmail SMTP is used for dispatching emails (configured in `.env`).

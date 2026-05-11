@@ -1550,7 +1550,7 @@ if (!function_exists('getProductSKU')) {
                     <h4><i class="bi bi-credit-card me-2"></i>Checkout</h4>
                     <div class="total-row">
                         <span>Total:</span>
-                        <strong id="cart-total">&#8369;0.00</strong>
+                        <strong id="cart-total">₱0.00</strong>
                     </div>
                     
 
@@ -1575,7 +1575,7 @@ if (!function_exists('getProductSKU')) {
                     <h2 id="smTitle">Product Title</h2>
                     
                     <div class="shopee-price-box">
-                        <span class="sm-currency">&#8369;</span><span id="smPrice">0.00</span>
+                        <span class="sm-currency">₱</span><span id="smPrice">0.00</span>
                     </div>
 
                     <div class="sm-info-row">
@@ -1718,15 +1718,15 @@ if (!function_exists('getProductSKU')) {
                     <div id="vatComputationBlock" class="p-3 mb-4 rounded border" style="display: none; background: #fffcf5; border-color: #ffeeba!important;">
                         <div class="d-flex justify-content-between mb-1">
                             <span class="text-secondary fw-medium">Vatable Sales:</span>
-                            <span class="fw-bold text-muted" id="vatableSalesAmount">&#8369;0.00</span>
+                            <span class="fw-bold text-muted" id="vatableSalesAmount">₱0.00</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-secondary fw-medium" id="vatTaxLabel">12% VAT (Included):</span>
-                            <span class="fw-bold text-warning" id="vatTaxAmount">&#8369;0.00</span>
+                            <span class="fw-bold text-warning" id="vatTaxAmount">₱0.00</span>
                         </div>
                         <div class="d-flex justify-content-between border-top pt-2 mt-2">
                             <span class="text-dark fw-bold fs-5">Grand Total Due:</span>
-                            <span class="fw-bold text-success fs-4" id="finalAmountWithVat">&#8369;0.00</span>
+                            <span class="fw-bold text-success fs-4" id="finalAmountWithVat">₱0.00</span>
                         </div>
                     </div>
 
@@ -2671,7 +2671,7 @@ if (!function_exists('getProductSKU')) {
             cartContainer.innerHTML = '';
             if (cartItems.length === 0) {
                 cartContainer.innerHTML = '<p class="text-muted">No items added.</p>';
-                cartTotal.textContent = "&#8369;0.00";
+                cartTotal.textContent = "₱0.00";
                 return;
             }
             
@@ -2692,7 +2692,7 @@ if (!function_exists('getProductSKU')) {
                         <input type="number" class="cart-qty-input" data-index="${index}" value="${item.qty}" min="1" style="width: 40px; text-align: center; border: 1px solid #ddd; border-radius: 4px; border-left: none; border-right: none; height: 28px; outline: none;">
                         <button class="qty-increase" data-index="${index}">+</button>
                     </div>
-                    <span class="item-price">&#8369;${(item.qty * item.price).toFixed(2)}</span>
+                    <span class="item-price">₱${(item.qty * item.price).toFixed(2)}</span>
                 `;
                 cartContainer.appendChild(div);
             });
@@ -2734,7 +2734,7 @@ if (!function_exists('getProductSKU')) {
             });
 
             const total = cartItems.reduce((sum, i) => sum + i.price * i.qty, 0);
-            cartTotal.textContent = `&#8369;${total.toFixed(2)}`;
+            cartTotal.textContent = `₱${total.toFixed(2)}`;
         }
 
         // Payment method selection
@@ -2773,8 +2773,8 @@ if (!function_exists('getProductSKU')) {
                 tr.innerHTML = `
                     <td class="text-dark fw-medium">${item.name} ${item.pack ? `<br><small class="text-muted fw-normal">${item.pack}</small>` : ''}</td>
                     <td class="text-center">${item.qty}</td>
-                    <td class="text-end">&#8369;${item.price.toFixed(2)}</td>
-                    <td class="text-end fw-bold text-dark">&#8369;${(item.price * item.qty).toFixed(2)}</td>
+                    <td class="text-end">₱${item.price.toFixed(2)}</td>
+                    <td class="text-end fw-bold text-dark">₱${(item.price * item.qty).toFixed(2)}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -2809,9 +2809,9 @@ if (!function_exists('getProductSKU')) {
                         document.getElementById('vatTaxLabel').textContent = "12% VAT (Added):";
                     }
                     
-                    document.getElementById('vatableSalesAmount').textContent = `&#8369;${vatableSales.toFixed(2)}`;
-                    document.getElementById('vatTaxAmount').textContent = `&#8369;${vat.toFixed(2)}`;
-                    document.getElementById('finalAmountWithVat').textContent = `&#8369;${grandTotal.toFixed(2)}`;
+                    document.getElementById('vatableSalesAmount').textContent = `₱${vatableSales.toFixed(2)}`;
+                    document.getElementById('vatTaxAmount').textContent = `₱${vat.toFixed(2)}`;
+                    document.getElementById('finalAmountWithVat').textContent = `₱${grandTotal.toFixed(2)}`;
                     
                     vatBlock.style.display = 'block';
                     vatTypeBlock.style.display = 'block';
@@ -2864,7 +2864,7 @@ if (!function_exists('getProductSKU')) {
 
                 const data = await response.json();
                 if (data.success) {
-                    showNotification('success', `Sale completed! Total: &#8369;${data.total.toFixed(2)} (${selectedPaymentMethod.toUpperCase()})`);
+                    showNotification('success', `Sale completed! Total: ₱${data.total.toFixed(2)} (${selectedPaymentMethod.toUpperCase()})`);
                     cartItems.length = 0;
                     updateCart();
                     
@@ -2961,7 +2961,7 @@ if (!function_exists('getProductSKU')) {
             document.getElementById('ooCustomerName').textContent = order.customer_name;
             document.getElementById('ooCustomerPhone').textContent = order.customer_phone;
             document.getElementById('ooCustomerEmail').textContent = order.customer_email;
-            document.getElementById('ooGrandTotal').textContent = '&#8369;' + parseFloat(order.total_amount).toFixed(2);
+            document.getElementById('ooGrandTotal').textContent = '₱' + parseFloat(order.total_amount).toFixed(2);
 
             const itemsList = document.getElementById('ooItemsList');
             let itemsHtml = '';
@@ -2972,7 +2972,7 @@ if (!function_exists('getProductSKU')) {
                     <tr>
                         <td>${name}</td>
                         <td>x${item.quantity}</td>
-                        <td class="text-end">&#8369;${parseFloat(item.subtotal).toFixed(2)}</td>
+                        <td class="text-end">₱${parseFloat(item.subtotal).toFixed(2)}</td>
                     </tr>
                 `;
             });

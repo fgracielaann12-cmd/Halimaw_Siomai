@@ -404,8 +404,8 @@ public function sell()
                                     <tr>
                                         <td>' . $itemName . $pack . '</td>
                                         <td style="text-align:center;">' . $qty . '</td>
-                                        <td class="text-right">&#8369;' . number_format($basePrice, 2) . '</td>
-                                        <td class="text-right">&#8369;' . number_format($sub, 2) . '</td>
+                                        <td class="text-right">₱' . number_format($basePrice, 2) . '</td>
+                                        <td class="text-right">₱' . number_format($sub, 2) . '</td>
                                     </tr>';
                 }
                 
@@ -418,11 +418,11 @@ public function sell()
                         $vatStr = '
                                     <tr>
                                         <td colspan="3" class="text-right" style="color:#858796;">Vatable Sales:</td>
-                                        <td class="text-right" style="color:#858796;">&#8369;' . number_format($vatableSales, 2) . '</td>
+                                        <td class="text-right" style="color:#858796;">₱' . number_format($vatableSales, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td colspan="3" class="text-right" style="color:#858796;">12% VAT (Included):</td>
-                                        <td class="text-right" style="color:#858796;">&#8369;' . number_format($vat, 2) . '</td>
+                                        <td class="text-right" style="color:#858796;">₱' . number_format($vat, 2) . '</td>
                                     </tr>';
                     } else {
                         $vat = $rawTotal * 0.12;
@@ -430,11 +430,11 @@ public function sell()
                         $vatStr = '
                                     <tr>
                                         <td colspan="3" class="text-right" style="color:#858796;">Vatable Sales:</td>
-                                        <td class="text-right" style="color:#858796;">&#8369;' . number_format($rawTotal, 2) . '</td>
+                                        <td class="text-right" style="color:#858796;">₱' . number_format($rawTotal, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td colspan="3" class="text-right" style="color:#858796;">12% VAT (Added):</td>
-                                        <td class="text-right" style="color:#858796;">&#8369;' . number_format($vat, 2) . '</td>
+                                        <td class="text-right" style="color:#858796;">₱' . number_format($vat, 2) . '</td>
                                     </tr>';
                     }
                 }
@@ -443,7 +443,7 @@ public function sell()
                 $receiptHtml .= '
                                     <tr class="total-row">
                                         <td colspan="3" class="text-right" style="font-size: 16px;">Grand Total Due:</td>
-                                        <td class="text-right" style="font-size: 16px; color: #1cc88a;">&#8369;' . number_format($grandTotalDisplay, 2) . '</td>
+                                        <td class="text-right" style="font-size: 16px; color: #1cc88a;">₱' . number_format($grandTotalDisplay, 2) . '</td>
                                     </tr>
                                 </tbody>
                             </table>

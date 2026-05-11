@@ -189,15 +189,15 @@ class ApiController extends ResourceController
                                         <tr>
                                             <td>' . $itemName . $pack . '</td>
                                             <td style="text-align:center;">' . $qty . '</td>
-                                            <td class="text-right">&#8369;' . number_format($basePrice, 2) . '</td>
-                                            <td class="text-right">&#8369;' . number_format($sub, 2) . '</td>
+                                            <td class="text-right">₱' . number_format($basePrice, 2) . '</td>
+                                            <td class="text-right">₱' . number_format($sub, 2) . '</td>
                                         </tr>';
                     }
 
                     $receiptHtml .= '
                                         <tr class="total-row">
                                             <td colspan="3" class="text-right" style="font-size: 16px;">Total Amount:</td>
-                                            <td class="text-right" style="font-size: 16px; color: #1cc88a;">&#8369;' . number_format($totalAmount, 2) . '</td>
+                                            <td class="text-right" style="font-size: 16px; color: #1cc88a;">₱' . number_format($totalAmount, 2) . '</td>
                                         </tr>
                                     </tbody>
                                 </table>

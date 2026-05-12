@@ -23,9 +23,11 @@ $totalNotif = $salesNotif + $stockReqNotif + $expiringNotif + $expiredNotif;
 
 <div class="top-navbar" style="padding-left: 20px; padding-right: 20px;">
     <div class="d-flex align-items-center gap-3">
-        <button class="mobile-menu-toggle" id="mobileMenuToggleInline">
-            <i class="bi bi-list"></i>
-        </button>
+        <?php if (!(isset($hide_toggle) && $hide_toggle)): ?>
+            <button class="mobile-menu-toggle d-lg-none" id="mobileMenuToggleInline">
+                <i class="bi bi-list"></i>
+            </button>
+        <?php endif; ?>
         <h5 class="mb-0">
             <?php if (isset($icon)): ?>
                 <i class="<?= $icon ?> me-2" style="font-size: 1.25rem;"></i>

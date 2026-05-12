@@ -461,7 +461,8 @@
 <div class="main-content">
     <?= view('partials/admin_topbar', [
         'title' => 'Pull-Outs',
-        'icon' => 'bi bi-trash3'
+        'icon' => 'bi bi-trash3',
+        'hide_toggle' => true
     ]) ?>
 
     <div class="container">

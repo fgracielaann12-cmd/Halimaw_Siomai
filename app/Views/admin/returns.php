@@ -319,7 +319,8 @@
     echo view('partials/admin_topbar', [
         'title' => 'Customer Returns',
         'icon' => 'bi bi-arrow-return-left text-primary',
-        'extra_buttons' => $extra_buttons
+        'extra_buttons' => $extra_buttons,
+        'hide_toggle' => true
     ]);
     ?>
         

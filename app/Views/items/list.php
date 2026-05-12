@@ -472,6 +472,17 @@
             background: var(--danger);
             color: white;
         }
+        #itemsTable .btn-view-info {
+            background-color: #ffffff !important;
+            color: #5a5c69 !important;
+            border: none !important;
+            box-shadow: none !important;
+            transition: all 0.2s ease-in-out;
+        }
+        #itemsTable .btn-view-info:hover {
+            background-color: #e9ecef !important;
+            color: #3a3b45 !important;
+        }
         .quantity-control {
             display: inline-flex;
             align-items: center;
@@ -497,10 +508,16 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            transition: all 0.2s;
             border-radius: 4px;
-            background: #f1f2f6;
-            border: 1px solid #ddd;
-            color: var(--dark);
+            background: #ffffff;
+            border: 1px solid #dee2e6 !important;
+            color: #6c757d !important;
+        }
+        .quantity-control button:hover {
+            background-color: #e9ecef !important;
+            color: #3a3b45 !important;
+            border-color: #adb5bd !important;
         }
 
         .badge {
@@ -846,9 +863,7 @@ function getSku($name, $variation = '') {
                         <th class="text-center align-middle">Quantity</th>
                         <th class="text-center align-middle hide-mobile">Value %</th>
                         <th class="text-center align-middle hide-mobile">Category</th>
-                        <th class="text-center align-middle hide-mobile">Expiration Date</th>
                         <th class="text-center align-middle">Status</th>
-                        <th class="text-center align-middle hide-mobile">Date Entry</th>
                         <th class="text-center align-middle">Actions</th>
                     </tr>
                 </thead>
@@ -892,9 +907,9 @@ function getSku($name, $variation = '') {
                     <?php if ($hasPackQty): ?>
                         <?php 
                         $sizes = [
-                            ['s' => '-S', 's_sku' => 'S12', 'l' => 'Small', 'q' => $item['pack_small_qty'] ?? 0, 'p' => (!empty($item['price_12']) && $item['price_12'] > 0) ? $item['price_12'] : 115, 'ql' => '(12)'],
-                            ['s' => '-M', 's_sku' => 'M20', 'l' => 'Medium', 'q' => $item['pack_medium_qty'] ?? 0, 'p' => (!empty($item['price_20']) && $item['price_20'] > 0) ? $item['price_20'] : 185, 'ql' => '(20)'],
-                            ['s' => '-L', 's_sku' => 'L40', 'l' => 'Large', 'q' => $item['pack_biggest_qty'] ?? 0, 'p' => (!empty($item['price_40']) && $item['price_40'] > 0) ? $item['price_40'] : 335, 'ql' => '(40)']
+                            ['s' => '-S', 's_sku' => 'S12', 'l' => 'Small', 'q' => $item['pack_small_qty'] ?? 0, 'p' => (!empty($item['pack_small_price']) && $item['pack_small_price'] > 0) ? $item['pack_small_price'] : 115, 'ql' => '(12)'],
+                            ['s' => '-M', 's_sku' => 'M20', 'l' => 'Medium', 'q' => $item['pack_medium_qty'] ?? 0, 'p' => (!empty($item['pack_medium_price']) && $item['pack_medium_price'] > 0) ? $item['pack_medium_price'] : 185, 'ql' => '(20)'],
+                            ['s' => '-L', 's_sku' => 'L40', 'l' => 'Large', 'q' => $item['pack_biggest_qty'] ?? 0, 'p' => (!empty($item['pack_biggest_price']) && $item['pack_biggest_price'] > 0) ? $item['pack_biggest_price'] : 335, 'ql' => '(40)']
                         ];
                         foreach ($sizes as $idx => $sz): 
                         ?>
@@ -911,7 +926,6 @@ function getSku($name, $variation = '') {
                                 ?>%
                             </td>
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
-                            <td class="text-center align-middle hide-mobile"><?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?></td>
                             <td class="text-center align-middle">
                                 <span class="badge 
                                     <?= $status == 'expired' ? 'bg-danger' :
@@ -920,10 +934,9 @@ function getSku($name, $variation = '') {
                                     <?= $statusLabel ?>
                                 </span>
                             </td>
-                            <td class="text-center align-middle hide-mobile"><?= esc($item['created_at']) ?></td>
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
-                                    <button type="button" class="btn btn-sm btn-info text-white" 
+                                    <button type="button" class="btn btn-sm btn-view-info" 
                                             onclick="showItemInfo('<?= esc($item['product_id']) ?><?= $sz['s'] ?>', '<?= esc($item['name']) ?> (<?= $sz['l'] ?>)', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($sz['q']) ?> <?= $sz['ql'] ?>', '₱<?= number_format($sz['p'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
                                         <i class="bi bi-info-circle"></i>
                                     </button>
@@ -931,11 +944,11 @@ function getSku($name, $variation = '') {
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
                                     <div class="d-flex align-items-center quantity-control" data-id="<?= $item['id'] ?>" data-size="<?= $sz['s'] ?>">
-                                        <button type="button" class="btn btn-sm btn-outline-danger open-qty-modal" data-action="decrease">
+                                        <button type="button" class="btn btn-sm btn-light border open-qty-modal" data-action="decrease">
                                             <i class="bi bi-dash"></i>
                                         </button>
                                         <input type="number" class="form-control form-control-sm qty-amount mx-1" readonly value="<?= esc($sz['q']) ?>">
-                                        <button type="button" class="btn btn-sm btn-outline-success open-qty-modal" data-action="increase">
+                                        <button type="button" class="btn btn-sm btn-light border open-qty-modal" data-action="increase">
                                             <i class="bi bi-plus"></i>
                                         </button>
                                     </div>
@@ -957,7 +970,6 @@ function getSku($name, $variation = '') {
                                 ?>%
                             </td>
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
-                            <td class="text-center align-middle hide-mobile"><?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?></td>
                             <td class="text-center align-middle">
                                 <span class="badge 
                                     <?= $status == 'expired' ? 'bg-danger' :
@@ -966,10 +978,9 @@ function getSku($name, $variation = '') {
                                     <?= $statusLabel ?>
                                 </span>
                             </td>
-                            <td class="text-center align-middle hide-mobile"><?= esc($item['created_at']) ?></td>
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
-                                    <button type="button" class="btn btn-sm btn-info text-white" 
+                                    <button type="button" class="btn btn-sm btn-view-info" 
                                             onclick="showItemInfo('<?= esc($item['product_id']) ?>', '<?= esc($item['name']) ?>', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($item['quantity']) ?>', '₱<?= number_format($item['price'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
                                         <i class="bi bi-info-circle"></i>
                                     </button>
@@ -977,11 +988,11 @@ function getSku($name, $variation = '') {
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
                                     <div class="d-flex align-items-center quantity-control" data-id="<?= $item['id'] ?>">
-                                        <button type="button" class="btn btn-sm btn-outline-danger open-qty-modal" data-action="decrease">
+                                        <button type="button" class="btn btn-sm btn-light border open-qty-modal" data-action="decrease">
                                             <i class="bi bi-dash"></i>
                                         </button>
                                         <input type="number" class="form-control form-control-sm qty-amount mx-1" readonly value="<?= esc($item['quantity']) ?>">
-                                        <button type="button" class="btn btn-sm btn-outline-success open-qty-modal" data-action="increase">
+                                        <button type="button" class="btn btn-sm btn-light border open-qty-modal" data-action="increase">
                                             <i class="bi bi-plus"></i>
                                         </button>
                                     </div>
@@ -1007,7 +1018,6 @@ function getSku($name, $variation = '') {
                 <h5 class="modal-title w-100 text-center fw-bold" id="itemInfoModalLabel">
                     <i class="bi bi-info-circle me-2"></i>Product Information
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
                 <div class="text-center mb-4">

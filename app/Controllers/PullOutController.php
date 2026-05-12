@@ -28,7 +28,12 @@ class PullOutController extends BaseController
         $variation = $request->getPost('variation');
         $quantity  = (int)$request->getPost('quantity');
         $reason    = $request->getPost('reason');
-        $category  = $request->getPost('category') ?? 'Food Waste';
+        
+        $category  = $request->getPost('category');
+        if (empty($category)) {
+            $category = ($reason === 'CUSTOMER_RETURN') ? 'Customer Return' : 'Food Waste';
+        }
+        
         $note      = $request->getPost('note');
         $userId    = session()->get('user_id');
 
@@ -111,11 +116,11 @@ class PullOutController extends BaseController
             return redirect()->back()->with('error', 'Product not found.');
         }
 
-        $variation = $pullOut['variation'];
+        $variation = strtolower($pullOut['variation'] ?? '');
         $qtyCol = 'quantity';
-        if ($variation === 'small') $qtyCol = 'pack_small_qty';
-        if ($variation === 'medium') $qtyCol = 'pack_medium_qty';
-        if ($variation === 'large') $qtyCol = 'pack_biggest_qty';
+        if (strpos($variation, 'small') !== false) $qtyCol = 'pack_small_qty';
+        if (strpos($variation, 'medium') !== false) $qtyCol = 'pack_medium_qty';
+        if (strpos($variation, 'large') !== false) $qtyCol = 'pack_biggest_qty';
 
         if (!isset($item[$qtyCol]) || $item[$qtyCol] < $pullOut['quantity']) {
             return redirect()->back()->with('error', 'Insufficient stock to approve this pull-out.');

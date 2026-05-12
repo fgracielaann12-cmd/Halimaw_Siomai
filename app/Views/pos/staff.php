@@ -47,6 +47,7 @@ if (!function_exists('getProductSKU')) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= csrf_hash() ?>">
     <title>Halimaw Siomai Staff POS</title>
     <!-- Bootstrap 5.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -1761,14 +1762,33 @@ if (!function_exists('getProductSKU')) {
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div id="stockAlertContainer"></div>
-                    <form id="stockRequestFormModal">
+                    <div id="stockAlertContainer">
+                        <?php if (session()->getFlashdata('success')): ?>
+                            <div class="alert alert-success py-2 border-0 shadow-sm"><i class="bi bi-check-circle me-2"></i><?= esc(session()->getFlashdata('success')) ?></div>
+                        <?php endif; ?>
+                        <?php if (session()->getFlashdata('error')): ?>
+                            <div class="alert alert-danger py-2 border-0 shadow-sm"><i class="bi bi-exclamation-circle me-2"></i><?= esc(session()->getFlashdata('error')) ?></div>
+                        <?php endif; ?>
+                    </div>
+                    <form id="stockRequestFormModal" method="POST" action="<?= site_url('user/submit-stock-request') ?>" onsubmit="
+                        const select = this.querySelector('select[name=\'item_id\']');
+                        const option = select.options[select.selectedIndex];
+                        const variation = option.getAttribute('data-variation');
+                        if (variation) {
+                            const reason = this.querySelector('textarea[name=\'reason\']');
+                            // Ensure we don't prepend it multiple times if they double-click
+                            if (!reason.value.startsWith('[Variation:')) {
+                                reason.value = `[Variation: ${variation}] ` + reason.value;
+                            }
+                        }
+                        return true;
+                    ">
                         <?= csrf_field() ?>
                         <div class="mb-4">
                             <label for="requestItemModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-box me-1"></i> Select Item
                             </label>
-                            <select id="requestItemModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
+                            <select id="requestItemModal" name="item_id" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
                                     <?php
@@ -1798,9 +1818,8 @@ if (!function_exists('getProductSKU')) {
                             <label for="requestActionModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-arrow-left-right me-1"></i> Adjustment Type
                             </label>
-                            <select id="requestActionModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
-                                <option value="">— Select action —</option>
-                                <option value="add">Add Stock</option>
+                            <select id="requestActionModal" name="action" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
+                                <option value="add" selected>Add Stock</option>
                                 <option value="subtract">Reduce Stock</option>
                             </select>
                         </div>
@@ -1808,18 +1827,18 @@ if (!function_exists('getProductSKU')) {
                             <label for="requestQtyModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-hash me-1"></i> Quantity
                             </label>
-                            <input type="number" id="requestQtyModal" class="form-control shadow-sm" min="1" placeholder="Enter adjustment amount" required
+                            <input type="number" id="requestQtyModal" name="quantity" class="form-control shadow-sm" min="1" placeholder="Enter adjustment amount" required
                                    style="border-radius: 5px; padding: 0.6rem 1rem;">
                         </div>
                         <div class="mb-4">
                             <label for="requestReasonModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-journal-text me-1"></i> Reason / Notes
                             </label>
-                            <textarea id="requestReasonModal" class="form-control shadow-sm" rows="3" placeholder="e.g., spillage, delivery, inventory correction..." required
+                            <textarea id="requestReasonModal" name="reason" class="form-control shadow-sm" rows="3" placeholder="e.g., spillage, delivery, inventory correction..." required
                                       style="border-radius: 5px; padding: 0.6rem 1rem;"></textarea>
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn fw-bold" style="
+                            <button type="submit" id="btnSubmitStockRequest" class="btn fw-bold" style="
                                 background: var(--primary);
                                 color: white;
                                 border: none;
@@ -2064,6 +2083,13 @@ if (!function_exists('getProductSKU')) {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
     document.addEventListener("DOMContentLoaded", () => {
+        // Auto-show modal if there's a flashdata related to stock request
+        <?php if (session()->getFlashdata('success') || session()->getFlashdata('error')): ?>
+            if (document.getElementById('helpModal')) {
+                new bootstrap.Modal(document.getElementById('helpModal')).show();
+            }
+        <?php endif; ?>
+
         // --- MOBILE MENU TOGGLE ---
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -2151,64 +2177,7 @@ if (!function_exists('getProductSKU')) {
         }
 
 
-        // ✅ STOCK REQUEST SUBMISSION
-        const stockRequestForm = document.getElementById("stockRequestFormModal");
-        if (stockRequestForm) {
-            stockRequestForm.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                const submitBtn = stockRequestForm.querySelector("button[type='submit']");
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submitting...';
 
-                const selectElement = document.getElementById("requestItemModal");
-                const itemId = selectElement.value;
-                const variation = selectElement.options[selectElement.selectedIndex].getAttribute("data-variation");
-                const action = document.getElementById("requestActionModal").value;
-                const quantity = parseInt(document.getElementById("requestQtyModal").value) || 0;
-                let reason = document.getElementById("requestReasonModal").value.trim();
-
-                if (variation) {
-                    reason = `[Variation: ${variation}] ` + reason;
-                }
-
-                if (!itemId || !action || !quantity || !reason) {
-                    alert("Please fill all fields.");
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Stock Request';
-                    return;
-                }
-
-                try {
-                    const response = await fetch("<?= site_url('user/submit-stock-request') ?>", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
-                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: new URLSearchParams({
-                            item_id: itemId,
-                            action: action,
-                            quantity: quantity,
-                            reason: reason
-                        })
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        alert(result.message || "Request submitted successfully!");
-                        stockRequestForm.reset();
-                        bootstrap.Modal.getInstance(document.getElementById("helpModal")).hide();
-                    } else {
-                        alert(result.message || "Failed to submit request.");
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert("An error occurred while submitting.");
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Stock Request';
-                }
-            });
-        }
 
         // ✅ PULL-OUT SUBMISSION
         const pullOutForm = document.getElementById("pullOutFormModal");

@@ -32,7 +32,7 @@ if (!function_exists('getProductSKU')) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="<?= csrf_token() ?>">
+    <meta name="csrf-token" content="<?= csrf_hash() ?>">
     <title>Inventory Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -721,28 +721,45 @@ if (!function_exists('getProductSKU')) {
     }
 
     if (!function_exists('getProductSKU')) {
-        function getProductSKU($name, $variation) {
-            $n = strtolower($name);
-            $base = null;
-            $sku = 'N/A';
+        function getProductSKU($name, $variation = '') {
+            $nameLower = strtolower($name);
             
-            if (strpos($n, 'pork siomai') !== false) $base = 'PRK-SMAI';
-            elseif (strpos($n, 'chicken siomai') !== false) $base = 'CHCKN-SMAI';
-            elseif (strpos($n, 'beef siomai') !== false) $base = 'BEEF-SMAI';
-            elseif (strpos($n, 'sharksfin siomai') !== false) $base = 'SHKSFIN-SMAI';
-            elseif (strpos($n, 'japanese siomai') !== false) $base = 'JAP-SMAI';
-            elseif (strpos($n, 'shrimp siomai') !== false) $base = 'SRIMP-SMAI';
-            elseif (strpos($n, 'burger') !== false) $sku = 'BRGR-PTTY-151G';
-            elseif (strpos($n, 'pastil') !== false || strpos($n, 'pastel') !== false) $sku = 'CHCKN-PSTL-200G';
-            elseif (strpos($n, 'chili') !== false) $sku = 'CHIL-GRLC-OIL-120G';
-            elseif (strpos(str_replace(' ', '', $n), 'toyomansi') !== false) $sku = 'TYMNS-SCE-150ML';
+            $siomaiBases = [
+                'pork siomai' => 'PRK-SMAI',
+                'chicken siomai' => 'CHCK-SMAI',
+                'beef siomai' => 'BEEF-SMAI',
+                'sharkfin siomai' => 'SHRKSF-SMAI',
+                'sharksfin siomai' => 'SHRKSF-SMAI',
+                'japanese siomai' => 'JPNS-SMAI',
+                'shrimp siomai' => 'SHRP-SMAI'
+            ];
             
-            if ($base) {
-                if ($variation === 'S') return $base . '-S12';
-                if ($variation === 'M') return $base . '-M20';
-                if ($variation === 'L') return $base . '-L40';
+            $otherSkus = [
+                'burger patty' => 'BRGR-PATTY-151G',
+                'chicken pastil' => 'CHCK-PASTIL-200G',
+                'chili garlic oil' => 'CHIL-GRLC-OIL-120G',
+                'toyomansi sauce' => 'TYMNS-SAUCE-150ML',
+                'toyo mansi sauce' => 'TYMNS-SAUCE-150ML'
+            ];
+
+            $suffix = '';
+            if ($variation === 'S') $suffix = 'S12';
+            if ($variation === 'M') $suffix = 'M20';
+            if ($variation === 'L') $suffix = 'L40';
+
+            foreach ($siomaiBases as $k => $v) {
+                if (strpos($nameLower, $k) !== false) {
+                    return $v . '-' . $suffix;
+                }
             }
-            return $sku;
+            
+            foreach ($otherSkus as $k => $v) {
+                if (strpos($nameLower, $k) !== false) {
+                    return $v;
+                }
+            }
+
+            return 'UNK-SKU';
         }
     }
     ?>
@@ -949,16 +966,13 @@ if (!function_exists('getProductSKU')) {
                 <table id="itemsTable" class="table table-bordered table-hover align-middle mb-0 text-center">
                     <thead>
                         <tr>
-                            <th>Product ID</th>
-                            <th>SKU</th>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                            <th>Category</th>
-                            <th>Expiration Date</th>
-                            <th>Days Left</th>
-                            <th>Status</th>
-                            <th class="hide-mobile">Date Entry</th>
+                            <th class="text-center align-middle">Product ID</th>
+                            <th class="text-center align-middle">Name</th>
+                            <th class="text-center align-middle">SKU</th>
+                            <th class="text-center align-middle">Price</th>
+                            <th class="text-center align-middle">Quantity</th>
+                            <th class="text-center align-middle hide-mobile">Category</th>
+                            <th class="text-center align-middle">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -991,15 +1005,16 @@ if (!function_exists('getProductSKU')) {
                                     $daysLeftText = "$daysLeft days left";
                                 }
                             }
-                            $isSiomai = stripos($item['name'], 'siomai') !== false;
+                            $hasPackQty = ($item['pack_small_qty'] ?? 0) > 0 || ($item['pack_medium_qty'] ?? 0) > 0 || ($item['pack_biggest_qty'] ?? 0) > 0;
                             
                             $displayRows = [];
-                            if ($isSiomai) {
+                            if ($hasPackQty) {
                                 $displayRows[] = [
                                     'variation' => 'S',
                                     'pack_name' => 'Small',
                                     'qty' => $item['pack_small_qty'] ?? 0,
                                     'id_suffix' => '-S',
+                                    'qty_label' => '(12)',
                                     'price' => (!empty($item['pack_small_price']) && $item['pack_small_price'] > 0) ? $item['pack_small_price'] : 115
                                 ];
                                 $displayRows[] = [
@@ -1007,6 +1022,7 @@ if (!function_exists('getProductSKU')) {
                                     'pack_name' => 'Medium',
                                     'qty' => $item['pack_medium_qty'] ?? 0,
                                     'id_suffix' => '-M',
+                                    'qty_label' => '(20)',
                                     'price' => (!empty($item['pack_medium_price']) && $item['pack_medium_price'] > 0) ? $item['pack_medium_price'] : 185
                                 ];
                                 $displayRows[] = [
@@ -1014,6 +1030,7 @@ if (!function_exists('getProductSKU')) {
                                     'pack_name' => 'Large',
                                     'qty' => $item['pack_biggest_qty'] ?? 0,
                                     'id_suffix' => '-L',
+                                    'qty_label' => '(40)',
                                     'price' => (!empty($item['pack_biggest_price']) && $item['pack_biggest_price'] > 0) ? $item['pack_biggest_price'] : 335
                                 ];
                             } else {
@@ -1031,27 +1048,30 @@ if (!function_exists('getProductSKU')) {
                             $isLowStock = $vItem['qty'] <= 10;
                             $priceDisplay = !empty($vItem['price']) ? '₱' . number_format((float)$vItem['price'], 2) : '<span class="text-muted">—</span>';
                         ?>
-                        <tr class="text-center" data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>" data-id="<?= $item['id'] ?>">
-                            <td><?= esc($item['product_id']) ?><?= $vItem['id_suffix'] ?></td>
-                            <td><?= esc(getProductSKU($item['name'], $vItem['variation'] ?? null)) ?></td>
-                            <td>
+                        <tr data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>" data-id="<?= $item['id'] ?>">
+                            <td class="text-center align-middle"><?= esc($item['product_id']) ?><?= $vItem['id_suffix'] ?></td>
+                            <td class="text-center align-middle">
                                 <?= esc($item['name']) ?>
                                 <?php if ($vItem['pack_name']): ?>
-                                    <small class="text-muted d-block"><?= esc($vItem['pack_name']) ?></small>
+                                    <small class="text-muted">(<?= esc($vItem['pack_name']) ?>)</small>
                                 <?php endif; ?>
                             </td>
-                            <td><?= $priceDisplay ?></td>
-                            <td style="white-space: nowrap;">
+                            <td class="text-center align-middle"><?= esc(!empty($item['sku']) ? $item['sku'] : getProductSKU($item['name'], $vItem['variation'] ?? null)) ?></td>
+                            <td class="text-center align-middle text-nowrap"><?= $priceDisplay ?></td>
+                            <td class="text-center align-middle text-nowrap">
+                                <span><?= esc($vItem['qty']) ?></span>
+                                <?php if (!empty($vItem['qty_label'])): ?>
+                                    <small class="text-muted"><?= $vItem['qty_label'] ?></small>
+                                <?php endif; ?>
+                                <?php if (stripos($item['name'], 'burger patty') !== false && empty($vItem['variation'])): ?>
+                                    <small class="text-muted">(6)</small>
+                                <?php endif; ?>
                                 <?php if ($isLowStock): ?>
-                                <span><strong><?= esc($vItem['qty']) ?></strong> <span class="badge bg-warning text-dark ms-1">Low</span></span><?php if (stripos($item['name'], 'burger patty') !== false && empty($vItem['variation'])): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?>
-                                <?php else: ?>
-                                <span><?= esc($vItem['qty']) ?></span><?php if (stripos($item['name'], 'burger patty') !== false && empty($vItem['variation'])): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?>
+                                    <span class="badge bg-warning text-dark ms-1">Low</span>
                                 <?php endif; ?>
                             </td>
-                            <td><?= esc($item['category'] ?? '—') ?></td>
-                            <td><?= empty($item['expiration_date']) ? '—' : esc($item['expiration_date']) ?></td>
-                            <td data-days-left="<?= $daysLeft ?? 0 ?>"><?= $daysLeftText ?></td>
-                            <td>
+                            <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '—') ?></td>
+                            <td class="text-center align-middle">
                                 <span class="badge 
                                     <?= $status == 'expired' ? 'bg-danger' :
                                     ($status == 'expiring today' || $status == 'expiring soon' ? 'bg-orange' :
@@ -1059,7 +1079,6 @@ if (!function_exists('getProductSKU')) {
                                     <?= $statusLabel ?>
                                 </span>
                             </td>
-                            <td class="hide-mobile"><?= esc($item['created_at']) ?></td>
                         </tr>
                         <?php endforeach; ?>
                         <?php endforeach; ?>
@@ -1083,14 +1102,33 @@ if (!function_exists('getProductSKU')) {
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div id="stockAlertContainer"></div>
-                    <form id="stockRequestFormModal">
+                    <div id="stockAlertContainer">
+                        <?php if (session()->getFlashdata('success')): ?>
+                            <div class="alert alert-success py-2 border-0 shadow-sm"><i class="bi bi-check-circle me-2"></i><?= esc(session()->getFlashdata('success')) ?></div>
+                        <?php endif; ?>
+                        <?php if (session()->getFlashdata('error')): ?>
+                            <div class="alert alert-danger py-2 border-0 shadow-sm"><i class="bi bi-exclamation-circle me-2"></i><?= esc(session()->getFlashdata('error')) ?></div>
+                        <?php endif; ?>
+                    </div>
+                    <form id="stockRequestFormModal" method="POST" action="<?= site_url('user/submit-stock-request') ?>" onsubmit="
+                        const select = this.querySelector('select[name=\'item_id\']');
+                        const option = select.options[select.selectedIndex];
+                        const variation = option.getAttribute('data-variation');
+                        if (variation) {
+                            const reason = this.querySelector('textarea[name=\'reason\']');
+                            // Ensure we don't prepend it multiple times if they double-click
+                            if (!reason.value.startsWith('[Variation:')) {
+                                reason.value = `[Variation: ${variation}] ` + reason.value;
+                            }
+                        }
+                        return true;
+                    ">
                         <?= csrf_field() ?>
                         <div class="mb-4">
                             <label for="requestItemModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-box me-1"></i> Select Item
                             </label>
-                            <select id="requestItemModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
+                            <select id="requestItemModal" name="item_id" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
                                     <?php
@@ -1120,9 +1158,8 @@ if (!function_exists('getProductSKU')) {
                             <label for="requestActionModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-arrow-left-right me-1"></i> Adjustment Type
                             </label>
-                            <select id="requestActionModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
-                                <option value="">— Select action —</option>
-                                <option value="add">Add Stock</option>
+                            <select id="requestActionModal" name="action" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
+                                <option value="add" selected>Add Stock</option>
                                 <option value="subtract">Reduce Stock</option>
                             </select>
                         </div>
@@ -1130,18 +1167,18 @@ if (!function_exists('getProductSKU')) {
                             <label for="requestQtyModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-hash me-1"></i> Quantity
                             </label>
-                            <input type="number" id="requestQtyModal" class="form-control shadow-sm" min="1" placeholder="Enter adjustment amount" required
+                            <input type="number" id="requestQtyModal" name="quantity" class="form-control shadow-sm" min="1" placeholder="Enter adjustment amount" required
                                    style="border-radius: 5px; padding: 0.6rem 1rem;">
                         </div>
                         <div class="mb-4">
                             <label for="requestReasonModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-journal-text me-1"></i> Reason / Notes
                             </label>
-                            <textarea id="requestReasonModal" class="form-control shadow-sm" rows="3" placeholder="e.g., spillage, delivery, inventory correction..." required
+                            <textarea id="requestReasonModal" name="reason" class="form-control shadow-sm" rows="3" placeholder="e.g., spillage, delivery, inventory correction..." required
                                       style="border-radius: 5px; padding: 0.6rem 1rem;"></textarea>
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn fw-bold" style="
+                            <button type="submit" id="btnSubmitStockRequest" class="btn fw-bold" style="
                                 background: var(--primary);
                                 color: white;
                                 border: none;
@@ -1363,6 +1400,13 @@ if (!function_exists('getProductSKU')) {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
     document.addEventListener("DOMContentLoaded", () => {
+        // Auto-show modal if there's a flashdata related to stock request
+        <?php if (session()->getFlashdata('success') || session()->getFlashdata('error')): ?>
+            if (document.getElementById('helpModal')) {
+                new bootstrap.Modal(document.getElementById('helpModal')).show();
+            }
+        <?php endif; ?>
+
         document.querySelectorAll('#sidebar .nav-link').forEach(link => {
             link.addEventListener('click', () => {
                 if (window.innerWidth <= 991) {
@@ -1540,64 +1584,7 @@ if (!function_exists('getProductSKU')) {
             document.getElementById("showAllBtn").style.display = "none";
         };
 
-        // ✅ STOCK REQUEST SUBMISSION
-        const form = document.getElementById("stockRequestFormModal");
-        if (form) {
-            form.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                const submitBtn = form.querySelector("button[type='submit']");
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submitting...';
 
-                const selectElement = document.getElementById("requestItemModal");
-                const itemId = selectElement.value;
-                const variation = selectElement.options[selectElement.selectedIndex].getAttribute("data-variation");
-                const action = document.getElementById("requestActionModal").value;
-                const quantity = parseInt(document.getElementById("requestQtyModal").value) || 0;
-                let reason = document.getElementById("requestReasonModal").value.trim();
-
-                if (variation) {
-                    reason = `[Variation: ${variation}] ` + reason;
-                }
-
-                if (!itemId || !action || !quantity || !reason) {
-                    alert("Please fill all fields.");
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Stock Request';
-                    return;
-                }
-
-                try {
-                    const response = await fetch("<?= site_url('user/submit-stock-request') ?>", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
-                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: new URLSearchParams({
-                            item_id: itemId,
-                            action: action,
-                            quantity: quantity,
-                            reason: reason
-                        })
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        alert(result.message || "Request submitted successfully!");
-                        form.reset();
-                        bootstrap.Modal.getInstance(document.getElementById("helpModal")).hide();
-                    } else {
-                        alert(result.message || "Failed to submit request.");
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert("An error occurred while submitting.");
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Stock Request';
-                }
-            });
-        }
         // ✅ PULL-OUT SUBMISSION
         const pullOutForm = document.getElementById("pullOutFormModal");
         if (pullOutForm) {

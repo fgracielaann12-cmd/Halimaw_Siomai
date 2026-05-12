@@ -643,11 +643,18 @@ $currentPath = $seg1 . '/' . $seg2;
                     <?php foreach ($requests as $r): ?>
                     <?php $status = strtolower(trim($r['status'] ?? '')); ?>
                     <tr class="<?= $status === 'pending' ? 'table-warning' : '' ?>">
+                        <?php
+                            $reasonText = $r['reason'] ?? '';
+                            $variationMatch = '';
+                            if (preg_match('/\[Variation: (.*?)\]\s*(.*)/is', $reasonText, $matches)) {
+                                $variationMatch = ' (' . trim($matches[1]) . ')';
+                                $reasonText = trim($matches[2]);
+                            }
+                        ?>
                         <td><?= $r['id'] ?></td>
                         <td><?= esc($r['user_name'] ?? 'Unknown') ?></td>
                         <td>
-                            <a href="<?= site_url('items/edit/' . $r['item_id']) ?>" class="text-decoration-none fw-semibold"><?= esc($r['item_name'] ?? 'Unknown') ?></a><br>
-                            <small class="text-muted">Batch: <?= esc($r['item_date'] ?? 'N/A') ?> | Exp: <?= empty($r['item_exp']) ? 'N/A' : esc($r['item_exp']) ?></small>
+                            <a href="<?= site_url('items/edit/' . $r['item_id']) ?>" class="text-decoration-none fw-semibold"><?= esc($r['item_name'] ?? 'Unknown') ?><?= esc($variationMatch) ?></a>
                         </td>
                         <td><?= $r['quantity'] ?></td>
                         <td class="text-center">
@@ -660,7 +667,7 @@ $currentPath = $seg1 . '/' . $seg2;
                             }
                             ?>
                         </td>
-                        <td><?= esc($r['reason'] ?? '—') ?></td>
+                        <td><?= esc($reasonText !== '' ? $reasonText : '—') ?></td>
                         <td>
                             <?php
                             if ($status === 'approved')

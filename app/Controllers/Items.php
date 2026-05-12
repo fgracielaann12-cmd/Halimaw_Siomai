@@ -95,9 +95,9 @@ class Items extends BaseController
         $totalValue = 0;
         foreach ($updatedItems as $it) {
             if (stripos($it['name'], 'siomai') !== false) {
-                $p12 = (!empty($it['price_12']) && $it['price_12'] > 0) ? $it['price_12'] : 115;
-                $p20 = (!empty($it['price_20']) && $it['price_20'] > 0) ? $it['price_20'] : 185;
-                $p40 = (!empty($it['price_40']) && $it['price_40'] > 0) ? $it['price_40'] : 335;
+                $p12 = (!empty($it['pack_small_price']) && $it['pack_small_price'] > 0) ? $it['pack_small_price'] : 115;
+                $p20 = (!empty($it['pack_medium_price']) && $it['pack_medium_price'] > 0) ? $it['pack_medium_price'] : 185;
+                $p40 = (!empty($it['pack_biggest_price']) && $it['pack_biggest_price'] > 0) ? $it['pack_biggest_price'] : 335;
                 $v1 = (float)($it['pack_small_qty'] ?? 0) * (float)$p12;
                 $v2 = (float)($it['pack_medium_qty'] ?? 0) * (float)$p20;
                 $v3 = (float)($it['pack_biggest_qty'] ?? 0) * (float)$p40;
@@ -214,9 +214,9 @@ class Items extends BaseController
         $totalValue = 0;
         foreach ($updatedItems as $it) {
             if (stripos($it['name'], 'siomai') !== false) {
-                $p12 = (!empty($it['price_12']) && $it['price_12'] > 0) ? $it['price_12'] : 115;
-                $p20 = (!empty($it['price_20']) && $it['price_20'] > 0) ? $it['price_20'] : 185;
-                $p40 = (!empty($it['price_40']) && $it['price_40'] > 0) ? $it['price_40'] : 335;
+                $p12 = (!empty($it['pack_small_price']) && $it['pack_small_price'] > 0) ? $it['pack_small_price'] : 115;
+                $p20 = (!empty($it['pack_medium_price']) && $it['pack_medium_price'] > 0) ? $it['pack_medium_price'] : 185;
+                $p40 = (!empty($it['pack_biggest_price']) && $it['pack_biggest_price'] > 0) ? $it['pack_biggest_price'] : 335;
                 $v1 = (float)($it['pack_small_qty'] ?? 0) * (float)$p12;
                 $v2 = (float)($it['pack_medium_qty'] ?? 0) * (float)$p20;
                 $v3 = (float)($it['pack_biggest_qty'] ?? 0) * (float)$p40;
@@ -289,9 +289,9 @@ class Items extends BaseController
         $totalValue = 0;
         foreach ($updatedItems as $it) {
             if (stripos($it['name'], 'siomai') !== false) {
-                $p12 = (!empty($it['price_12']) && $it['price_12'] > 0) ? $it['price_12'] : 115;
-                $p20 = (!empty($it['price_20']) && $it['price_20'] > 0) ? $it['price_20'] : 185;
-                $p40 = (!empty($it['price_40']) && $it['price_40'] > 0) ? $it['price_40'] : 335;
+                $p12 = (!empty($it['pack_small_price']) && $it['pack_small_price'] > 0) ? $it['pack_small_price'] : 115;
+                $p20 = (!empty($it['pack_medium_price']) && $it['pack_medium_price'] > 0) ? $it['pack_medium_price'] : 185;
+                $p40 = (!empty($it['pack_biggest_price']) && $it['pack_biggest_price'] > 0) ? $it['pack_biggest_price'] : 335;
                 $v1 = (float)($it['pack_small_qty'] ?? 0) * (float)$p12;
                 $v2 = (float)($it['pack_medium_qty'] ?? 0) * (float)$p20;
                 $v3 = (float)($it['pack_biggest_qty'] ?? 0) * (float)$p40;

@@ -1,0 +1,114 @@
+--- submitStockRequest POST DATA ---
+Array
+(
+    [item_id] => 5615
+    [action] => add
+    [quantity] => 10
+    [reason] => test curl
+)
+
+userId: NULL
+--- submitStockRequest POST DATA ---
+Array
+(
+    [item_id] => 5615
+    [action] => add
+    [quantity] => 10
+    [reason] => test curl
+)
+
+userId: NULL
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 9b0c944032159ec91a737ec650768b1e
+    [item_id] => 5615
+    [action] => add
+    [quantity] => 10
+    [reason] => sample
+)
+
+userId: 4
+Insert success: ID 30
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 9b0c944032159ec91a737ec650768b1e
+    [item_id] => 5616
+    [action] => add
+    [quantity] => 10
+    [reason] => sample1 
+)
+
+userId: 19
+Insert success: ID 31
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 9b0c944032159ec91a737ec650768b1e
+    [item_id] => 5616
+    [action] => add
+    [quantity] => 10
+    [reason] => sample2
+)
+
+userId: 19
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 9b0c944032159ec91a737ec650768b1e
+    [item_id] => 5617
+    [action] => add
+    [quantity] => 10
+    [reason] => sample3
+)
+
+userId: 19
+Insert success: ID 32
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 9b0c944032159ec91a737ec650768b1e
+    [item_id] => 5618
+    [action] => add
+    [quantity] => 10
+    [reason] => sample
+)
+
+userId: 19
+Insert success: ID 33
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 9b0c944032159ec91a737ec650768b1e
+    [item_id] => 5618
+    [action] => add
+    [quantity] => 10
+    [reason] => sample
+)
+
+userId: 19
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 9b0c944032159ec91a737ec650768b1e
+    [item_id] => 5619
+    [action] => add
+    [quantity] => 5
+    [reason] => try lang po!
+)
+
+userId: 19
+Insert success: ID 34
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 9b0c944032159ec91a737ec650768b1e
+    [item_id] => 5619
+    [action] => add
+    [quantity] => 10
+    [reason] => [Variation: Medium] samplesample
+)
+
+userId: 19
+Insert success: ID 35

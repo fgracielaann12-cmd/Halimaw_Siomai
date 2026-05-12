@@ -112,7 +112,7 @@ if (!function_exists('getProductSKU')) {
             margin: 0;
             padding: 0;
             display: flex;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* SIDEBAR */
@@ -259,6 +259,9 @@ if (!function_exists('getProductSKU')) {
 
         /* TOP NAVBAR */
         .top-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
             background: white;
             height: 60px;
             padding: 0 20px;
@@ -268,7 +271,6 @@ if (!function_exists('getProductSKU')) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
         }
         .top-navbar h5 {
             margin: 0;
@@ -324,9 +326,12 @@ if (!function_exists('getProductSKU')) {
             flex-shrink: 0;
             transition: all 0.2s;
             position: fixed;
-            top: 15px;
+            top: 9px;
             left: 15px;
             z-index: 1100;
+        }
+        .sidebar-overlay.active ~ .mobile-menu-toggle {
+            display: none !important;
         }
         .mobile-menu-toggle:hover {
             background: var(--sidebar-hover);
@@ -633,6 +638,31 @@ if (!function_exists('getProductSKU')) {
             z-index: 10 !important;
         }
     </style>
+
+    
+
+    <!-- DISABLE BROWSER BACK/FORWARD BUTTONS COMPLETELY -->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Push an empty state immediately
+        history.pushState(null, null, location.href);
+        // If the user tries to go back, instantly push them forward again
+        window.onpopstate = function () {
+            history.go(1);
+        };
+        
+        function enforceClientAuth() {
+            if (localStorage.getItem('auth_status') === 'logged_out') {
+                document.documentElement.style.display = 'none';
+                if(document.body) document.body.style.display = 'none';
+                window.location.replace('/Halimaw_Siomai/index.php/login?blocked=1&cb=' + new Date().getTime());
+            }
+        }
+        enforceClientAuth();
+        window.addEventListener('pageshow', enforceClientAuth);
+    </script>
 </head>
 <body>
     <?php
@@ -1603,10 +1633,11 @@ if (!function_exists('getProductSKU')) {
                             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
                         },
                         body: new URLSearchParams({
-                            product_id: itemId,
-                            pull_out_reason: reason,
+                            item_id: itemId,
+                            variation: variation || "",
+                            reason: reason,
                             quantity: quantity,
-                            reason_note: note
+                            note: note
                         })
                     });
                     const result = await response.json();

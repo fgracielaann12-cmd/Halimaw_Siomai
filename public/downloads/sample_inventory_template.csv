@@ -1,0 +1,3 @@
+product_id,name,sku,price,quantity,category,expiration_date,auto_delete,image_path
+P010,Pork Siomai Small,PRK-SMAI-S12,115.00,50,Food,2027-12-12,0,
+P010-M,Pork Siomai Medium,PRK-SMAI-M20,185.00,50,Food,2027-12-12,0,

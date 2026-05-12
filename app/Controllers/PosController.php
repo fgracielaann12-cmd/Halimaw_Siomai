@@ -19,9 +19,16 @@ class PosController extends BaseController
 
     public function adminIndex()
     {
+        // Fix Bug 2: Explicitly fetch regular items and variations
         $products = $this->productModel
-            ->where('quantity >', 0)
+            ->groupStart()
+                ->where('quantity >', 0)
+                ->orWhere('pack_small_qty >', 0)
+                ->orWhere('pack_medium_qty >', 0)
+                ->orWhere('pack_biggest_qty >', 0)
+            ->groupEnd()
             ->where('status !=', 'expired')
+            ->where('status !=', 'manually deleted')
             ->orderBy('name', 'ASC')
             ->findAll();
 
@@ -30,6 +37,8 @@ class PosController extends BaseController
                 $product['image'] = 'default.jpg';
             }
         }
+
+        $products = $this->groupProductsForPos($products);
 
         return view('pos/index', ['products' => $products]);
     }
@@ -37,8 +46,14 @@ class PosController extends BaseController
     public function staffIndex()
     {
         $products = $this->productModel
-            ->where('quantity >', 0)
+            ->groupStart()
+                ->where('quantity >', 0)
+                ->orWhere('pack_small_qty >', 0)
+                ->orWhere('pack_medium_qty >', 0)
+                ->orWhere('pack_biggest_qty >', 0)
+            ->groupEnd()
             ->where('status !=', 'expired')
+            ->where('status !=', 'manually deleted')
             ->orderBy('name', 'ASC')
             ->findAll();
 
@@ -48,12 +63,111 @@ class PosController extends BaseController
             }
         }
 
+        $products = $this->groupProductsForPos($products);
+
         $items = $this->productModel
             ->where('status !=', 'expired')
+            ->where('status !=', 'manually deleted')
             ->orderBy('name', 'ASC')
             ->findAll();
 
         return view('pos/staff', ['products' => $products, 'items' => $items]);
+    }
+
+    private function groupProductsForPos($products)
+    {
+        $grouped = [];
+        $variationsMap = [];
+
+        foreach ($products as $product) {
+            $isVariation = (isset($product['is_variation_child']) && $product['is_variation_child'] == 1);
+            $groupId = $product['variation_group_id'] ?? null;
+
+            if ($isVariation && $groupId) {
+                // Use explicit variation grouping
+                if (!isset($variationsMap[$groupId])) {
+                    $variationsMap[$groupId] = [
+                        'baseName' => preg_replace('/\s*(Small|Medium|Large|Extra Large|XL|XXL)$/i', '', $product['name']),
+                        'category' => $product['category'] ?? '',
+                        'image' => $product['image'] ?? 'default.jpg',
+                        'image_path' => $product['image_path'] ?? null,
+                        'expiration_date' => $product['expiration_date'] ?? null,
+                        'totalStock' => 0,
+                        'variations' => []
+                    ];
+                }
+                
+                $variationsMap[$groupId]['totalStock'] += (int) $product['quantity'];
+                $variationsMap[$groupId]['variations'][] = [
+                    'label' => $product['variation_label'] ?? $this->extractLabel($product['name']),
+                    'price' => (float) $product['price'],
+                    'stock' => (int) $product['quantity'],
+                    'product_id' => $product['product_id'],
+                    'id' => $product['id']
+                ];
+            } else if (preg_match('/^(.*?)-([A-Za-z0-9]+)$/', $product['product_id'], $matches)) {
+                // Fallback for legacy regex-based variations
+                $baseId = $matches[1];
+                $suffix = $matches[2];
+                
+                $baseName = $product['name'];
+                $label = $suffix;
+                
+                if (preg_match('/^(.*?)\s+(Small|Medium|Large|Extra Large|XL|XXL)$/i', $product['name'], $nameMatches)) {
+                    $baseName = trim($nameMatches[1]);
+                    $label = trim($nameMatches[2]);
+                }
+
+                if (!isset($variationsMap[$baseId])) {
+                    $variationsMap[$baseId] = [
+                        'baseName' => $baseName,
+                        'category' => $product['category'] ?? '',
+                        'image' => $product['image'] ?? 'default.jpg',
+                        'image_path' => $product['image_path'] ?? null,
+                        'expiration_date' => $product['expiration_date'] ?? null,
+                        'totalStock' => 0,
+                        'variations' => []
+                    ];
+                }
+                
+                $variationsMap[$baseId]['totalStock'] += (int) $product['quantity'];
+                $variationsMap[$baseId]['variations'][] = [
+                    'label' => $label,
+                    'price' => (float) $product['price'],
+                    'stock' => (int) $product['quantity'],
+                    'product_id' => $product['product_id'],
+                    'id' => $product['id']
+                ];
+            } else {
+                // Regular item
+                $grouped[$product['product_id']] = $product;
+            }
+        }
+
+        foreach ($variationsMap as $baseId => $groupData) {
+            $grouped[$baseId] = [
+                'id' => $groupData['variations'][0]['id'] ?? 0, 
+                'product_id' => $baseId,
+                'name' => $groupData['baseName'],
+                'category' => $groupData['category'],
+                'image' => $groupData['image'],
+                'image_path' => $groupData['image_path'],
+                'expiration_date' => $groupData['expiration_date'],
+                'quantity' => $groupData['totalStock'],
+                'price' => $groupData['variations'][0]['price'] ?? 0,
+                'is_custom_variation' => true,
+                'custom_variations' => json_encode($groupData['variations'])
+            ];
+        }
+
+        return array_values($grouped);
+    }
+
+    private function extractLabel($name) {
+        if (preg_match('/\s*(Small|Medium|Large|Extra Large|XL|XXL)$/i', $name, $matches)) {
+            return trim($matches[1]);
+        }
+        return 'Regular';
     }
 
 public function sell()
@@ -106,7 +220,7 @@ public function sell()
                 throw new \Exception("Incomplete cart item data");
             }
 
-            $productId = (int) $item['product_id'];
+            $productIdRaw = $item['product_id'];
             $displayQty = (int) $item['qty'];
             $price = (float) $item['price'];
             $type = $item['type'] ?? 'other';
@@ -115,10 +229,19 @@ public function sell()
                 $price = $price * 1.12;
             }
 
-            $product = $itemModel->find($productId);
-            if (!$product) {
-                throw new \Exception("Product ID {$productId} not found");
+            $product = null;
+            if (is_numeric($productIdRaw)) {
+                $product = $itemModel->find((int)$productIdRaw);
             }
+            if (!$product) {
+                $product = $itemModel->where('product_id', $productIdRaw)->first();
+            }
+
+            if (!$product) {
+                throw new \Exception("Product ID {$productIdRaw} not found");
+            }
+
+            $realId = $product['id'];
 
             // 🔑 CALCULATE REAL QUANTITY TO DEDUCT AND WHICH COLUMN TO DEDUCT FROM
             $deductQty = $displayQty;
@@ -153,7 +276,7 @@ public function sell()
             $saleData = [
                 'transaction_id' => $transactionId,
                 'user_id'        => $userId,
-                'product_id'     => $productId,
+                'product_id'     => $realId,
                 'quantity'       => $displayQty, // This now reflects raw count of packs!
                 'pack'           => $item['pack'] ?? ($type === 'patty' ? '6pcs' : null),
                 'price'          => $price,
@@ -164,16 +287,16 @@ public function sell()
             ];
 
             if (!$this->salesModel->insert($saleData)) {
-                throw new \Exception("Failed to record sale for item: " . ($product['name'] ?? $productId));
+                throw new \Exception("Failed to record sale for item: " . ($product['name'] ?? $productIdRaw));
             }
 
             // Deduct from inventory
             $newStock = $currentStock - $deductQty;
             
-            log_message('info', "Deducting Stock: Product ID {$productId}, Name: {$product['name']}, Column: {$stockColumn}, Old: {$currentStock}, Deduct: {$deductQty}, New: {$newStock}");
+            log_message('info', "Deducting Stock: Product ID {$realId} (Raw: {$productIdRaw}), Name: {$product['name']}, Column: {$stockColumn}, Old: {$currentStock}, Deduct: {$deductQty}, New: {$newStock}");
 
-            if (!$itemModel->update($productId, [$stockColumn => $newStock])) {
-                throw new \Exception("Failed to update inventory for: " . ($product['name'] ?? $productId));
+            if (!$itemModel->update($realId, [$stockColumn => $newStock])) {
+                throw new \Exception("Failed to update inventory for: " . ($product['name'] ?? $productIdRaw));
             }
         }
 
@@ -281,8 +404,8 @@ public function sell()
                                     <tr>
                                         <td>' . $itemName . $pack . '</td>
                                         <td style="text-align:center;">' . $qty . '</td>
-                                        <td class="text-right">&#8369;' . number_format($basePrice, 2) . '</td>
-                                        <td class="text-right">&#8369;' . number_format($sub, 2) . '</td>
+                                        <td class="text-right">₱' . number_format($basePrice, 2) . '</td>
+                                        <td class="text-right">₱' . number_format($sub, 2) . '</td>
                                     </tr>';
                 }
                 
@@ -295,11 +418,11 @@ public function sell()
                         $vatStr = '
                                     <tr>
                                         <td colspan="3" class="text-right" style="color:#858796;">Vatable Sales:</td>
-                                        <td class="text-right" style="color:#858796;">&#8369;' . number_format($vatableSales, 2) . '</td>
+                                        <td class="text-right" style="color:#858796;">₱' . number_format($vatableSales, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td colspan="3" class="text-right" style="color:#858796;">12% VAT (Included):</td>
-                                        <td class="text-right" style="color:#858796;">&#8369;' . number_format($vat, 2) . '</td>
+                                        <td class="text-right" style="color:#858796;">₱' . number_format($vat, 2) . '</td>
                                     </tr>';
                     } else {
                         $vat = $rawTotal * 0.12;
@@ -307,11 +430,11 @@ public function sell()
                         $vatStr = '
                                     <tr>
                                         <td colspan="3" class="text-right" style="color:#858796;">Vatable Sales:</td>
-                                        <td class="text-right" style="color:#858796;">&#8369;' . number_format($rawTotal, 2) . '</td>
+                                        <td class="text-right" style="color:#858796;">₱' . number_format($rawTotal, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td colspan="3" class="text-right" style="color:#858796;">12% VAT (Added):</td>
-                                        <td class="text-right" style="color:#858796;">&#8369;' . number_format($vat, 2) . '</td>
+                                        <td class="text-right" style="color:#858796;">₱' . number_format($vat, 2) . '</td>
                                     </tr>';
                     }
                 }
@@ -320,7 +443,7 @@ public function sell()
                 $receiptHtml .= '
                                     <tr class="total-row">
                                         <td colspan="3" class="text-right" style="font-size: 16px;">Grand Total Due:</td>
-                                        <td class="text-right" style="font-size: 16px; color: #1cc88a;">&#8369;' . number_format($grandTotalDisplay, 2) . '</td>
+                                        <td class="text-right" style="font-size: 16px; color: #1cc88a;">₱' . number_format($grandTotalDisplay, 2) . '</td>
                                     </tr>
                                 </tbody>
                             </table>

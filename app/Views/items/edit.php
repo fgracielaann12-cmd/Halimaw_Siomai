@@ -77,7 +77,7 @@
             margin: 0;
             padding: 0;
             display: flex;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* SIDEBAR */
@@ -417,6 +417,31 @@
             z-index: 10 !important;
         }
     </style>
+
+    
+
+    <!-- DISABLE BROWSER BACK/FORWARD BUTTONS COMPLETELY -->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Push an empty state immediately
+        history.pushState(null, null, location.href);
+        // If the user tries to go back, instantly push them forward again
+        window.onpopstate = function () {
+            history.go(1);
+        };
+        
+        function enforceClientAuth() {
+            if (localStorage.getItem('auth_status') === 'logged_out') {
+                document.documentElement.style.display = 'none';
+                if(document.body) document.body.style.display = 'none';
+                window.location.replace('/Halimaw_Siomai/index.php/login?blocked=1&cb=' + new Date().getTime());
+            }
+        }
+        enforceClientAuth();
+        window.addEventListener('pageshow', enforceClientAuth);
+    </script>
 </head>
 <body>
 
@@ -442,116 +467,66 @@
             <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
         <?php endif; ?>
 
+        <?php $isSiomai = stripos($item['name'], 'siomai') !== false; ?>
+        <?php $targetSize = isset($_GET['size']) ? strtolower($_GET['size']) : null; ?>
+
         <!-- Edit Form -->
-        <form action="<?= base_url('items/update/' . $item['id']) ?>" method="post" class="card">
+        <form action="<?= base_url('items/update/' . $item['id'] . ($targetSize ? '?size=' . $targetSize : '')) ?>" method="post" class="card">
             <?= csrf_field() ?>
 
             <div class="mb-3">
                 <label for="product_id" class="form-label">Product ID</label>
                 <input type="text" class="form-control" id="product_id" name="product_id"
-                    value="<?= esc($item['product_id']) ?>" required>
+                    value="<?= esc($targetSize ? $item['product_id'] . '-' . strtoupper(substr($targetSize, 0, 1)) : $item['product_id']) ?>" required>
             </div>
 
             <div class="mb-3">
                 <label for="name" class="form-label">Item Name</label>
-                <input type="text" class="form-control" id="name" name="name" value="<?= esc($item['name']) ?>"
+                <input type="text" class="form-control" id="name" name="name" value="<?= esc($targetSize ? $item['name'] . ' (' . ucfirst($targetSize) . ')' : $item['name']) ?>"
                     required>
             </div>
 
-            <?php $isSiomai = stripos($item['name'], 'siomai') !== false; ?>
-            <?php $targetSize = isset($_GET['size']) ? strtolower($_GET['size']) : null; ?>
+            <?php if ($isSiomai && $targetSize): ?>
+                <?php
+                $qtyVal = 0;
+                $priceVal = 0;
+                $sizeLabel = ucfirst($targetSize);
+                if ($targetSize === 'small') {
+                    $qtyVal = $item['pack_small_qty'] ?? 0;
+                    $priceVal = $item['pack_small_price'] ?? 115;
+                } elseif ($targetSize === 'medium') {
+                    $qtyVal = $item['pack_medium_qty'] ?? 0;
+                    $priceVal = $item['pack_medium_price'] ?? 185;
+                } elseif ($targetSize === 'large') {
+                    $qtyVal = $item['pack_biggest_qty'] ?? 0;
+                    $priceVal = $item['pack_biggest_price'] ?? 335;
+                }
+                ?>
+                <input type="hidden" name="size" value="<?= esc($targetSize) ?>">
+                <div class="mb-3">
+                    <label for="quantity" class="form-label"><?= $sizeLabel ?> Pack Quantity</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity"
+                        value="<?= esc($qtyVal) ?>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="price" class="form-label"><?= $sizeLabel ?> Pack Price</label>
+                    <input type="number" step="0.01" class="form-control" id="price" name="price"
+                        value="<?= esc($priceVal) ?>" required>
+                </div>
+            <?php endif; ?>
 
-            <?php if (!$isSiomai): ?>
+            <?php if (!$targetSize): ?>
             <div class="mb-3">
                 <label for="quantity" class="form-label">Quantity</label>
                 <input type="number" class="form-control" id="quantity" name="quantity"
                     value="<?= esc($item['quantity']) ?>" required>
             </div>
-            <?php else: ?>
-                <input type="hidden" name="quantity" value="<?= esc($item['quantity']) ?>">
-            <?php endif; ?>
             
-            <?php if ($isSiomai): ?>
-                <?php if (!$targetSize || $targetSize === 'small'): ?>
-                <div class="mb-4 mt-2">
-                    <h6 class="fw-bold mb-3 text-primary">
-                        <i class="bi bi-box-seam me-2"></i>
-                        <?= $targetSize ? 'Edit Small Pack Quantity' : 'Small Pack Quantity' ?>
-                    </h6>
-                    <div class="mb-3">
-                        <label class="form-label">Small Pack Qty (12s)</label>
-                        <input type="number" class="form-control" name="pack_small_qty" value="<?= esc($item['pack_small_qty'] ?? 0) ?>">
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <h6 class="fw-bold mb-3 text-primary">
-                        <i class="bi bi-tag me-2"></i>
-                        <?= $targetSize ? 'Edit Small Pack Price' : 'Small Pack Price' ?>
-                    </h6>
-                    <div class="mb-3">
-                        <label class="form-label">Small Pack Price</label>
-                        <input type="number" step="0.01" class="form-control" name="pack_small_price" value="<?= esc($item['pack_small_price'] ?? 115) ?>">
-                    </div>
-                </div>
-                <?php endif; ?>
-
-                <?php if (!$targetSize || $targetSize === 'medium'): ?>
-                <div class="mb-4 <?= !$targetSize ? 'mt-4 border-top pt-4' : 'mt-2' ?>">
-                    <h6 class="fw-bold mb-3 text-primary">
-                        <i class="bi bi-box-seam me-2"></i>
-                        <?= $targetSize ? 'Edit Medium Pack Quantity' : 'Medium Pack Quantity' ?>
-                    </h6>
-                    <div class="mb-3">
-                        <label class="form-label">Medium Pack Qty (20s)</label>
-                        <input type="number" class="form-control" name="pack_medium_qty" value="<?= esc($item['pack_medium_qty'] ?? 0) ?>">
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <h6 class="fw-bold mb-3 text-primary">
-                        <i class="bi bi-tag me-2"></i>
-                        <?= $targetSize ? 'Edit Medium Pack Price' : 'Medium Pack Price' ?>
-                    </h6>
-                    <div class="mb-3">
-                        <label class="form-label">Medium Pack Price</label>
-                        <input type="number" step="0.01" class="form-control" name="pack_medium_price" value="<?= esc($item['pack_medium_price'] ?? 185) ?>">
-                    </div>
-                </div>
-                <?php endif; ?>
-
-                <?php if (!$targetSize || $targetSize === 'large'): ?>
-                <div class="mb-4 <?= !$targetSize ? 'mt-4 border-top pt-4' : 'mt-2' ?>">
-                    <h6 class="fw-bold mb-3 text-primary">
-                        <i class="bi bi-box-seam me-2"></i>
-                        <?= $targetSize ? 'Edit Large Pack Quantity' : 'Large Pack Quantity' ?>
-                    </h6>
-                    <div class="mb-3">
-                        <label class="form-label">Large Pack Qty (40s)</label>
-                        <input type="number" class="form-control" name="pack_biggest_qty" value="<?= esc($item['pack_biggest_qty'] ?? 0) ?>">
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <h6 class="fw-bold mb-3 text-primary">
-                        <i class="bi bi-tag me-2"></i>
-                        <?= $targetSize ? 'Edit Large Pack Price' : 'Large Pack Price' ?>
-                    </h6>
-                    <div class="mb-3">
-                        <label class="form-label">Large Pack Price</label>
-                        <input type="number" step="0.01" class="form-control" name="pack_biggest_price" value="<?= esc($item['pack_biggest_price'] ?? 335) ?>">
-                    </div>
-                </div>
-                <?php endif; ?>
-            <?php endif; ?>
-
-
-
-            <?php if (!$isSiomai): ?>
             <div class="mb-3">
                 <label for="price" class="form-label">General Price</label>
                 <input type="number" step="0.01" class="form-control" id="price" name="price"
                     value="<?= esc($item['price']) ?>" required>
             </div>
-            <?php else: ?>
-                <input type="hidden" name="price" value="<?= esc($item['price']) ?>">
             <?php endif; ?>
 
             <div class="mb-3">

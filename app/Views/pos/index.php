@@ -1,4 +1,4 @@
-﻿<?php 
+<?php 
 $currentPath = uri_string(); 
 
 function isActive($paths) {
@@ -94,7 +94,7 @@ function isActive($paths) {
             margin: 0;
             padding: 0;
             display: flex;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* SIDEBAR */
@@ -1191,6 +1191,31 @@ function isActive($paths) {
             -moz-appearance: textfield;
         }
     </style>
+
+    
+
+    <!-- DISABLE BROWSER BACK/FORWARD BUTTONS COMPLETELY -->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Push an empty state immediately
+        history.pushState(null, null, location.href);
+        // If the user tries to go back, instantly push them forward again
+        window.onpopstate = function () {
+            history.go(1);
+        };
+        
+        function enforceClientAuth() {
+            if (localStorage.getItem('auth_status') === 'logged_out') {
+                document.documentElement.style.display = 'none';
+                if(document.body) document.body.style.display = 'none';
+                window.location.replace('/Halimaw_Siomai/index.php/login?blocked=1&cb=' + new Date().getTime());
+            }
+        }
+        enforceClientAuth();
+        window.addEventListener('pageshow', enforceClientAuth);
+    </script>
 </head>
 
 <body>
@@ -1286,8 +1311,13 @@ function isActive($paths) {
                         if (($product['quantity'] ?? 0) <= 0) continue;
 
                         $nameLower = strtolower($product['name']);
-                        $isSiomai = strpos($nameLower, 'siomai') !== false;
-                        $isPatty = strpos($nameLower, 'burger patty') !== false || strpos($nameLower, 'patty') !== false;
+                        $isCustomVar = !empty($product['is_custom_variation']);
+                        $hasPackPrices = (!empty($product['pack_small_price']) && $product['pack_small_price'] > 0);
+                        
+                        // Fix Bug 1: Only show siomai pack options if it actually has pack data (Legacy system)
+                        // Fix Bug 2: Move grouped variations to 'other' to use the custom_variation modal
+                        $isSiomai = (strpos($nameLower, 'siomai') !== false && $hasPackPrices && !$isCustomVar);
+                        $isPatty = (strpos($nameLower, 'burger patty') !== false || strpos($nameLower, 'patty') !== false) && !$isCustomVar;
 
                         if ($isSiomai) {
                             $siomaiProducts[] = $product;
@@ -1300,7 +1330,7 @@ function isActive($paths) {
 
                     // 🔸 Render Siomai (with pack dropdown)
                     foreach ($siomaiProducts as $product):
-                        $img = $product['image'] ?? 'default.jpg';
+                        $imgSrc = !empty($product['image_path']) ? base_url($product['image_path']) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
                         $stock = (int) ($product['quantity'] ?? 0);
                         $isLowStock = $stock <= 10;
                     ?>
@@ -1310,19 +1340,19 @@ function isActive($paths) {
                              data-type="siomai"
                              data-product-id="<?= $product['id'] ?>"
                              data-stock="<?= $stock ?>"
-                             data-image="<?= base_url('public/Images/' . $img) ?>"
+                             data-image="<?= $imgSrc ?>"
                              data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
                              data-prices='{"Small Pack":<?=($product['pack_small_price'] ?? 115)?>,"Medium Pack":<?=($product['pack_medium_price'] ?? 185)?>,"Large Pack":<?=($product['pack_biggest_price'] ?? 335)?>}'
                              data-packstocks='{"Small Pack":<?=($product['pack_small_qty'] ?? 0)?>,"Medium Pack":<?=($product['pack_medium_qty'] ?? 0)?>,"Large Pack":<?=($product['pack_biggest_qty'] ?? 0)?>}'>
                             
-                            <img src="<?= base_url('public/Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
+                            <img src="<?= $imgSrc ?>" alt="<?= esc($product['name']) ?>">
                             <h6><?= esc($product['name']) ?></h6>
                         </div>
                             <?php endforeach; ?>
 
                             <!-- 🔸 Render Patty (no dropdown, but type=patty) -->
                             <?php foreach ($pattyProducts as $product):
-                            $img = $product['image'] ?? 'default.jpg';
+                            $imgSrc = !empty($product['image_path']) ? base_url($product['image_path']) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
                             $stock = (int) ($product['quantity'] ?? 0);
                             $isLowStock = $stock <= 10;
                             $price = 190.00; // Fixed price
@@ -1333,22 +1363,24 @@ function isActive($paths) {
                              data-type="patty"
                              data-product-id="<?= $product['id'] ?>"
                              data-stock="<?= $stock ?>"
-                             data-image="<?= base_url('public/Images/' . $img) ?>"
+                             data-image="<?= $imgSrc ?>"
                              data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
                              data-price="<?= $price ?>">
 
-                            <img src="<?= base_url('public/Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
+                            <img src="<?= $imgSrc ?>" alt="<?= esc($product['name']) ?>">
                             <h6><?= esc($product['name']) ?></h6>
                             </div>
                             <?php endforeach; ?>
 
                             <!-- 🔸 Render Other Products -->
                             <?php foreach ($otherProducts as $product):
-                            $img = $product['image'] ?? 'default.jpg';
+                            $imgSrc = !empty($product['image_path']) ? base_url($product['image_path']) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
                             $stock = (int) ($product['quantity'] ?? 0);
                             $isLowStock = $stock <= 10;
                             $nameLower = strtolower($product['name']);
                             $price = $product['price'] ?? 0;
+                            
+                            $isCustomVar = !empty($product['is_custom_variation']);
 
                             // 🔥 SET CORRECT PRICE FOR KEY ITEMS
                             if (strpos($nameLower, 'burger patty') !== false) {
@@ -1360,18 +1392,27 @@ function isActive($paths) {
                             } elseif (strpos($nameLower, 'toyomansi') !== false) {
                             $price = 65.00;
                             }
+                            
+                            $itemType = 'other';
+                            if (strpos($nameLower, 'patty') !== false) {
+                                $itemType = 'patty';
+                            }
+                            if ($isCustomVar) {
+                                $itemType = 'custom_variation';
+                            }
                             ?>
                             <div class="pos-item-card <?= $stock <= 0 ? 'out-of-stock' : '' ?>"
                             onclick="openShopeeModal(this)"
                             data-name="<?= esc($product['name']) ?>"
-                            data-type="other"
+                            data-type="<?= $itemType ?>"
                             data-product-id="<?= $product['id'] ?>"
                             data-stock="<?= $stock ?>"
-                            data-image="<?= base_url('public/Images/' . $img) ?>"
+                            data-image="<?= $imgSrc ?>"
                             data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
-                            data-price="<?= $price ?>">
+                            data-price="<?= $price ?>"
+                            <?= $isCustomVar ? "data-variations='" . esc($product['custom_variations']) . "'" : "" ?>>
 
-                            <img src="<?= base_url('public/Images/' . $img) ?>" alt="<?= esc($product['name']) ?>">
+                            <img src="<?= $imgSrc ?>" alt="<?= esc($product['name']) ?>">
                             <h6><?= esc($product['name']) ?></h6>
                             </div><?php endforeach; ?>
                     <?php if (empty($siomaiProducts) && empty($pattyProducts) && empty($otherProducts)): ?>
@@ -1902,6 +1943,54 @@ function isActive($paths) {
                     currentModalItem.stock = 0;
                     document.getElementById('smPiecesRow').style.display = 'none';
                 }
+            } else if (type === 'custom_variation') {
+                document.getElementById('smStockLabel').textContent = "Left";
+                varRow.style.display = 'flex';
+                
+                const customVars = JSON.parse(card.dataset.variations || '[]');
+                let first = true;
+                
+                for (const v of customVars) {
+                    const btn = document.createElement('button');
+                    btn.textContent = v.label;
+                    
+                    if(v.stock <= 0) {
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                        btn.disabled = true;
+                    }
+                    
+                    if (first && v.stock > 0) {
+                        btn.classList.add('active');
+                        currentModalItem.pack = v.label;
+                        currentModalItem.price = parseFloat(v.price);
+                        currentModalItem.stock = parseInt(v.stock);
+                        currentModalItem.packSize = 1;
+                        currentModalItem.productId = parseInt(v.id);
+                        document.getElementById('smStock').textContent = v.stock + " left";
+                        first = false;
+                    }
+                    
+                    btn.onclick = () => {
+                        varContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        currentModalItem.pack = v.label;
+                        currentModalItem.price = parseFloat(v.price);
+                        currentModalItem.stock = parseInt(v.stock);
+                        currentModalItem.packSize = 1;
+                        currentModalItem.productId = parseInt(v.id);
+                        document.getElementById('smStock').textContent = v.stock + " left";
+                        document.getElementById('smQtyInput').value = 1;
+                        updateSmPriceDisplay();
+                    };
+                    varContainer.appendChild(btn);
+                }
+                
+                if (first) {
+                    document.getElementById('smStock').textContent = "0 left";
+                    currentModalItem.stock = 0;
+                }
+                document.getElementById('smPiecesRow').style.display = 'none';
             } else {
                 document.getElementById('smStockLabel').textContent = "Left";
                 varRow.style.display = 'none';

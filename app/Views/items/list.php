@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -76,7 +76,7 @@
             margin: 0;
             padding: 0;
             display: flex;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* SIDEBAR */
@@ -146,24 +146,6 @@
             text-decoration: none;
         }
 
-            50% { background-position: 100% 50%; box-shadow: 0 0 10px rgba(78,115,223,0.4); }
-            100% { background-position: 0% 50%; box-shadow: 0 0 0 rgba(78,115,223,0); }
-        }
-
-            50% { background-position: 100% 50%; box-shadow: 0 0 10px rgba(78,115,223,0.4); }
-            100% { background-position: 0% 50%; box-shadow: 0 0 0 rgba(78,115,223,0); }
-        }
-
-            50% { background-position: 100% 50%; box-shadow: 0 0 12px rgba(78,115,223,0.6); filter: brightness(1.1); }
-            100% { background-position: 0% 50%; box-shadow: 0 0 0 rgba(78,115,223,0); filter: brightness(1); }
-        }
-
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-            70% { box-shadow: 0 0 0 10px rgba(78, 115, 223, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(78, 115, 223, 0); }
-        }
         @keyframes navGlow {
             0% { box-shadow: 0 0 5px rgba(78,115,223,0.3); filter: brightness(1); }
             50% { box-shadow: 0 0 15px rgba(78,115,223,0.9); filter: brightness(1.2); }
@@ -203,11 +185,14 @@
 
         /* TOP NAVBAR */
         .top-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
             background: white;
             padding: 12px 20px;
-            border-radius: var(--border-radius);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
             box-shadow: var(--card-shadow);
-            margin-bottom: 24px;
+            margin: 0 0 15px 0 !important;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -635,6 +620,31 @@
             z-index: 10 !important;
         }
     </style>
+
+    
+
+    <!-- DISABLE BROWSER BACK/FORWARD BUTTONS COMPLETELY -->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Push an empty state immediately
+        history.pushState(null, null, location.href);
+        // If the user tries to go back, instantly push them forward again
+        window.onpopstate = function () {
+            history.go(1);
+        };
+        
+        function enforceClientAuth() {
+            if (localStorage.getItem('auth_status') === 'logged_out') {
+                document.documentElement.style.display = 'none';
+                if(document.body) document.body.style.display = 'none';
+                window.location.replace('/Halimaw_Siomai/index.php/login?blocked=1&cb=' + new Date().getTime());
+            }
+        }
+        enforceClientAuth();
+        window.addEventListener('pageshow', enforceClientAuth);
+    </script>
 </head>
 <body>
 
@@ -717,7 +727,8 @@ function getSku($name, $variation = '') {
         <?php
         $totalValue = array_reduce($items, fn($sum, $item) => $sum + (($item['price'] ?? 0) * ($item['quantity'] ?? 0)), 0);
         $lowStockItems = array_filter($items, function($i) {
-            if (stripos($i['name'], 'siomai') !== false) {
+            $hasPackQty = ($i['pack_small_qty'] ?? 0) > 0 || ($i['pack_medium_qty'] ?? 0) > 0 || ($i['pack_biggest_qty'] ?? 0) > 0;
+            if ($hasPackQty) {
                 return ($i['pack_small_qty'] ?? 0) <= 10 || ($i['pack_medium_qty'] ?? 0) <= 10 || ($i['pack_biggest_qty'] ?? 0) <= 10;
             }
             return $i['quantity'] <= 10;
@@ -782,12 +793,12 @@ function getSku($name, $variation = '') {
                     </button>
                     <ul class="dropdown-menu w-100" aria-labelledby="sortFilterBtn">
                         <li><a class="dropdown-item active" href="#" onclick="selectSort('default', 'Default', event)">Default</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="selectSort('name_asc', 'Name (A–Z)', event)">Name (A–Z)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="selectSort('name_desc', 'Name (Z–A)', event)">Name (Z–A)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="selectSort('quantity_asc', 'Quantity (Low → High)', event)">Quantity (Low → High)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="selectSort('quantity_desc', 'Quantity (High → Low)', event)">Quantity (High → Low)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="selectSort('date_asc', 'Date (Oldest → Newest)', event)">Date (Oldest → Newest)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="selectSort('date_desc', 'Date (Newest → Oldest)', event)">Date (Newest → Oldest)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectSort('name_asc', 'Name (A-Z)', event)">Name (A-Z)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectSort('name_desc', 'Name (Z-A)', event)">Name (Z-A)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectSort('quantity_asc', 'Quantity (Low - High)', event)">Quantity (Low - High)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectSort('quantity_desc', 'Quantity (High - Low)', event)">Quantity (High - Low)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectSort('date_asc', 'Date (Oldest - Newest)', event)">Date (Oldest - Newest)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectSort('date_desc', 'Date (Newest - Oldest)', event)">Date (Newest - Oldest)</a></li>
                         <li><a class="dropdown-item" href="#" onclick="selectSort('expiring_soon', 'Expiring Soon', event)">Expiring Soon</a></li>
                         <li><a class="dropdown-item" href="#" onclick="selectSort('expired', 'Expired', event)">Expired</a></li>
                         <li><a class="dropdown-item" href="#" onclick="selectSort('active', 'Active', event)">Active</a></li>
@@ -815,7 +826,7 @@ function getSku($name, $variation = '') {
                 <div class="floating-alert expiry-alert">
                     <i class="bi bi-shield-exclamation me-2 fs-6"></i>
                     You have <?= count($expiringItems) ?> item(s) expiring soon!
-                    <span class="ms-2 text-decoration-underline" style="font-size: 0.85rem;">View details →</span>
+                    <span class="ms-2 text-decoration-underline" style="font-size: 0.85rem;">View details</span>
                 </div>
             </a>
         <?php endif; ?>
@@ -848,7 +859,7 @@ function getSku($name, $variation = '') {
                         if (empty($item['expiration_date']) || $item['expiration_date'] === '0000-00-00') {
                             $status = 'na';
                             $statusLabel = "N/A";
-                            $daysLeftText = "—";
+                            $daysLeftText = "&mdash;";
                         } else {
                             $expiration = new DateTime($item['expiration_date']);
                             $interval = $today->diff($expiration);
@@ -871,14 +882,14 @@ function getSku($name, $variation = '') {
                                 $daysLeftText = "$daysLeft days left";
                             }
                         }
-                        $isSiomai = stripos($item['name'], 'siomai') !== false;
-                        if ($isSiomai) {
+                        $hasPackQty = ($item['pack_small_qty'] ?? 0) > 0 || ($item['pack_medium_qty'] ?? 0) > 0 || ($item['pack_biggest_qty'] ?? 0) > 0;
+                        if ($hasPackQty) {
                             $isLowStock = ($item['pack_small_qty'] ?? 0) <= 10 || ($item['pack_medium_qty'] ?? 0) <= 10 || ($item['pack_biggest_qty'] ?? 0) <= 10;
                         } else {
                             $isLowStock = $item['quantity'] <= 10;
                         }
                     ?>
-                    <?php if (stripos($item['name'], 'siomai') !== false): ?>
+                    <?php if ($hasPackQty): ?>
                         <?php 
                         $sizes = [
                             ['s' => '-S', 's_sku' => 'S12', 'l' => 'Small', 'q' => $item['pack_small_qty'] ?? 0, 'p' => (!empty($item['price_12']) && $item['price_12'] > 0) ? $item['price_12'] : 115, 'ql' => '(12)'],
@@ -890,7 +901,7 @@ function getSku($name, $variation = '') {
                         <tr data-id="<?= $item['id'] ?>" data-low-stock="<?= ($sz['q'] <= 10) ? 'true' : 'false' ?>" <?= $idx > 0 ? 'style="border-top:1px dashed #dee2e6;"' : '' ?>>
                             <td class="text-center align-middle"><?= esc($item['product_id']) ?><?= $sz['s'] ?></td>
                             <td class="text-center align-middle"><?= esc($item['name']) ?> <small class="text-muted">(<?= $sz['l'] ?>)</small></td>
-                            <td class="text-center align-middle"><?= esc(getSku($item['name'], $sz['s_sku'])) ?></td>
+                            <td class="text-center align-middle"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?></td>
                             <td class="text-center align-middle text-nowrap">₱<?= number_format($sz['p'], 2) ?></td>
                             <td class="text-center align-middle text-nowrap"><span><?= esc($sz['q']) ?></span> <small class="text-muted"><?= $sz['ql'] ?></small></td>
                             <td class="text-center align-middle hide-mobile">
@@ -899,8 +910,8 @@ function getSku($name, $variation = '') {
                                 echo $totalValue > 0 ? number_format(($val / $totalValue) * 100, 1) : '0';
                                 ?>%
                             </td>
-                            <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '—') ?></td>
-                            <td class="text-center align-middle hide-mobile"><?= empty($item['expiration_date']) ? '—' : esc($item['expiration_date']) ?></td>
+                            <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
+                            <td class="text-center align-middle hide-mobile"><?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?></td>
                             <td class="text-center align-middle">
                                 <span class="badge 
                                     <?= $status == 'expired' ? 'bg-danger' :
@@ -913,7 +924,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
                                     <button type="button" class="btn btn-sm btn-info text-white" 
-                                            onclick="showItemInfo('<?= esc($item['product_id']) ?><?= $sz['s'] ?>', '<?= esc($item['name']) ?> (<?= $sz['l'] ?>)', '<?= esc(getSku($item['name'], $sz['s_sku'])) ?>', '<?= esc($item['category'] ?? '—') ?>', '<?= esc($sz['q']) ?> <?= $sz['ql'] ?>', '₱<?= number_format($sz['p'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '—' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\'><?= $statusLabel ?></span>')" title="View Info">
+                                            onclick="showItemInfo('<?= esc($item['product_id']) ?><?= $sz['s'] ?>', '<?= esc($item['name']) ?> (<?= $sz['l'] ?>)', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($sz['q']) ?> <?= $sz['ql'] ?>', '₱<?= number_format($sz['p'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
                                         <i class="bi bi-info-circle"></i>
                                     </button>
                                     <a href="<?= site_url('items/edit/' . $item['id'] . '?size=' . strtolower($sz['l'])) ?>" class="btn btn-sm btn-edit">
@@ -936,7 +947,7 @@ function getSku($name, $variation = '') {
                         <tr data-id="<?= $item['id'] ?>" data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>">
                             <td class="text-center align-middle"><?= esc($item['product_id']) ?></td>
                             <td class="text-center align-middle"><?= esc($item['name']) ?></td>
-                            <td class="text-center align-middle"><?= esc(getSku($item['name'])) ?></td>
+                            <td class="text-center align-middle"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?></td>
                             <td class="text-center align-middle text-nowrap">₱<?= number_format($item['price'], 2) ?></td>
                             <td class="text-center align-middle text-nowrap"><span><?= esc($item['quantity']) ?></span><?php if (stripos($item['name'], 'burger patty') !== false): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?></td>
                             <td class="text-center align-middle hide-mobile">
@@ -945,8 +956,8 @@ function getSku($name, $variation = '') {
                                 echo $totalValue > 0 ? number_format(($val / $totalValue) * 100, 1) : '0';
                                 ?>%
                             </td>
-                            <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '—') ?></td>
-                            <td class="text-center align-middle hide-mobile"><?= empty($item['expiration_date']) ? '—' : esc($item['expiration_date']) ?></td>
+                            <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
+                            <td class="text-center align-middle hide-mobile"><?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?></td>
                             <td class="text-center align-middle">
                                 <span class="badge 
                                     <?= $status == 'expired' ? 'bg-danger' :
@@ -959,7 +970,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
                                     <button type="button" class="btn btn-sm btn-info text-white" 
-                                            onclick="showItemInfo('<?= esc($item['product_id']) ?>', '<?= esc($item['name']) ?>', '<?= esc(getSku($item['name'])) ?>', '<?= esc($item['category'] ?? '—') ?>', '<?= esc($item['quantity']) ?>', '₱<?= number_format($item['price'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '—' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\'><?= $statusLabel ?></span>')" title="View Info">
+                                            onclick="showItemInfo('<?= esc($item['product_id']) ?>', '<?= esc($item['name']) ?>', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($item['quantity']) ?>', '₱<?= number_format($item['price'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
                                         <i class="bi bi-info-circle"></i>
                                     </button>
                                     <a href="<?= site_url('items/edit/' . $item['id']) ?>" class="btn btn-sm btn-edit">

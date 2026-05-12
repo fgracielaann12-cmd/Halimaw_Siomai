@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -224,6 +224,31 @@
             z-index: 10 !important;
         }
     </style>
+
+    
+
+    <!-- DISABLE BROWSER BACK/FORWARD BUTTONS COMPLETELY -->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Push an empty state immediately
+        history.pushState(null, null, location.href);
+        // If the user tries to go back, instantly push them forward again
+        window.onpopstate = function () {
+            history.go(1);
+        };
+        
+        function enforceClientAuth() {
+            if (localStorage.getItem('auth_status') === 'logged_out') {
+                document.documentElement.style.display = 'none';
+                if(document.body) document.body.style.display = 'none';
+                window.location.replace('/Halimaw_Siomai/index.php/login?blocked=1&cb=' + new Date().getTime());
+            }
+        }
+        enforceClientAuth();
+        window.addEventListener('pageshow', enforceClientAuth);
+    </script>
 </head>
 
 <body class="bg-light">

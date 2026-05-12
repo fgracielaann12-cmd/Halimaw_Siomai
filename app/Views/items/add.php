@@ -75,7 +75,7 @@
             margin: 0;
             padding: 0;
             display: flex;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* SIDEBAR */
@@ -468,6 +468,31 @@
             z-index: 10 !important;
         }
     </style>
+
+    
+
+    <!-- DISABLE BROWSER BACK/FORWARD BUTTONS COMPLETELY -->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Push an empty state immediately
+        history.pushState(null, null, location.href);
+        // If the user tries to go back, instantly push them forward again
+        window.onpopstate = function () {
+            history.go(1);
+        };
+        
+        function enforceClientAuth() {
+            if (localStorage.getItem('auth_status') === 'logged_out') {
+                document.documentElement.style.display = 'none';
+                if(document.body) document.body.style.display = 'none';
+                window.location.replace('/Halimaw_Siomai/index.php/login?blocked=1&cb=' + new Date().getTime());
+            }
+        }
+        enforceClientAuth();
+        window.addEventListener('pageshow', enforceClientAuth);
+    </script>
 </head>
 <body>
 
@@ -481,17 +506,55 @@
             <h2>Add New Item</h2>
             <form id="itemForm" method="post" action="<?= base_url('/items/store') ?>" enctype="multipart/form-data" novalidate>
                 <?= csrf_field() ?>
-                <input type="text" name="product_id" class="form-control" placeholder="Product ID" value="<?= esc($nextProductId ?? '') ?>" required>
-                <input type="text" name="name" class="form-control" placeholder="Name" required>
-                <input type="number" name="quantity" class="form-control" placeholder="General Quantity" min="0" required>
+                <input type="text" name="product_id" class="form-control" placeholder="Product ID" value="<?= esc($nextProductId ?? '') ?>" required readonly>
+                <input type="text" name="name" class="form-control" placeholder="Product Name" required>
+                <input type="text" name="sku" class="form-control" placeholder="SKU Code (e.g. PRK-SMAI-S12)" required>
+
+                <!-- Size Variation Override Checkbox -->
+                <div class="form-check form-switch my-3 text-start ps-5">
+                    <input class="form-check-input" type="checkbox" id="enable_variations" name="enable_variations" value="1">
+                    <label class="form-check-label fw-bold text-secondary" for="enable_variations">Size Variation Override</label>
+                </div>
+
+                <!-- Variations Section -->
+                <div class="card mb-3 border-0 shadow-sm" id="variations_section" style="display:none; background: #fafbfc; border-radius: 8px;">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold text-secondary small">Product Size Variations</span>
+                            <button type="button" class="btn btn-sm btn-primary" id="add_size_variation_btn">
+                                <i class="bi bi-plus-lg me-1"></i> Add Size Variation
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm align-middle text-center" id="variationsTable" style="font-size: 0.9rem;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Variation Label (Size)</th>
+                                        <th>SKU Suffix</th>
+                                        <th>Price Override (₱)</th>
+                                        <th>Quantity</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="variations_table_body">
+                                    <!-- Dynamic size variation rows will appear here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="number" name="quantity" class="form-control" placeholder="Total Quantity" min="0" required>
                 <input type="number" step="0.01" name="price" class="form-control" placeholder="Price (₱)" min="0" required>
 
-                <input type="date" name="expiration_date" id="expiration_date" class="form-control">
+                <input type="date" name="expiration_date" id="expiration_date" class="form-control" placeholder="mm/dd/yyyy">
 
                 <select name="category" id="category" class="form-select" required>
                     <option value="">Select Category</option>
                     <option value="Food">Food</option>
                     <option value="Non-Food">Non-Food</option>
+                    <option value="Condiments">Condiments</option>
                 </select>
 
                 <div id="subcategoryContainer" style="display:none;">
@@ -503,9 +566,28 @@
                 </div>
 
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="auto_delete" id="auto_delete" disabled>
-                    <label class="form-check-label" for="auto_delete">Auto delete on expiry</label>
+                    <input class="form-check-input" type="checkbox" name="auto_delete" id="auto_delete">
+                    <label class="form-check-label" for="auto_delete">Auto Delete on Expiry</label>
                 </div>
+
+                <!-- Product Image Upload -->
+                <div class="file-upload-container mt-3" id="imageDropArea" style="cursor: pointer; position: relative; padding: 0;">
+                    <div class="file-upload-label" style="cursor: pointer; display: block; padding: 30px;">
+                        Drag & Drop Product Image here or <br>
+                        <span style="text-decoration: underline;">Click to Browse</span><br>
+                        <small class="text-muted">(JPG, PNG, WEBP)</small>
+                    </div>
+                    <input type="file" name="product_image" id="product_image" accept=".jpg, .jpeg, .png, .webp" style="display:none;">
+                    <div id="imagePreviewContainer" style="display:none; margin-bottom: 15px; position: relative;">
+                        <img id="imagePreview" src="" style="max-width:100%; max-height:150px; object-fit:contain; border-radius:8px; border: 1px solid #ddd; padding: 3px; background: white;">
+                    </div>
+                    <div id="imageNameDisplay" class="file-name-display mb-3" style="display:none; margin-left: 15px; margin-right: 15px;">
+                        <span id="imageName"></span>
+                        <i class="bi bi-x-circle remove-file-btn" id="removeImageBtn"></i>
+                    </div>
+                </div>
+
+
 
                 <button class="submit-button" type="submit">Add New Item</button>
             </form>
@@ -517,18 +599,18 @@
             <form id="uploadForm" method="post" action="<?= base_url('/items/bulk-upload') ?>" enctype="multipart/form-data">
                 <?= csrf_field() ?>
                 <div class="file-upload-container" id="dropArea">
-                    <label for="bulk_file" class="file-upload-label">
+                    <div class="file-upload-label">
                         Drag & Drop CSV here or <br>
                         <span style="text-decoration: underline;">Click to Browse</span>
-                    </label>
+                    </div>
                     <input type="file" name="bulk_file" id="bulk_file" accept=".csv" style="display:none;">
                     <div id="fileNameDisplay" class="file-name-display">
                         <span id="fileName"></span>
                         <i class="bi bi-x-circle remove-file-btn" id="removeFileBtn"></i>
                     </div>
                     <div class="form-text mt-2 text-muted">
-                        Format: <b>Product ID, Name, Quantity, Expiration Date, Category, Subcategory</b><br>
-                        <small>Download <a href="<?= base_url('SampleBulkUpload.csv') ?>" class="text-primary">sample template</a></small>
+                        Format: <b>product_id, name, sku, price, quantity, category, expiration_date, auto_delete, image_path</b><br>
+                        <small>Download <a href="<?= base_url('downloads/sample_inventory_template.csv') ?>" class="text-primary" download>sample template</a></small>
                     </div>
                 </div>
                 <button class="submit-button mt-3" type="submit">Upload CSV File</button>
@@ -610,8 +692,10 @@ document.addEventListener('DOMContentLoaded', () => {
         expirationInput.classList.add('disabled');
     }
     function enableAutoDelete(enable) {
-        autoDelete.disabled = !enable;
-        autoDelete.checked = enable;
+        if (autoDelete) {
+            autoDelete.disabled = !enable;
+            autoDelete.checked = enable;
+        }
     }
 
     itemForm.addEventListener('submit', function (e) {
@@ -693,6 +777,167 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Only CSV files are allowed.');
         }
     });
+
+    // Image Upload
+    const imgDropArea = document.getElementById('imageDropArea');
+    const imgInput = document.getElementById('product_image');
+    const imgNameDisplay = document.getElementById('imageNameDisplay');
+    const imgNameText = document.getElementById('imageName');
+    const imgRemoveBtn = document.getElementById('removeImageBtn');
+
+    imgDropArea.addEventListener('click', (e) => {
+        if (e.target.closest('#removeImageBtn') || e.target.closest('#imageNameDisplay') || e.target.closest('#imagePreviewContainer')) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+        imgInput.click();
+    });
+    imgDropArea.addEventListener('dragover', e => { 
+        e.preventDefault(); 
+        imgDropArea.classList.add('dragover'); 
+    });
+    imgDropArea.addEventListener('dragleave', () => imgDropArea.classList.remove('dragover'));
+    imgDropArea.addEventListener('drop', e => {
+        e.preventDefault();
+        imgDropArea.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (file.type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+                imgInput.files = e.dataTransfer.files;
+                showImgName(file);
+            } else {
+                alert('Please upload a valid JPG, PNG, or WEBP image');
+            }
+        }
+    });
+    imgInput.addEventListener('change', () => { 
+        if (imgInput.files.length > 0) {
+            const file = imgInput.files[0];
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (file.type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+                showImgName(file);
+            } else {
+                alert('Please upload a valid image file');
+                imgInput.value = '';
+            }
+        }
+    });
+    imgRemoveBtn.addEventListener('click', (e) => { 
+        e.stopPropagation();
+        imgInput.value = ''; 
+        imgNameDisplay.style.display = 'none'; 
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const previewImg = document.getElementById('imagePreview');
+        if (previewContainer && previewImg) {
+            previewContainer.style.display = 'none';
+            previewImg.src = '';
+        }
+    });
+    function showImgName(file) { 
+        imgNameText.textContent = file.name; 
+        imgNameDisplay.style.display = 'inline-flex'; 
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const previewImg = document.getElementById('imagePreview');
+            if (previewContainer && previewImg) {
+                previewImg.src = e.target.result;
+                previewContainer.style.display = 'block';
+            }
+        }
+        reader.readAsDataURL(file);
+    }
+
+    // Variations Logic
+    const enableVariations = document.getElementById('enable_variations');
+    const variationsSection = document.getElementById('variations_section');
+    const addSizeVariationBtn = document.getElementById('add_size_variation_btn');
+    const variationsTableBody = document.getElementById('variations_table_body');
+    const mainPrice = document.querySelector('input[name="price"]');
+    const mainQuantity = document.querySelector('input[name="quantity"]');
+
+    function createEditableVariationRow(label = '', suffix = '', price = '', quantity = '') {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <input type="text" name="var_label[]" class="form-control form-control-sm" placeholder="e.g. (Small)" value="${label}" required>
+            </td>
+            <td>
+                <input type="text" name="var_sku_suffix[]" class="form-control form-control-sm" placeholder="e.g. -S" value="${suffix}">
+            </td>
+            <td>
+                <input type="number" step="0.01" name="var_price[]" class="form-control form-control-sm" placeholder="Use Base Price" value="${price}">
+            </td>
+            <td>
+                <input type="number" name="var_quantity[]" class="form-control form-control-sm" placeholder="0" value="${quantity}" required>
+            </td>
+            <td>
+                <button type="button" class="btn btn-sm btn-outline-danger remove-var-btn"><i class="bi bi-trash"></i></button>
+            </td>
+        `;
+
+        tr.querySelector('.remove-var-btn').addEventListener('click', function() {
+            tr.remove();
+            toggleMainFormFieldsRequired();
+        });
+
+        return tr;
+    }
+
+    function addEditableSizeRow(label = '', suffix = '', price = '', quantity = '') {
+        const tr = createEditableVariationRow(label, suffix, price, quantity);
+        // Prepend so that the new row appears at the TOP of the list!
+        variationsTableBody.insertBefore(tr, variationsTableBody.firstChild);
+        toggleMainFormFieldsRequired();
+    }    function toggleMainFormFieldsRequired() {
+        const isEnabled = enableVariations.checked;
+
+        if (isEnabled) {
+            mainPrice.required = false;
+            mainQuantity.required = false;
+            mainPrice.disabled = true;
+            mainQuantity.disabled = true;
+            mainPrice.value = '';
+            mainQuantity.value = '';
+        } else {
+            mainPrice.required = true;
+            mainQuantity.required = true;
+            mainPrice.disabled = false;
+            mainQuantity.disabled = false;
+        }
+    }
+
+    enableVariations.addEventListener('change', function() {
+        const isEnabled = this.checked;
+        variationsSection.style.display = isEnabled ? 'block' : 'none';
+
+        if (isEnabled && variationsTableBody.children.length === 0) {
+            // Pre-load default standard variations as fully editable fields
+            addEditableSizeRow('(Large)', '-L', '', '');
+            addEditableSizeRow('(Medium)', '-M', '', '');
+            addEditableSizeRow('(Small)', '-S', '', '');
+            addEditableSizeRow('', '', '', ''); // Default singular size row
+        }
+
+        toggleMainFormFieldsRequired();
+    });
+
+    addSizeVariationBtn.addEventListener('click', function() {
+        if (!enableVariations.checked) {
+            alert('Please enable Size Variation Override first!');
+            return;
+        }
+        // Prepend an empty editable row of inputs at the TOP of the table
+        addEditableSizeRow('', '', '', '');
+    });
+
+    // Run on initial page load to ensure correct state
+    enableVariations.checked = false;
+    variationsSection.style.display = 'none';
+    toggleMainFormFieldsRequired();
 });
 </script>
 </body>

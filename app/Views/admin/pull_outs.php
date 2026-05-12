@@ -562,9 +562,10 @@
                         <td>
                             <?php
                             $reason = $r['pull_out_reason'];
-                            if ($reason === 'SPOILED' || stripos($reason, 'spoil') !== false) echo '<span class="badge bg-danger">Spoiled</span>';
-                            elseif ($reason === 'CONTAMINATED') echo '<span class="badge bg-warning text-dark">Contaminated</span>';
-                            elseif ($reason === 'DAMAGED_PACKAGING') echo '<span class="badge bg-secondary">Damaged Pkg</span>';
+                            if ($reason === 'Shortage') echo '<span class="badge bg-warning text-dark">Shortage</span>';
+                            elseif ($reason === 'Spoilage' || $reason === 'SPOILED' || stripos($reason, 'spoil') !== false) echo '<span class="badge bg-danger">Spoilage</span>';
+                            elseif ($reason === 'Damaged Packaging' || $reason === 'DAMAGED_PACKAGING') echo '<span class="badge bg-secondary">Damaged Pkg</span>';
+                            elseif ($reason === 'CONTAMINATED') echo '<span class="badge bg-info text-dark">Contaminated</span>';
                             elseif ($reason === 'CUSTOMER_RETURN') echo '<span class="badge bg-info text-dark">Customer Return</span>';
                             else echo '<span class="badge bg-dark">' . esc($reason) . '</span>';
                             ?>

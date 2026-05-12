@@ -107,7 +107,9 @@ class UserPosController extends BaseController
         $db = \Config\Database::connect();
         $db->transStart();
 
+        $transactionId = 'OUT-' . date('Ymd') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
         $totalSaleAmount = 0;
+        $salesBatch = [];
 
         try {
             foreach ($cart as $item) {
@@ -129,21 +131,17 @@ class UserPosController extends BaseController
                 $total = $price * $quantity;
                 $totalSaleAmount += $total;
 
-                // Insert sale record
-                $saleData = [
-                    'user_id'    => $userId,
-                    'product_id' => $product['id'],
-                    'quantity'   => $quantity,
-                    'price'      => $price,
-                    'total'      => $total,
-                    'pack'       => $item['pack'] ?? null,
-                    'created_at' => date('Y-m-d H:i:s')
+                // Prepare Sales record
+                $salesBatch[] = [
+                    'transaction_id' => $transactionId,
+                    'user_id'        => $userId,
+                    'product_id'     => $product['id'],
+                    'quantity'       => $quantity,
+                    'price'          => $price,
+                    'total'          => $total,
+                    'pack'           => $item['pack'] ?? null,
+                    'created_at'     => date('Y-m-d H:i:s')
                 ];
-
-                if (!$this->salesModel->insert($saleData)) {
-                    $errors = $this->salesModel->errors();
-                    throw new \Exception("Failed to insert sale: ".json_encode($errors));
-                }
 
                 // Update product quantity
                 $currentQuantity = $product['quantity'] ?? $product['stock'] ?? 0;
@@ -159,6 +157,18 @@ class UserPosController extends BaseController
                     throw new \Exception("Failed to update product quantity: ".json_encode($errors));
                 }
             }
+
+            // Insert Transaction Summary
+            $transactionModel = new \App\Models\TransactionModel();
+            $transactionModel->insert([
+                'transaction_id' => $transactionId,
+                'user_id'        => $userId,
+                'total_amount'   => $totalSaleAmount,
+                'created_at'     => date('Y-m-d H:i:s')
+            ]);
+
+            // Batch insert sales
+            $this->salesModel->insertBatch($salesBatch);
 
             $db->transComplete();
 

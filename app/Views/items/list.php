@@ -863,7 +863,9 @@ function getSku($name, $variation = '') {
                         <th class="text-center align-middle">Quantity</th>
                         <th class="text-center align-middle hide-mobile">Value %</th>
                         <th class="text-center align-middle hide-mobile">Category</th>
+                        <th class="text-center align-middle hide-mobile">Expiration Date</th>
                         <th class="text-center align-middle">Status</th>
+                        <th class="text-center align-middle hide-mobile">Date Entry</th>
                         <th class="text-center align-middle">Actions</th>
                     </tr>
                 </thead>
@@ -926,6 +928,13 @@ function getSku($name, $variation = '') {
                                 ?>%
                             </td>
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
+                            <td class="text-center align-middle hide-mobile">
+                                <?php if (!empty($item['expiration_date']) && $item['expiration_date'] !== '0000-00-00'): ?>
+                                    <?= date('M d, Y', strtotime($item['expiration_date'])) ?>
+                                <?php else: ?>
+                                    &mdash;
+                                <?php endif; ?>
+                            </td>
                             <td class="text-center align-middle">
                                 <span class="badge 
                                     <?= $status == 'expired' ? 'bg-danger' :
@@ -933,6 +942,13 @@ function getSku($name, $variation = '') {
                                     ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>">
                                     <?= $statusLabel ?>
                                 </span>
+                            </td>
+                            <td class="text-center align-middle hide-mobile">
+                                <?php if (!empty($item['created_at'])): ?>
+                                    <?= date('M d, Y h:i A', strtotime($item['created_at'])) ?>
+                                <?php else: ?>
+                                    &mdash;
+                                <?php endif; ?>
                             </td>
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
@@ -970,6 +986,13 @@ function getSku($name, $variation = '') {
                                 ?>%
                             </td>
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
+                            <td class="text-center align-middle hide-mobile">
+                                <?php if (!empty($item['expiration_date']) && $item['expiration_date'] !== '0000-00-00'): ?>
+                                    <?= date('M d, Y', strtotime($item['expiration_date'])) ?>
+                                <?php else: ?>
+                                    &mdash;
+                                <?php endif; ?>
+                            </td>
                             <td class="text-center align-middle">
                                 <span class="badge 
                                     <?= $status == 'expired' ? 'bg-danger' :
@@ -977,6 +1000,13 @@ function getSku($name, $variation = '') {
                                     ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>">
                                     <?= $statusLabel ?>
                                 </span>
+                            </td>
+                            <td class="text-center align-middle hide-mobile">
+                                <?php if (!empty($item['created_at'])): ?>
+                                    <?= date('M d, Y h:i A', strtotime($item['created_at'])) ?>
+                                <?php else: ?>
+                                    &mdash;
+                                <?php endif; ?>
                             </td>
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">

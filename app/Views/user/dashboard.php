@@ -1246,10 +1246,9 @@ if (!function_exists('getProductSKU')) {
                             </label>
                             <select id="pullOutReasonModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Select Reason —</option>
-                                <option value="SPOILED">Spoiled / Expired</option>
-                                <option value="CONTAMINATED">Contaminated</option>
-                                <option value="DAMAGED_PACKAGING">Damaged Packaging</option>
-                                <option value="CUSTOMER_RETURN">Customer Return</option>
+                                <option value="Shortage">Shortage</option>
+                                <option value="Spoilage">Spoilage</option>
+                                <option value="Damaged Packaging">Damaged Packaging</option>
                             </select>
                         </div>
                         <div class="mb-4">
@@ -1283,66 +1282,50 @@ if (!function_exists('getProductSKU')) {
     <div class="modal fade" id="returnModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-                <div class="modal-header bg-gradient bg-primary text-white p-4 border-0 position-relative">
-                    <h5 class="modal-title fw-bold fs-4"><i class="bi bi-arrow-return-left me-2"></i>Process Customer Return</h5>
-                    <button type="button" class="btn-close btn-close-white position-absolute top-50 end-0 translate-middle-y me-4" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header p-3 border-0 position-relative" style="background-color: #2c3e50; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h5 class="modal-title fw-semibold text-white w-100 text-center" style="font-size: 1.15rem;">
+                        <i class="bi bi-arrow-return-left me-2"></i>Process Customer Return
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white position-absolute top-50 end-0 translate-middle-y me-3" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4 bg-light">
+                <div class="modal-body p-4 bg-white">
                     <form id="returnFormModal">
                         <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" id="returnCsrf">
                         
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold text-dark mb-2">
-                                    <i class="bi bi-receipt me-1 text-primary"></i> Transaction ID
-                                </label>
-                                <input type="text" class="form-control form-control-lg shadow-sm" id="returnTransactionId" placeholder="e.g. TXN-12345" required style="border-radius: 8px;">
-                                <small class="text-muted mt-1 d-block"><i class="bi bi-info-circle me-1"></i>Required to validate the purchase</small>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold text-dark mb-2">
-                                    <i class="bi bi-box me-1 text-primary"></i> Item Returned
-                                </label>
-                                <select class="form-select form-select-lg shadow-sm" id="returnItemModal" required style="border-radius: 8px;">
-                                    <option value="" disabled selected>Search for product...</option>
-                                    <?php if(isset($items) && !empty($items)): ?>
-                                        <?php foreach($items as $item): ?>
-                                            <!-- Normal Items -->
-                                            <option value="<?= esc($item['id']) ?>"><?= esc($item['name']) ?></option>
-                                            
-                                            <!-- Siomai Variations -->
-                                            <?php if(stripos($item['name'], 'siomai') !== false): ?>
-                                                <option value="<?= esc($item['id']) ?>" data-variation="Small Pack"><?= esc($item['name']) ?> - Small Pack</option>
-                                                <option value="<?= esc($item['id']) ?>" data-variation="Medium Pack"><?= esc($item['name']) ?> - Medium Pack</option>
-                                                <option value="<?= esc($item['id']) ?>" data-variation="Large Pack"><?= esc($item['name']) ?> - Large Pack</option>
-                                            <?php endif; ?>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                            </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                <i class="bi bi-receipt me-1"></i> Transaction ID
+                            </label>
+                            <input type="text" id="returnTransactionId" class="form-control form-control-lg" required placeholder="Enter Transaction ID (e.g. TXN-12345 or OUT-6789)" style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
                         </div>
 
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                <i class="bi bi-box me-1"></i> Select Item
+                            </label>
+                            <select id="returnItemModal" class="form-select form-select-lg" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                                <option value="" disabled selected>— Enter Transaction ID first —</option>
+                            </select>
+                        </div>
+                        
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold text-dark mb-2">
-                                    <i class="bi bi-123 me-1 text-primary"></i> Quantity Returned
+                                <label for="returnQtyModal" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                    <i class="bi bi-hash me-1"></i> Quantity
                                 </label>
-                                <div class="input-group input-group-lg shadow-sm" style="border-radius: 8px; overflow: hidden;">
-                                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-hash text-muted"></i></span>
-                                    <input type="number" class="form-control border-start-0 ps-0" id="returnQtyModal" min="1" placeholder="0" required>
-                                </div>
+                                <input type="number" id="returnQtyModal" class="form-control form-control-lg" min="1" placeholder="Enter amount" required
+                                       style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold text-dark mb-2">
-                                    <i class="bi bi-chat-left-text me-1 text-primary"></i> Reason for Return
+                                <label for="returnReasonModal" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> Reason for Return
                                 </label>
-                                <select class="form-select form-select-lg shadow-sm" id="returnReasonModal" required style="border-radius: 8px;">
-                                    <option value="" disabled selected>Select a reason...</option>
-                                    <option value="Wrong Item Served">Wrong Item Served</option>
-                                    <option value="Customer Changed Mind">Customer Changed Mind</option>
-                                    <option value="Item Damaged / Bad Quality">Item Damaged / Bad Quality</option>
-                                    <option value="Foreign Object Found">Foreign Object Found</option>
-                                    <option value="Under-cooked / Spoilage">Under-cooked / Spoilage</option>
+                                <select id="returnReasonModal" class="form-select form-select-lg" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                                    <option value="" disabled selected>— Select Reason —</option>
+                                    <option value="Wrong Order">Wrong Order</option>
+                                    <option value="Change of Mind">Change of Mind</option>
+                                    <option value="Quality Issue">Quality Issue</option>
+                                    <option value="Damaged Item">Damaged Item</option>
                                 </select>
                             </div>
                         </div>
@@ -1358,35 +1341,41 @@ if (!function_exists('getProductSKU')) {
 
                         <!-- CONDITION EVALUATION -->
                         <div class="mb-4">
-                            <label class="form-label fw-semibold text-dark mb-3 d-block">
+                            <label class="form-label fw-bold text-dark mb-3 d-block" style="font-size: 0.95rem;">
                                 <i class="bi bi-check-circle me-1"></i> Item Condition Evaluation
                             </label>
                             
                             <div class="d-flex flex-column gap-3">
                                 <!-- Restockable Option -->
-                                <div class="form-check p-3 rounded shadow-sm border border-success" style="background-color: #f0fdf4;">
-                                    <input class="form-check-input ms-2" type="radio" name="returnCondition" id="condRestockable" value="RESTOCKABLE" required style="transform: scale(1.3);">
+                                <div class="form-check p-3 rounded" style="background-color: #f8fff9; border: 1px solid #28a745;">
+                                    <input class="form-check-input ms-2 mt-2" type="radio" name="returnCondition" id="condRestockable" value="RESTOCKABLE" required style="transform: scale(1.3);">
                                     <label class="form-check-label ms-3 w-100" for="condRestockable" style="cursor:pointer;">
-                                        <div class="fw-bold text-success" style="font-size: 1.1rem;">RESTOCKABLE</div>
+                                        <div class="fw-bold text-success" style="font-size: 1.05rem;">RESTOCKABLE</div>
                                         <small class="text-muted">Item is in perfect condition, safe for consumption, and can be resold immediately.</small>
                                     </label>
                                 </div>
                                 
                                 <!-- Non-Restockable Option -->
-                                <div class="form-check p-3 rounded shadow-sm border border-danger" style="background-color: #fef2f2;">
-                                    <input class="form-check-input ms-2" type="radio" name="returnCondition" id="condNonRestockable" value="NON-RESTOCKABLE" required style="transform: scale(1.3);">
+                                <div class="form-check p-3 rounded" style="background-color: #fff8f8; border: 1px solid #dc3545;">
+                                    <input class="form-check-input ms-2 mt-2" type="radio" name="returnCondition" id="condNonRestockable" value="NON-RESTOCKABLE" required style="transform: scale(1.3);">
                                     <label class="form-check-label ms-3 w-100" for="condNonRestockable" style="cursor:pointer;">
-                                        <div class="fw-bold text-danger" style="font-size: 1.1rem;">NON-RESTOCKABLE (Waste)</div>
+                                        <div class="fw-bold text-danger" style="font-size: 1.05rem;">NON-RESTOCKABLE (Waste)</div>
                                         <small class="text-muted">Item is compromised, spoiled, damaged, or unsafe. This will automatically generate a <strong class="text-danger">Pull-Out Request</strong>.</small>
                                     </label>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2 mt-4">
-                            <button type="button" class="btn btn-light border shadow-sm px-4 fw-semibold" data-bs-dismiss="modal" style="border-radius: 5px;">Cancel</button>
-                            <button type="submit" class="btn btn-primary shadow-sm px-4 fw-semibold" style="border-radius: 5px;">
-                                <i class="bi bi-send me-2"></i>Process Return
+                        <div class="d-flex justify-content-end gap-3 mt-3">
+                            <style>
+                                .btn-return-cancel { transition: all 0.2s ease-in-out; }
+                                .btn-return-cancel:hover { background-color: #d1d5db !important; border-color: #d1d5db !important; }
+                                .btn-return-process { transition: all 0.2s ease-in-out; }
+                                .btn-return-process:hover { background-color: #1e40af !important; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; }
+                            </style>
+                            <button type="button" class="btn btn-light px-4 py-2 fw-bold btn-return-cancel" data-bs-dismiss="modal" style="border-radius: 10px !important; border: 1px solid #e2e8f0; background-color: #f8fafc; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4 py-2 fw-bold btn-return-process" style="border-radius: 10px !important; background-color: #1d4ed8; border: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                <i class="bi bi-send me-1"></i> Process Return
                             </button>
                         </div>
                     </form>
@@ -1643,7 +1632,68 @@ if (!function_exists('getProductSKU')) {
                     submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Pull-Out';
                 }
             });
+        }
+
         // ✅ RETURNS SUBMISSION
+        const txnInput = document.getElementById('returnTransactionId');
+        const itemSelect = $('#returnItemModal');
+        const qtyInput = document.getElementById('returnQtyModal');
+
+        if (txnInput) {
+            // Clear item select initially to guide the user
+            itemSelect.empty().append('<option value="" disabled selected>— Enter Transaction ID first —</option>').trigger('change');
+
+            let lastFetchedTxn = '';
+
+            // Fetch items for the entered Transaction ID
+            async function fetchTransactionItems() {
+                const txnId = txnInput.value.trim();
+                if (!txnId || txnId === lastFetchedTxn) return;
+                lastFetchedTxn = txnId;
+
+                try {
+                    // Show loading state
+                    itemSelect.empty().append('<option value="" disabled selected>— Fetching Items... —</option>').trigger('change');
+                    
+                    const response = await fetch(`<?= site_url('user/sales/transaction-items') ?>/${txnId}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await response.json();
+
+                    if (data.success && data.items.length > 0) {
+                        itemSelect.empty().append('<option value="" disabled selected>— Choose item from this transaction —</option>');
+                        data.items.forEach(item => {
+                            const optionText = `${item.product_name} (${item.pack || 'Standard'})`;
+                            const newOption = new Option(optionText, item.product_id, false, false);
+                            $(newOption).attr('data-qty', item.quantity);
+                            $(newOption).attr('data-variation', item.pack);
+                            itemSelect.append(newOption);
+                        });
+                        itemSelect.trigger('change');
+                    } else {
+                        alert('No items found for this Transaction ID. Please verify the ID.');
+                        itemSelect.empty().append('<option value="" disabled selected>— No items found —</option>').trigger('change');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error fetching transaction details.');
+                    lastFetchedTxn = '';
+                }
+            }
+
+            txnInput.addEventListener('change', fetchTransactionItems);
+            txnInput.addEventListener('blur', fetchTransactionItems);
+        }
+
+        // Auto-fill Quantity when item is selected
+        itemSelect.on('change', function() {
+            const selectedOption = $(this).find('option:selected');
+            const qty = selectedOption.attr('data-qty');
+            if (qty) {
+                qtyInput.value = qty;
+            }
+        });
+
         const returnForm = document.getElementById("returnFormModal");
         if (returnForm) {
             returnForm.addEventListener("submit", async (e) => {

@@ -43,91 +43,133 @@ $requests = $builder->get()->getResultArray();
         ]);
     }
 
-    public function approve($id)
+    public function approve($id = null)
     {
+        $db = \Config\Database::connect();
         $stockRequestModel = new StockRequestModel();
         $itemModel = new ItemModel();
         $logModel = new ItemLogModel();
         $requestLog = new StockRequestLogModel();
 
-        // Fetch the request
-        $request = $stockRequestModel->find($id);
-        if (!$request) {
-            return redirect()->back()->with('error', 'Request not found.');
+        // Support both single ID from URL and bulk IDs from POST
+        $ids = $id ? [$id] : $this->request->getPost('ids');
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No requests selected.');
         }
 
-        // Prevent re-approval
-        if (strtolower($request['status']) === 'approved') {
-            return redirect()->back()->with('info', 'This request is already approved.');
-        }
+        try {
+            $db->transStart();
 
-        // Fetch the item
-        $item = $itemModel->find($request['item_id']);
-        if (!$item) {
-            return redirect()->back()->with('error', 'Item not found.');
-        }
-
-        $reason = $request['reason'] ?? '';
-        $qtyField = 'quantity';
-        
-        if (preg_match('/\[Variation:\s*(Small|Medium|Large)\]/i', $reason, $matches)) {
-            $varType = strtolower($matches[1]);
-            if ($varType === 'small') {
-                $qtyField = 'pack_small_qty';
-            } elseif ($varType === 'medium') {
-                $qtyField = 'pack_medium_qty';
-            } elseif ($varType === 'large') {
-                $qtyField = 'pack_biggest_qty';
+            // 1. Fetch pending requests
+            $requests = $stockRequestModel->whereIn('id', $ids)->where('status', 'pending')->findAll();
+            if (empty($requests)) {
+                throw new \Exception('No pending requests found.');
             }
-        }
 
-        $oldQty = (int) ($item[$qtyField] ?? 0);
-        $qty = abs((int)$request['quantity']); // ensure positive
+            $itemIds = array_unique(array_column($requests, 'item_id'));
 
-        // Handle action: add or subtract
-        $action = strtolower(trim($request['action'] ?? 'add'));
-
-        $updateData = [];
-
-        if ($action === 'subtract') {
-            $newQty = max(0, $oldQty - $qty); // decrease quantity
-        } else {
-            $newQty = $oldQty + $qty; // increase quantity
+            // 2. LOCK AFFECTED ITEMS with SELECT ... FOR UPDATE to prevent race conditions
+            $db->query("SELECT id FROM items WHERE id IN (" . implode(',', array_map('intval', $itemIds)) . ") FOR UPDATE");
             
-            // If it's an addition (new batch), update the Date Entry and Expiration Date
-            $updateData['created_at'] = date('Y-m-d H:i:s');
-            // Set expiration date 20 days newly fresh
-            $updateData['expiration_date'] = date('Y-m-d', strtotime('+20 days'));
+            // Re-fetch items to get current quantities under lock
+            $items = $itemModel->whereIn('id', $itemIds)->findAll();
+            $itemsMap = [];
+            foreach ($items as $item) {
+                $itemsMap[$item['id']] = $item;
+            }
+
+            $itemUpdates = [];
+            $itemLogs = [];
+            $requestUpdates = [];
+            $requestLogs = [];
+
+            foreach ($requests as $req) {
+                $itemId = $req['item_id'];
+                if (!isset($itemsMap[$itemId])) continue;
+
+                $item = $itemsMap[$itemId];
+                $reason = $req['reason'] ?? '';
+                $qtyField = 'quantity';
+                
+                // Variation logic to determine correct column (Small, Medium, Large)
+                if (preg_match('/\[Variation:\s*(Small|Medium|Large)\]/i', $reason, $matches)) {
+                    $varType = strtolower($matches[1]);
+                    if ($varType === 'small') $qtyField = 'pack_small_qty';
+                    elseif ($varType === 'medium') $qtyField = 'pack_medium_qty';
+                    elseif ($varType === 'large') $qtyField = 'pack_biggest_qty';
+                }
+
+                $oldQty = (int) ($item[$qtyField] ?? 0);
+                $qty = abs((int)$req['quantity']);
+                $action = strtolower(trim($req['action'] ?? 'add'));
+
+                // Initialize or accumulate updates for this item
+                if (!isset($itemUpdates[$itemId])) {
+                    $itemUpdates[$itemId] = ['id' => $itemId];
+                }
+
+                // Calculate New Quantity
+                if ($action === 'subtract') {
+                    $newQty = max(0, $oldQty - $qty);
+                } else {
+                    $newQty = $oldQty + $qty;
+                    // For additions, update timestamps and expiration
+                    $itemUpdates[$itemId]['created_at'] = date('Y-m-d H:i:s');
+                    $itemUpdates[$itemId]['expiration_date'] = date('Y-m-d', strtotime('+20 days'));
+                }
+                
+                // Track cumulative qty if multiple requests for same item are in the batch
+                $runningQty = isset($itemUpdates[$itemId][$qtyField]) ? $itemUpdates[$itemId][$qtyField] : $oldQty;
+                $itemUpdates[$itemId][$qtyField] = ($action === 'subtract') ? max(0, $runningQty - $qty) : ($runningQty + $qty);
+
+                $itemLogs[] = [
+                    'item_id'    => $itemId,
+                    'old_data'   => json_encode([$qtyField => $oldQty]),
+                    'new_data'   => json_encode([$qtyField => $itemUpdates[$itemId][$qtyField]]),
+                    'updated_by' => session()->get('username') ?? 'Admin',
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+
+                $requestUpdates[] = ['id' => $req['id'], 'status' => 'approved'];
+                
+                $requestLogs[] = [
+                    'request_id'  => $req['id'],
+                    'action'      => 'approved',
+                    'message'     => "Stock request approved. {$qtyField} updated from {$oldQty} to " . $itemUpdates[$itemId][$qtyField],
+                    'performed_by'=> session()->get('username') ?? 'Admin',
+                    'created_at'  => date('Y-m-d H:i:s'),
+                ];
+            }
+
+            // 3. EXECUTE BATCH OPERATIONS
+            if (!empty($itemUpdates)) {
+                $itemModel->updateBatch(array_values($itemUpdates), 'id');
+            }
+            if (!empty($requestUpdates)) {
+                $stockRequestModel->updateBatch($requestUpdates, 'id');
+            }
+            if (!empty($itemLogs)) {
+                $logModel->insertBatch($itemLogs);
+            }
+            if (!empty($requestLogs)) {
+                $requestLog->insertBatch($requestLogs);
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                throw new \Exception('Transaction failed to complete.');
+            }
+
+            return redirect()->back()->with('success', count($requests) . ' stock request(s) approved successfully!');
+
+        } catch (\Exception $e) {
+            if ($db->transEnabled()) $db->transRollback();
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
-
-        $updateData[$qtyField] = $newQty;
-
-        // Update item quantity (and dates if applicable)
-        $itemModel->update($item['id'], $updateData);
-
-        // Log the update to item_logs
-        $logModel->insert([
-            'item_id'    => $item['id'],
-            'old_data'   => json_encode([$qtyField => $oldQty]),
-            'new_data'   => json_encode([$qtyField => $newQty]),
-            'updated_by' => session()->get('username') ?? 'Admin',
-            'updated_at' => date('Y-m-d H:i:s'),
-        ]);
-
-        // Mark the request as approved
-        $stockRequestModel->update($id, ['status' => 'approved']);
-
-        // Log to stock_request_logs
-        $requestLog->insert([
-            'request_id'  => $id,
-            'action'      => 'approved',
-            'message'     => 'Stock request approved. Quantity updated from ' . $oldQty . ' to ' . $newQty,
-            'performed_by'=> session()->get('username') ?? 'Admin',
-            'created_at'  => date('Y-m-d H:i:s'),
-        ]);
-
-        return redirect()->back()->with('success', 'Stock request approved and quantity updated successfully!');
     }
+
 
     public function reject($id)
     {

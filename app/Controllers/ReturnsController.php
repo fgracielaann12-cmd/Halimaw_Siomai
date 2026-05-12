@@ -69,105 +69,146 @@ class ReturnsController extends BaseController
     }
 
     // --- STAFF API ---
-    public function submit()
+    public function processReturn()
     {
-        $request = service('request');
-
-        // Note: We use getVar() to support both form-data and json, but with file upload it will be form-data
-        $transactionId = $request->getVar('transaction_id');
-        $itemId        = $request->getVar('item_id');
-        $variation     = $request->getVar('variation');
-        $quantity      = (int)$request->getVar('quantity');
-        $reason        = $request->getVar('reason');
-        $condition     = $request->getVar('return_condition') ?? $request->getVar('condition'); // Handle both names
-        $userId        = session()->get('user_id');
-
-        if (!$transactionId || !$itemId || !$quantity || !$reason || !$condition) {
-            return $this->response->setJSON(['success' => false, 'message' => 'All fields are required.']);
+        $db = \Config\Database::connect();
+        $userId = session()->get('user_id');
+        
+        // Support both single and multiple return items
+        $rawItems = $this->request->getVar('items');
+        if (empty($rawItems)) {
+            // Fallback for single item submission (classic form)
+            $rawItems = [[
+                'transaction_id'   => $this->request->getVar('transaction_id'),
+                'item_id'          => $this->request->getVar('item_id'),
+                'variation'        => $this->request->getVar('variation'),
+                'quantity'         => (int)$this->request->getVar('quantity'),
+                'reason'           => $this->request->getVar('reason'),
+                'condition'        => $this->request->getVar('return_condition') ?? $this->request->getVar('condition'),
+                'note'             => $this->request->getVar('note'),
+                'evidence_path'    => null
+            ]];
         }
 
-        // --- Handle File Upload ---
-        $evidencePath = null;
-        $file = $this->request->getFile('evidence_file');
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            $newName = $file->getRandomName();
-            $file->move(FCPATH . 'public/uploads/returns', $newName);
-            $evidencePath = 'public/uploads/returns/' . $newName;
-        }
+        try {
+            $db->transStart();
 
-        // Validate Transaction ID
-        $transaction = $this->transactionModel->where('transaction_id', $transactionId)->first();
-        if (!$transaction) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Invalid Transaction ID.']);
-        }
+            $returnBatch = [];
+            $pullOutBatch = [];
+            $restockUpdates = [
+                'quantity' => [],
+                'pack_small_qty' => [],
+                'pack_medium_qty' => [],
+                'pack_biggest_qty' => []
+            ];
+            $itemLogs = [];
 
-        $item = $this->itemModel->find($itemId);
-        if (!$item) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Item not found.']);
-        }
+            foreach ($rawItems as $input) {
+                $txnId = $input['transaction_id'] ?? null;
+                $itemId = $input['item_id'] ?? null;
+                $quantity = (int)($input['quantity'] ?? 0);
+                $condition = $input['condition'] ?? 'NON_RESTOCKABLE';
+                $variation = $input['variation'] ?? '';
+                
+                if (!$txnId || !$itemId || !$quantity) {
+                    throw new \Exception('Transaction ID, Item ID, and Quantity are required for all entries.');
+                }
 
-        $actionTaken = 'RESTOCKED';
+                $item = $this->itemModel->find($itemId);
+                if (!$item) throw new \Exception("Item ID {$itemId} not found.");
 
-        if ($condition === 'RESTOCKABLE') {
-            // Restock logic
-            $qtyCol = 'quantity';
-            $varLower = strtolower($variation ?? '');
-            if (strpos($varLower, 'small') !== false) $qtyCol = 'pack_small_qty';
-            if (strpos($varLower, 'medium') !== false) $qtyCol = 'pack_medium_qty';
-            if (strpos($varLower, 'large') !== false) $qtyCol = 'pack_biggest_qty';
+                $actionTaken = ($condition === 'RESTOCKABLE') ? 'RESTOCKED' : 'PULL_OUT';
+                
+                // Handle Evidence (simplified for batch; handles single file upload if present)
+                $evidencePath = $input['evidence_path'] ?? null;
+                $file = $this->request->getFile('evidence_file');
+                if ($file && $file->isValid() && !$file->hasMoved()) {
+                    $newName = $file->getRandomName();
+                    $file->move(FCPATH . 'public/uploads/returns', $newName);
+                    $evidencePath = 'public/uploads/returns/' . $newName;
+                }
 
-            $newQty = $item[$qtyCol] + $quantity;
-            $this->itemModel->update($item['id'], [$qtyCol => $newQty]);
+                $returnBatch[] = [
+                    'transaction_id'   => $txnId,
+                    'item_id'          => $itemId,
+                    'variation'        => $variation,
+                    'quantity'         => $quantity,
+                    'reason'           => $input['reason'] ?? 'Customer Return',
+                    'evidence_path'    => $evidencePath,
+                    'return_condition' => $condition,
+                    'action_taken'     => $actionTaken,
+                    'processed_by'     => $userId,
+                    'created_at'       => date('Y-m-d H:i:s')
+                ];
 
-            $this->itemLogModel->insert([
-                'item_id'    => $item['id'],
-                'old_data'   => json_encode([$qtyCol => $item[$qtyCol]]),
-                'new_data'   => json_encode([$qtyCol => $newQty]),
-                'updated_by' => 'Staff (RETURN - RESTOCK: TXN ' . $transactionId . ')'
-            ]);
+                if ($condition === 'RESTOCKABLE') {
+                    // Restock Logic (Grouped for updateBatch)
+                    $varLower = strtolower($variation);
+                    $qtyCol = 'quantity';
+                    if (strpos($varLower, 'small') !== false) $qtyCol = 'pack_small_qty';
+                    elseif (strpos($varLower, 'medium') !== false) $qtyCol = 'pack_medium_qty';
+                    elseif (strpos($varLower, 'large') !== false) $qtyCol = 'pack_biggest_qty';
 
-        } else {
-            // NON-RESTOCKABLE (Escalate to Pull-Out)
-            $actionTaken = 'PULL_OUT';
+                    $currentQty = (int)($item[$qtyCol] ?? 0);
+                    if (isset($restockUpdates[$qtyCol][$itemId])) {
+                        $currentQty = $restockUpdates[$qtyCol][$itemId][$qtyCol];
+                    }
+
+                    $newQty = $currentQty + $quantity;
+                    $restockUpdates[$qtyCol][$itemId] = ['id' => $itemId, $qtyCol => $newQty];
+                    
+                    $itemLogs[] = [
+                        'item_id'    => $itemId,
+                        'old_data'   => json_encode([$qtyCol => $currentQty]),
+                        'new_data'   => json_encode([$qtyCol => $newQty]),
+                        'updated_by' => "System (Return Restock - TXN: {$txnId})",
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                } else {
+                    // Non-restockable -> Escalated to Pull-Out (Damaged Packaging)
+                    $unitCost = $item['price'];
+                    $varLower = strtolower($variation);
+                    if (strpos($varLower, 'small') !== false) $unitCost = $item['pack_small_price'] ?? $unitCost;
+                    elseif (strpos($varLower, 'medium') !== false) $unitCost = $item['pack_medium_price'] ?? $unitCost;
+                    elseif (strpos($varLower, 'large') !== false) $unitCost = $item['pack_biggest_price'] ?? $unitCost;
+
+                    $pullOutBatch[] = [
+                        'product_id'      => $itemId,
+                        'variation'       => $variation,
+                        'quantity'        => $quantity,
+                        'unit_cost'       => $unitCost,
+                        'total_loss'      => $unitCost * $quantity,
+                        'pull_out_reason' => 'Damaged Packaging', // As per requirements
+                        'category'        => 'Customer Return',
+                        'reason_note'     => "[Auto-generated from Returns] TXN: {$txnId}",
+                        'image_path'      => $evidencePath,
+                        'reported_by'     => $userId,
+                        'status'          => 'PENDING'
+                    ];
+                }
+            }
+
+            // Commit Batch Operations
+            if (!empty($returnBatch)) $this->returnModel->insertBatch($returnBatch);
+            if (!empty($pullOutBatch)) $this->pullOutModel->insertBatch($pullOutBatch);
             
-            $unitCost = $item['price'];
-            $varLower = strtolower($variation ?? '');
-            if (strpos($varLower, 'small') !== false && isset($item['pack_small_price'])) $unitCost = $item['pack_small_price'];
-            if (strpos($varLower, 'medium') !== false && isset($item['pack_medium_price'])) $unitCost = $item['pack_medium_price'];
-            if (strpos($varLower, 'large') !== false && isset($item['pack_biggest_price'])) $unitCost = $item['pack_biggest_price'];
+            foreach ($restockUpdates as $col => $updates) {
+                if (!empty($updates)) $this->itemModel->updateBatch(array_values($updates), 'id');
+            }
+            if (!empty($itemLogs)) $this->itemLogModel->insertBatch($itemLogs);
 
-            $totalLoss = $unitCost * $quantity;
+            $db->transComplete();
 
-            $this->pullOutModel->insert([
-                'product_id'      => $itemId,
-                'variation'       => $variation,
-                'quantity'        => $quantity,
-                'unit_cost'       => $unitCost,
-                'total_loss'      => $totalLoss,
-                'pull_out_reason' => 'CUSTOMER_RETURN',
-                'category'        => 'Customer Return',
-                'reason_note'     => '[Auto-generated from Returns] TXN: ' . $transactionId . ' - Reason: ' . $reason,
-                'image_path'      => $evidencePath, // Pass the evidence to pull-outs
-                'reported_by'     => $userId,
-                'status'          => 'PENDING'
-            ]);
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                throw new \Exception('Transaction failed to complete.');
+            }
+
+            return $this->response->setJSON(['success' => true, 'message' => count($returnBatch) . ' Return(s) processed successfully.']);
+
+        } catch (\Exception $e) {
+            if ($db->transEnabled()) $db->transRollback();
+            return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
         }
-
-        // Save Return Record
-        $this->returnModel->insert([
-            'transaction_id'   => $transactionId,
-            'item_id'          => $itemId,
-            'variation'        => $variation,
-            'quantity'         => $quantity,
-            'reason'           => $reason,
-            'evidence_path'    => $evidencePath,
-            'return_condition' => $condition,
-            'action_taken'     => $actionTaken,
-            'processed_by'     => $userId,
-            'created_at'       => date('Y-m-d H:i:s')
-        ]);
-
-        $msg = $condition === 'RESTOCKABLE' ? 'Return processed and item restocked successfully.' : 'Return processed and escalated to Pull-Outs successfully.';
-        return $this->response->setJSON(['success' => true, 'message' => $msg]);
     }
 }

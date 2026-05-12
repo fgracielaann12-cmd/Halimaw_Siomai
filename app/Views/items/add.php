@@ -526,15 +526,15 @@
                             </button>
                         </div>
 
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-sm align-middle text-center" id="variationsTable" style="font-size: 0.9rem;">
+                        <div class="table-responsive-custom">
+                            <table class="table table-bordered table-sm align-middle text-center mb-0" id="variationsTable">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Variation Label (Size)</th>
-                                        <th>SKU Suffix</th>
-                                        <th>Price Override (₱)</th>
-                                        <th>Quantity</th>
-                                        <th>Action</th>
+                                        <th style="font-size: 0.75rem; padding: 4px;">Label (Size)</th>
+                                        <th style="font-size: 0.75rem; padding: 4px;">SKU Suffix</th>
+                                        <th style="font-size: 0.75rem; padding: 4px;">Price (₱)</th>
+                                        <th style="font-size: 0.75rem; padding: 4px;">Qty</th>
+                                        <th style="font-size: 0.75rem; padding: 4px; width: 35px;"><i class="bi bi-trash"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody id="variations_table_body">
@@ -862,20 +862,22 @@ document.addEventListener('DOMContentLoaded', () => {
     function createEditableVariationRow(label = '', suffix = '', price = '', quantity = '') {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>
-                <input type="text" name="var_label[]" class="form-control form-control-sm" placeholder="e.g. (Small)" value="${label}" required>
+            <td class="p-0 align-middle">
+                <input type="text" name="var_label[]" class="form-control m-0 border-0 bg-transparent text-center px-1" placeholder="(Size)" value="${label}" required style="box-shadow: none; font-size: 0.8rem;">
             </td>
-            <td>
-                <input type="text" name="var_sku_suffix[]" class="form-control form-control-sm" placeholder="e.g. -S" value="${suffix}">
+            <td class="p-0 align-middle">
+                <input type="text" name="var_sku_suffix[]" class="form-control m-0 border-0 bg-transparent text-center px-1" placeholder="-S" value="${suffix}" style="box-shadow: none; font-size: 0.8rem;">
             </td>
-            <td>
-                <input type="number" step="0.01" name="var_price[]" class="form-control form-control-sm" placeholder="Use Base Price" value="${price}">
+            <td class="p-0 align-middle">
+                <input type="number" step="0.01" name="var_price[]" class="form-control m-0 border-0 bg-transparent text-center px-1" placeholder="Base" value="${price}" style="box-shadow: none; font-size: 0.8rem;">
             </td>
-            <td>
-                <input type="number" name="var_quantity[]" class="form-control form-control-sm" placeholder="0" value="${quantity}" required>
+            <td class="p-0 align-middle">
+                <input type="number" name="var_quantity[]" class="form-control m-0 border-0 bg-transparent text-center px-1" placeholder="0" value="${quantity}" required style="box-shadow: none; font-size: 0.8rem;">
             </td>
-            <td>
-                <button type="button" class="btn btn-sm btn-outline-danger remove-var-btn"><i class="bi bi-trash"></i></button>
+            <td class="p-0 align-middle text-center">
+                <button type="button" class="btn btn-sm text-danger remove-var-btn p-1 m-0 border-0" title="Remove" style="font-size: 1rem;">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
             </td>
         `;
 
@@ -889,8 +891,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addEditableSizeRow(label = '', suffix = '', price = '', quantity = '') {
         const tr = createEditableVariationRow(label, suffix, price, quantity);
-        // Prepend so that the new row appears at the TOP of the list!
-        variationsTableBody.insertBefore(tr, variationsTableBody.firstChild);
+        variationsTableBody.appendChild(tr);
         toggleMainFormFieldsRequired();
     }    function toggleMainFormFieldsRequired() {
         const isEnabled = enableVariations.checked;

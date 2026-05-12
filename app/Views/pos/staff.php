@@ -1904,19 +1904,11 @@ if (!function_exists('getProductSKU')) {
                             <label for="pullOutReasonModal" class="form-label fw-semibold text-dark mb-2">
                                 <i class="bi bi-exclamation-triangle me-1"></i> Reason
                             </label>
-                            <input type="text" id="pullOutReasonModal" class="form-control shadow-sm" required placeholder="e.g. Expired, Spoiled, Damaged, Customer Return" style="border-radius: 5px; padding: 0.6rem 1rem;">
-                        </div>
-                        <div class="mb-4">
-                            <label for="pullOutCategoryModal" class="form-label fw-semibold text-dark mb-2">
-                                <i class="bi bi-tags me-1"></i> Category
-                            </label>
-                            <select id="pullOutCategoryModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
-                                <option value="">— Select Category —</option>
-                                <option value="Expiry">Expiry</option>
-                                <option value="Handling Error">Handling Error</option>
-                                <option value="Storage Issue">Storage Issue</option>
-                                <option value="Quality Issue">Quality Issue</option>
-                                <option value="Customer Return">Customer Return</option>
+                            <select id="pullOutReasonModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
+                                <option value="">— Select Reason —</option>
+                                <option value="Shortage">Shortage</option>
+                                <option value="Spoilage">Spoilage</option>
+                                <option value="Damaged Packaging">Damaged Packaging</option>
                             </select>
                         </div>
                         <div class="mb-4">
@@ -1969,7 +1961,7 @@ if (!function_exists('getProductSKU')) {
                             <label for="returnTransactionId" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
                                 <i class="bi bi-receipt me-1"></i> Transaction ID
                             </label>
-                            <input type="text" id="returnTransactionId" class="form-control form-control-lg" required placeholder="Enter Transaction ID (e.g. TXN-12345)" style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                            <input type="text" id="returnTransactionId" class="form-control form-control-lg" required placeholder="Enter Transaction ID (e.g. TXN-12345 or OUT-6789)" style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
                         </div>
 
                         <div class="mb-4">
@@ -1977,29 +1969,7 @@ if (!function_exists('getProductSKU')) {
                                 <i class="bi bi-box me-1"></i> Select Item
                             </label>
                             <select id="returnItemModal" class="form-select form-select-lg" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
-                                <option value="" disabled selected>— Choose an item —</option>
-                                <?php foreach ($items as $item): ?>
-                                    <?php
-                                        $isSiomai = stripos($item['name'], 'siomai') !== false;
-                                        $displayRows = [];
-                                        if ($isSiomai) {
-                                            $displayRows[] = ['variation' => 'S', 'pack_name' => 'Small Pack', 'id_suffix' => '-S'];
-                                            $displayRows[] = ['variation' => 'M', 'pack_name' => 'Medium Pack', 'id_suffix' => '-M'];
-                                            $displayRows[] = ['variation' => 'L', 'pack_name' => 'Large Pack', 'id_suffix' => '-L'];
-                                        } else {
-                                            $displayRows[] = ['variation' => null, 'pack_name' => '', 'id_suffix' => ''];
-                                        }
-                                    ?>
-                                    <?php foreach ($displayRows as $vItem): ?>
-                                        <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
-                                            <?php if (function_exists('getProductSKU')): ?>
-                                                <?= esc(getProductSKU($item['name'], $vItem['variation'])) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
-                                            <?php else: ?>
-                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
-                                            <?php endif; ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                <?php endforeach; ?>
+                                <option value="" disabled selected>— Enter Transaction ID first —</option>
                             </select>
                         </div>
                         
@@ -2192,12 +2162,11 @@ if (!function_exists('getProductSKU')) {
                 const itemId = pullOutItemSelect.value;
                 const variation = pullOutItemSelect.options[pullOutItemSelect.selectedIndex].getAttribute("data-variation");
                 const reason = document.getElementById("pullOutReasonModal").value;
-                const category = document.getElementById("pullOutCategoryModal").value;
                 const quantity = parseInt(document.getElementById("pullOutQtyModal").value) || 0;
                 let note = document.getElementById("pullOutNoteModal").value.trim();
                 const imageFile = document.getElementById("pullOutImageModal").files[0];
 
-                if (!itemId || !reason || !category || !quantity) {
+                if (!itemId || !reason || !quantity) {
                     alert("Please fill all required fields.");
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Pull-Out';
@@ -2209,7 +2178,7 @@ if (!function_exists('getProductSKU')) {
                 if (variation) formData.append('variation', variation.toLowerCase());
                 formData.append('quantity', quantity);
                 formData.append('reason', reason);
-                formData.append('category', category);
+                formData.append('category', reason); // Using reason as category for backend consistency
                 formData.append('note', note);
                 if (imageFile) formData.append('image', imageFile);
 
@@ -2239,6 +2208,65 @@ if (!function_exists('getProductSKU')) {
             });
         }
         // ✅ RETURNS SUBMISSION
+        const txnInput = document.getElementById('returnTransactionId');
+        const itemSelect = $('#returnItemModal');
+        const qtyInput = document.getElementById('returnQtyModal');
+
+        if (txnInput) {
+            // Clear item select initially to guide the user
+            itemSelect.empty().append('<option value="" disabled selected>— Enter Transaction ID first —</option>').trigger('change');
+
+            let lastFetchedTxn = '';
+
+            // Fetch items for the entered Transaction ID
+            async function fetchTransactionItems() {
+                const txnId = txnInput.value.trim();
+                if (!txnId || txnId === lastFetchedTxn) return;
+                lastFetchedTxn = txnId;
+
+                try {
+                    // Show loading state
+                    itemSelect.empty().append('<option value="" disabled selected>— Fetching Items... —</option>').trigger('change');
+                    
+                    const response = await fetch(`<?= site_url('user/sales/transaction-items') ?>/${txnId}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await response.json();
+
+                    if (data.success && data.items.length > 0) {
+                        itemSelect.empty().append('<option value="" disabled selected>— Choose item from this transaction —</option>');
+                        data.items.forEach(item => {
+                            const optionText = `${item.product_name} (${item.pack || 'Standard'})`;
+                            const newOption = new Option(optionText, item.product_id, false, false);
+                            $(newOption).attr('data-qty', item.quantity);
+                            $(newOption).attr('data-variation', item.pack);
+                            itemSelect.append(newOption);
+                        });
+                        itemSelect.trigger('change');
+                    } else {
+                        alert('No items found for this Transaction ID. Please verify the ID.');
+                        itemSelect.empty().append('<option value="" disabled selected>— No items found —</option>').trigger('change');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error fetching transaction details.');
+                    lastFetchedTxn = '';
+                }
+            }
+
+            txnInput.addEventListener('change', fetchTransactionItems);
+            txnInput.addEventListener('blur', fetchTransactionItems);
+        }
+
+        // Auto-fill Quantity when item is selected
+        itemSelect.on('change', function() {
+            const selectedOption = $(this).find('option:selected');
+            const qty = selectedOption.attr('data-qty');
+            if (qty) {
+                qtyInput.value = qty;
+            }
+        });
+
         const returnForm = document.getElementById("returnFormModal");
         if (returnForm) {
             returnForm.addEventListener("submit", async (e) => {

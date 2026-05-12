@@ -106,7 +106,36 @@
             #sidebar { transform: translateX(-100%); }
             #sidebar.active { transform: translateX(0); }
             .main-content { margin-left: 0 !important; width: 100% !important; }
+            .top-navbar {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                right: 0;
+                width: 100% !important;
+                z-index: 1030 !important;
+                border-radius: 0 !important;
+                margin-bottom: 0 !important;
+                background: white !important;
+                padding: 10px 15px !important;
+            }
+            .main-content {
+                padding-top: 75px !important;
+            }
             .top-navbar h5 { font-size: 1rem; }
+            
+            /* Uniform Button Design for Mobile */
+            .btn-process-return {
+                white-space: nowrap !important;
+                font-size: 0.9rem !important;
+                font-weight: 700 !important;
+                padding: 0 18px !important;
+                height: 40px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                border-radius: 50px !important;
+                letter-spacing: 0.2px;
+            }
         }
 
         /* MAIN CONTENT */
@@ -318,8 +347,8 @@
             <h5 class="mb-0"><i class="bi bi-arrow-return-left me-2 text-primary" style="font-size: 1.25rem;"></i>Customer Returns</h5>
         </div>
         
-        <button class="btn btn-primary shadow-sm btn-sm px-3 py-2" data-bs-toggle="modal" data-bs-target="#returnModal" style="border-radius: 8px !important;">
-            <i class="bi bi-plus-circle me-1"></i> Process Return
+        <button class="btn btn-primary btn-process-return shadow-sm" data-bs-toggle="modal" data-bs-target="#returnModal" style="border-radius: 50px !important; height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0 20px; font-weight: 700;">
+            <i class="bi bi-plus-lg me-2" style="font-weight: 800;"></i> Process Return
         </button>
     </div>
         

@@ -76,7 +76,9 @@
             margin: 0;
             padding: 0;
             display: flex;
-            overflow-x: clip;
+            overflow-x: hidden !important;
+            box-sizing: border-box;
+            max-width: 100vw;
         }
 
         /* SIDEBAR */
@@ -181,6 +183,9 @@
             width: calc(100% - var(--sidebar-width));
             min-height: 100vh;
             transition: margin-left 0.3s ease;
+            max-width: 100%;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
 
         /* TOP NAVBAR */
@@ -249,8 +254,11 @@
 
         /* CONTAINER */
         .container {
-            max-width: 98%;
+            max-width: 100%;
+            width: 100%;
             padding: 0 20px 20px;
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
 
         /* SUMMARY CARD */
@@ -287,24 +295,27 @@
             box-shadow: var(--card-shadow);
             background: white;
             margin-bottom: 30px;
+            width: 100%;
+        }
+        #itemsTable {
+            width: 100%;
+            table-layout: auto;
+            margin-bottom: 0;
         }
 
+        /* Hide secondary columns on tablet & mobile */
         @media (max-width: 991px) {
-            .table-responsive-custom {
-                overflow-x: auto;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hide-mobile { display: none; }
+            .hide-mobile { display: none !important; }
+            .table-responsive-custom { overflow-x: auto; }
             .summary-card h3 { font-size: 1.5rem; }
             .summary-card h6 { font-size: 0.8rem; }
             .controls-section {
-                flex-direction: column;
-                align-items: stretch;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.5rem !important;
             }
             .controls-section > div {
-                width: 100%;
+                width: 100% !important;
             }
         }
 
@@ -543,7 +554,27 @@
             
             
             .main-content { margin-left: 0; width: 100%; }
-            .top-navbar { position: sticky; top: 0; z-index: 1000; border-radius: 0; margin-bottom: 15px; }
+            .top-navbar { 
+                position: fixed !important; 
+                top: 0; 
+                left: 0;
+                right: 0;
+                width: 100% !important;
+                z-index: 1030 !important; 
+                border-radius: 0 !important; 
+                margin-bottom: 0 !important;
+                background: white !important;
+                padding: 10px 15px !important;
+            }
+            .main-content {
+                padding-top: 80px !important;
+            }
+            .btn-add-new-item {
+                white-space: nowrap !important;
+                font-size: 0.85rem !important;
+                padding: 0 12px !important;
+                height: 38px !important;
+            }
             #sidebar.active { transform: translateX(0); }
 
             .sidebar-overlay {
@@ -557,9 +588,7 @@
                 z-index: 1040;
             }
             .sidebar-overlay.active { display: block; }
-
             .container { padding: 0 15px 15px; }
-            .top-navbar { padding: 10px 15px; }
         }
     </style>
     <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
@@ -594,7 +623,8 @@
             border-bottom-right-radius: 0 !important;
         }
 
-        /* --- UNIFIED TABLE SCROLLING & SIZING FIX --- */
+        /* --- UNIFIED TABLE SIZING FIX --- */
+        html { overflow-x: hidden !important; max-width: 100vw; }
         .table, table {
             font-size: 0.95rem !important;
         }
@@ -606,26 +636,30 @@
             .table, table { font-size: 0.9rem !important; }
             .table th, .table td, table th, table td { padding: 0.75rem 0.5rem !important; }
         }
-        .table-responsive, .table-responsive-custom {
-            max-height: 65vh !important;
+        /* Table wrapper: vertical scroll ON, horizontal scroll only when table is wider than container */
+        .table-responsive-custom {
+            overflow-x: auto !important;
             overflow-y: auto !important;
+            max-height: 65vh !important;
         }
-        .table-responsive::-webkit-scrollbar, .table-responsive-custom::-webkit-scrollbar {
-            width: 8px; height: 8px;
+        /* Slim scrollbars inside the table wrapper only */
+        .table-responsive-custom::-webkit-scrollbar {
+            height: 5px;
+            width: 5px;
         }
-        .table-responsive::-webkit-scrollbar-track, .table-responsive-custom::-webkit-scrollbar-track {
-            background: #f1f1f1; border-radius: 4px; margin: 0 10px;
+        .table-responsive-custom::-webkit-scrollbar-track {
+            background: #f1f1f1; border-radius: 4px;
         }
-        .table-responsive::-webkit-scrollbar-thumb, .table-responsive-custom::-webkit-scrollbar-thumb {
+        .table-responsive-custom::-webkit-scrollbar-thumb {
             background: #c1c1c1; border-radius: 4px;
         }
-        .table-responsive::-webkit-scrollbar-thumb:hover, .table-responsive-custom::-webkit-scrollbar-thumb:hover {
+        .table-responsive-custom::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
         }
-        /* Sticky Headers */
+        /* Sticky header — works because the table wrapper now scrolls vertically */
         .table thead th, table thead th, .table th {
             position: sticky !important;
-            top: -1px !important;
+            top: 0 !important;
             z-index: 10 !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
             background-color: var(--primary, #4e73df) !important;
@@ -863,6 +897,8 @@ function getSku($name, $variation = '') {
                         <th class="text-center align-middle">Quantity</th>
                         <th class="text-center align-middle hide-mobile">Value %</th>
                         <th class="text-center align-middle hide-mobile">Category</th>
+                        <th class="text-center align-middle hide-mobile">Expiration Date</th>
+                        <th class="text-center align-middle hide-mobile">Date Entry</th>
                         <th class="text-center align-middle">Status</th>
                         <th class="text-center align-middle">Actions</th>
                     </tr>
@@ -926,6 +962,8 @@ function getSku($name, $variation = '') {
                                 ?>%
                             </td>
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
+                            <td class="text-center align-middle hide-mobile text-nowrap"><?= (empty($item['expiration_date']) || $item['expiration_date'] === '0000-00-00') ? '&mdash;' : esc(date('m/d/Y', strtotime($item['expiration_date']))) ?></td>
+                            <td class="text-center align-middle hide-mobile text-nowrap"><?= !empty($item['created_at']) ? esc(date('m/d/Y', strtotime($item['created_at']))) : '&mdash;' ?></td>
                             <td class="text-center align-middle">
                                 <span class="badge 
                                     <?= $status == 'expired' ? 'bg-danger' :
@@ -937,7 +975,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
                                     <button type="button" class="btn btn-sm btn-view-info" 
-                                            onclick="showItemInfo('<?= esc($item['product_id']) ?><?= $sz['s'] ?>', '<?= esc($item['name']) ?> (<?= $sz['l'] ?>)', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($sz['q']) ?> <?= $sz['ql'] ?>', '₱<?= number_format($sz['p'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
+                                            onclick="showItemInfo('<?= esc($item['product_id']) ?><?= $sz['s'] ?>', '<?= esc($item['name']) ?> (<?= $sz['l'] ?>)', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($sz['q']) ?> <?= $sz['ql'] ?>', '&#8369;<?= number_format($sz['p'], 2) ?>', '<?= !empty($item['created_at']) ? esc(date('m/d/Y', strtotime($item['created_at']))) : '&mdash;' ?>', '<?= (empty($item['expiration_date']) || $item['expiration_date'] === '0000-00-00') ? '&mdash;' : esc(date('m/d/Y', strtotime($item['expiration_date']))) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
                                         <i class="bi bi-info-circle"></i>
                                     </button>
                                     <a href="<?= site_url('items/edit/' . $item['id'] . '?size=' . strtolower($sz['l'])) ?>" class="btn btn-sm btn-edit">
@@ -970,6 +1008,8 @@ function getSku($name, $variation = '') {
                                 ?>%
                             </td>
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
+                            <td class="text-center align-middle hide-mobile text-nowrap"><?= (empty($item['expiration_date']) || $item['expiration_date'] === '0000-00-00') ? '&mdash;' : esc(date('m/d/Y', strtotime($item['expiration_date']))) ?></td>
+                            <td class="text-center align-middle hide-mobile text-nowrap"><?= !empty($item['created_at']) ? esc(date('m/d/Y', strtotime($item['created_at']))) : '&mdash;' ?></td>
                             <td class="text-center align-middle">
                                 <span class="badge 
                                     <?= $status == 'expired' ? 'bg-danger' :
@@ -981,7 +1021,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
                                     <button type="button" class="btn btn-sm btn-view-info" 
-                                            onclick="showItemInfo('<?= esc($item['product_id']) ?>', '<?= esc($item['name']) ?>', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($item['quantity']) ?>', '₱<?= number_format($item['price'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
+                                            onclick="showItemInfo('<?= esc($item['product_id']) ?>', '<?= esc($item['name']) ?>', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($item['quantity']) ?>', '&#8369;<?= number_format($item['price'], 2) ?>', '<?= !empty($item['created_at']) ? esc(date('m/d/Y', strtotime($item['created_at']))) : '&mdash;' ?>', '<?= (empty($item['expiration_date']) || $item['expiration_date'] === '0000-00-00') ? '&mdash;' : esc(date('m/d/Y', strtotime($item['expiration_date']))) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
                                         <i class="bi bi-info-circle"></i>
                                     </button>
                                     <a href="<?= site_url('items/edit/' . $item['id']) ?>" class="btn btn-sm btn-edit">
@@ -1217,8 +1257,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const nameB = b.children[1]?.textContent.trim().toLowerCase() || "";
             const qtyA = parseFloat(a.children[4]?.textContent) || 0;
             const qtyB = parseFloat(b.children[4]?.textContent) || 0;
-            const dateA = new Date(a.children[9]?.textContent.trim() || 0);
-            const dateB = new Date(b.children[9]?.textContent.trim() || 0);
+            const dateA = new Date(a.children[8]?.textContent.trim() || 0);
+            const dateB = new Date(b.children[8]?.textContent.trim() || 0);
             const statusA = a.querySelector(".badge")?.textContent.trim().toLowerCase() || "";
             const statusB = b.querySelector(".badge")?.textContent.trim().toLowerCase() || "";
             const statusOrder = { 'expired': 0, 'expiring today': 1, 'expiring soon': 1, 'active': 2, 'n/a': 3 };

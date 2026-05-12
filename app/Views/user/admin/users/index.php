@@ -22,6 +22,20 @@
     }
 
     @media (max-width: 991px) {
+        .btn-add-staff {
+            position: fixed !important;
+            top: 13px !important;
+            right: 15px !important;
+            z-index: 1050 !important;
+            white-space: nowrap !important;
+            font-size: 0.85rem !important;
+            padding: 0 12px !important;
+            height: 38px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+        }
         .table {
             min-width: 700px !important;
             font-size: 0.9rem !important;
@@ -37,7 +51,7 @@
     </style>
 
 <?= $this->section('header_actions') ?>
-    <a href="<?= site_url('admin/staff/users/create') ?>" class="btn btn-primary shadow-sm px-4 py-2 fw-semibold" style="transition: all 0.3s ease; border-radius: 8px !important;">
+    <a href="<?= site_url('admin/staff/users/create') ?>" class="btn btn-primary btn-add-staff shadow-sm px-4 py-2 fw-semibold" style="transition: all 0.3s ease; border-radius: 8px !important;">
         <i class="bi bi-person-plus-fill me-2"></i> Add Staff
     </a>
 <?= $this->endSection() ?>

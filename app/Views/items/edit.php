@@ -530,6 +530,12 @@
             <?php endif; ?>
 
             <div class="mb-3">
+                <label for="date_entry" class="form-label">Date Entry</label>
+                <input type="date" class="form-control" id="date_entry" name="date_entry"
+                    value="<?= !empty($item['created_at']) ? date('Y-m-d', strtotime($item['created_at'])) : date('Y-m-d') ?>">
+            </div>
+
+            <div class="mb-3">
                 <label for="expiration_date" class="form-label">Expiration Date</label>
                 <input type="date" class="form-control" id="expiration_date" name="expiration_date"
                     value="<?= esc($item['expiration_date']) ?>">

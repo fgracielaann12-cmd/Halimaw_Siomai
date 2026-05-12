@@ -459,14 +459,10 @@
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
-    <div class="top-navbar">
-        <div class="d-flex align-items-center gap-3">
-            <button class="mobile-menu-toggle-inline d-lg-none" id="mobileMenuToggleInline">
-                <i class="bi bi-list"></i>
-            </button>
-            <h5 class="mb-0"><i class="bi bi-trash3 me-2" style="font-size: 1.25rem;"></i>Pull-Outs</h5>
-        </div>
-    </div>
+    <?= view('partials/admin_topbar', [
+        'title' => 'Pull-Outs',
+        'icon' => 'bi bi-trash3'
+    ]) ?>
 
     <div class="container">
         <!-- Flash Messages -->

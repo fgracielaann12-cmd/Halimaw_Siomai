@@ -658,15 +658,10 @@
     <?= view('partials/admin_sidebar') ?>
 
     <div class="main-content">
-        <!-- TOP NAVBAR -->
-        <div class="top-navbar" style="padding-left: 20px;">
-            <div class="d-flex align-items-center gap-3">
-                <button class="mobile-menu-toggle" id="mobileMenuToggleInline">
-                    <i class="bi bi-list"></i>
-                </button>
-                <h5 class="mb-0"><i class="bi bi-graph-up me-2" style="font-size: 1.25rem;"></i>Sales Records</h5>
-            </div>
-        </div>
+        <?= view('partials/admin_topbar', [
+            'title' => 'Sales Records',
+            'icon' => 'bi bi-graph-up'
+        ]) ?>
 
         <div class="container">
             <!-- 📊 PERFORMANCE ANALYTICS SECTION -->

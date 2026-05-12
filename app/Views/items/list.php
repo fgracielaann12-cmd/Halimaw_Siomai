@@ -443,6 +443,8 @@
         #itemsTable th, #itemsTable td {
             text-align: center !important;
             vertical-align: middle !important;
+            padding: 6px 4px !important;
+            font-size: 0.85rem !important;
         }
         #itemsTable thead th {
             background: var(--primary);
@@ -599,7 +601,7 @@
             font-size: 0.95rem !important;
         }
         .table th, .table td, table th, table td {
-            padding: 12px 15px !important;
+            padding: 6px 8px !important;
             vertical-align: middle !important;
         }
         @media (max-width: 991px) {
@@ -722,23 +724,21 @@ function getSku($name, $variation = '') {
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
-    <!-- TOP NAVBAR -->
-    <div class="top-navbar" style="padding-left: 20px; padding-right: 20px;">
-        <div class="d-flex align-items-center gap-3">
-            <button class="mobile-menu-toggle" id="mobileMenuToggleInline">
-                <i class="bi bi-list"></i>
-            </button>
-            <h5 class="mb-0"><i class="bi bi-box-seam me-2" style="font-size: 1.25rem;"></i>Admin Inventory</h5>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <a href="<?= site_url('items/add') ?>" class="btn-add-new-item mb-0 shadow-sm" style="height: 40px; margin: 0; padding: 0 16px;">
-                <i class="bi bi-plus-lg me-2"></i>Add New Item
-            </a>
-            <button onclick="location.reload()" class="btn btn-light shadow-sm border" style="height: 40px; width: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px;" title="Refresh Table">
-                <i class="bi bi-arrow-clockwise" style="font-size: 1.2rem; color: #3a3b45;"></i>
-            </button>
-        </div>
-    </div>
+    <?php
+    $extra_buttons = '
+        <a href="' . site_url('items/add') . '" class="btn-add-new-item mb-0 shadow-sm" style="height: 40px; margin: 0; padding: 0 16px; display: flex; align-items: center;">
+            <i class="bi bi-plus-lg me-2"></i>Add New Item
+        </a>
+        <button onclick="location.reload()" class="btn btn-light shadow-sm border" style="height: 40px; width: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px;" title="Refresh Table">
+            <i class="bi bi-arrow-clockwise" style="font-size: 1.2rem; color: #3a3b45;"></i>
+        </button>
+    ';
+    echo view('partials/admin_topbar', [
+        'title' => 'Admin Inventory',
+        'icon' => 'bi bi-box-seam',
+        'extra_buttons' => $extra_buttons
+    ]);
+    ?>
 
     <div class="container">
         <?php
@@ -856,7 +856,7 @@ function getSku($name, $variation = '') {
             <table id="itemsTable" class="table table-bordered table-hover align-middle mb-0 text-center">
                 <thead>
                     <tr>
-                        <th class="text-center align-middle">Product ID</th>
+                        <th class="text-center align-middle">Prod ID</th>
                         <th class="text-center align-middle">Name</th>
                         <th class="text-center align-middle">SKU</th>
                         <th class="text-center align-middle">Price</th>
@@ -864,7 +864,7 @@ function getSku($name, $variation = '') {
                         <th class="text-center align-middle hide-mobile">Value %</th>
                         <th class="text-center align-middle hide-mobile">Category</th>
                         <th class="text-center align-middle hide-mobile">Expiration Date</th>
-                        <th class="text-center align-middle">Status</th>
+                        <th class="text-center align-middle" style="width: 1%; white-space: nowrap;">Status</th>
                         <th class="text-center align-middle hide-mobile">Date Entry</th>
                         <th class="text-center align-middle">Actions</th>
                     </tr>
@@ -930,7 +930,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
                             <td class="text-center align-middle hide-mobile">
                                 <?php if (!empty($item['expiration_date']) && $item['expiration_date'] !== '0000-00-00'): ?>
-                                    <?= date('M d, Y', strtotime($item['expiration_date'])) ?>
+                                    <?= date('m/d/Y', strtotime($item['expiration_date'])) ?>
                                 <?php else: ?>
                                     &mdash;
                                 <?php endif; ?>
@@ -945,7 +945,7 @@ function getSku($name, $variation = '') {
                             </td>
                             <td class="text-center align-middle hide-mobile">
                                 <?php if (!empty($item['created_at'])): ?>
-                                    <?= date('M d, Y h:i A', strtotime($item['created_at'])) ?>
+                                    <?= date('m/d/Y H:i', strtotime($item['created_at'])) ?>
                                 <?php else: ?>
                                     &mdash;
                                 <?php endif; ?>
@@ -953,7 +953,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
                                     <button type="button" class="btn btn-sm btn-view-info" 
-                                            onclick="showItemInfo('<?= esc($item['product_id']) ?><?= $sz['s'] ?>', '<?= esc($item['name']) ?> (<?= $sz['l'] ?>)', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($sz['q']) ?> <?= $sz['ql'] ?>', '₱<?= number_format($sz['p'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
+                                            onclick="showItemInfo('<?= esc($item['product_id']) ?><?= $sz['s'] ?>', '<?= esc($item['name']) ?> (<?= $sz['l'] ?>)', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($sz['q']) ?> <?= $sz['ql'] ?>', '₱<?= number_format($sz['p'], 2) ?>', '<?= !empty($item['created_at']) ? date('m/d/Y H:i', strtotime($item['created_at'])) : '&mdash;' ?>', '<?= empty($item['expiration_date']) || $item['expiration_date'] === '0000-00-00' ? '&mdash;' : date('m/d/Y', strtotime($item['expiration_date'])) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
                                         <i class="bi bi-info-circle"></i>
                                     </button>
                                     <a href="<?= site_url('items/edit/' . $item['id'] . '?size=' . strtolower($sz['l'])) ?>" class="btn btn-sm btn-edit">
@@ -988,7 +988,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
                             <td class="text-center align-middle hide-mobile">
                                 <?php if (!empty($item['expiration_date']) && $item['expiration_date'] !== '0000-00-00'): ?>
-                                    <?= date('M d, Y', strtotime($item['expiration_date'])) ?>
+                                    <?= date('m/d/Y', strtotime($item['expiration_date'])) ?>
                                 <?php else: ?>
                                     &mdash;
                                 <?php endif; ?>
@@ -1003,7 +1003,7 @@ function getSku($name, $variation = '') {
                             </td>
                             <td class="text-center align-middle hide-mobile">
                                 <?php if (!empty($item['created_at'])): ?>
-                                    <?= date('M d, Y h:i A', strtotime($item['created_at'])) ?>
+                                    <?= date('m/d/Y H:i', strtotime($item['created_at'])) ?>
                                 <?php else: ?>
                                     &mdash;
                                 <?php endif; ?>
@@ -1011,7 +1011,7 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
                                     <button type="button" class="btn btn-sm btn-view-info" 
-                                            onclick="showItemInfo('<?= esc($item['product_id']) ?>', '<?= esc($item['name']) ?>', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($item['quantity']) ?>', '₱<?= number_format($item['price'], 2) ?>', '<?= esc($item['created_at']) ?>', '<?= empty($item['expiration_date']) ? '&mdash;' : esc($item['expiration_date']) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
+                                            onclick="showItemInfo('<?= esc($item['product_id']) ?>', '<?= esc($item['name']) ?>', '<?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?>', '<?= esc($item['category'] ?? '&mdash;') ?>', '<?= esc($item['quantity']) ?>', '₱<?= number_format($item['price'], 2) ?>', '<?= !empty($item['created_at']) ? date('m/d/Y H:i', strtotime($item['created_at'])) : '&mdash;' ?>', '<?= empty($item['expiration_date']) || $item['expiration_date'] === '0000-00-00' ? '&mdash;' : date('m/d/Y', strtotime($item['expiration_date'])) ?>', '<span class=\'badge <?= $status == 'expired' ? 'bg-danger' : ($status == 'expiring soon' ? 'bg-warning text-dark' : ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>\' ><?= $statusLabel ?></span>')" title="View Info">
                                         <i class="bi bi-info-circle"></i>
                                     </button>
                                     <a href="<?= site_url('items/edit/' . $item['id']) ?>" class="btn btn-sm btn-edit">

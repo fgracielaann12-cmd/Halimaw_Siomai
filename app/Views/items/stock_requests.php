@@ -576,15 +576,10 @@ $currentPath = $seg1 . '/' . $seg2;
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
-    <!-- TOP NAVBAR MATCHING STAFF POS/DASHBOARD -->
-    <div class="top-navbar">
-        <div class="d-flex align-items-center gap-3">
-            <button class="mobile-menu-toggle-inline d-lg-none" id="mobileMenuToggleInline">
-                <i class="bi bi-list"></i>
-            </button>
-            <h5 class="mb-0"><i class="bi bi-box-seam me-2" style="font-size: 1.25rem;"></i>Stock Requests</h5>
-        </div>
-    </div>
+    <?= view('partials/admin_topbar', [
+        'title' => 'Stock Requests',
+        'icon' => 'bi bi-box-seam'
+    ]) ?>
 
     <div class="container">
         <!-- Flash Messages -->

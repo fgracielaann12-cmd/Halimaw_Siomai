@@ -310,18 +310,18 @@
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
-    <div class="top-navbar">
-        <div class="d-flex align-items-center gap-3">
-            <button class="mobile-menu-toggle-inline d-lg-none" id="mobileMenuToggleInline">
-                <i class="bi bi-list"></i>
-            </button>
-            <h5 class="mb-0"><i class="bi bi-arrow-return-left me-2 text-primary" style="font-size: 1.25rem;"></i>Customer Returns</h5>
-        </div>
-        
+    <?php
+    $extra_buttons = '
         <button class="btn btn-primary shadow-sm btn-sm px-3 py-2" data-bs-toggle="modal" data-bs-target="#returnModal" style="border-radius: 8px !important;">
             <i class="bi bi-plus-circle me-1"></i> Process Return
         </button>
-    </div>
+    ';
+    echo view('partials/admin_topbar', [
+        'title' => 'Customer Returns',
+        'icon' => 'bi bi-arrow-return-left text-primary',
+        'extra_buttons' => $extra_buttons
+    ]);
+    ?>
         
         <div class="container-fluid px-4 py-4">
             <!-- Dashboard Metrics -->

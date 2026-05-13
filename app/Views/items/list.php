@@ -912,6 +912,7 @@ function getSku($name, $variation = '') {
                         <th class="text-center align-middle">Quantity</th>
                         <th class="text-center align-middle hide-mobile">Category</th>
                         <th class="text-center align-middle hide-mobile">Expiration Date</th>
+                        <th class="text-center align-middle hide-mobile">Date Entry</th>
                         <th class="text-center align-middle" style="width: 1%; white-space: nowrap;">Status</th>
                         <th class="text-center align-middle">Actions</th>
                     </tr>
@@ -983,6 +984,9 @@ function getSku($name, $variation = '') {
                                     &mdash;
                                 <?php endif; ?>
                             </td>
+                            <td class="text-center align-middle hide-mobile">
+                                <?= !empty($item['created_at']) ? date('m/d/Y H:i', strtotime($item['created_at'])) : '&mdash;' ?>
+                            </td>
                             <td class="text-center align-middle">
                                 <span class="badge 
                                     <?= $status == 'expired' ? 'bg-danger' :
@@ -1032,6 +1036,9 @@ function getSku($name, $variation = '') {
                                 <?php else: ?>
                                     &mdash;
                                 <?php endif; ?>
+                            </td>
+                            <td class="text-center align-middle hide-mobile">
+                                <?= !empty($item['created_at']) ? date('m/d/Y H:i', strtotime($item['created_at'])) : '&mdash;' ?>
                             </td>
                             <td class="text-center align-middle">
                                 <span class="badge 
@@ -1260,7 +1267,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("#itemsTable tbody tr").forEach(row => {
             const pid = row.children[0]?.textContent.toLowerCase() || "";
             const name = row.children[1]?.textContent.toLowerCase() || "";
-            const rowCategory = row.children[6]?.textContent.toLowerCase().trim() || "";
+            const rowCategory = row.children[5]?.textContent.toLowerCase().trim() || "";
             const statusBadge = row.querySelector(".badge")?.textContent.trim().toLowerCase() || "";
             
             let matchesSortFilter = true;
@@ -1289,8 +1296,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const nameB = b.children[1]?.textContent.trim().toLowerCase() || "";
             const qtyA = parseFloat(a.children[4]?.textContent) || 0;
             const qtyB = parseFloat(b.children[4]?.textContent) || 0;
-            const dateA = new Date(a.children[9]?.textContent.trim() || 0);
-            const dateB = new Date(b.children[9]?.textContent.trim() || 0);
+            const dateA = new Date(a.children[7]?.textContent.trim() || 0);
+            const dateB = new Date(b.children[7]?.textContent.trim() || 0);
             const statusA = a.querySelector(".badge")?.textContent.trim().toLowerCase() || "";
             const statusB = b.querySelector(".badge")?.textContent.trim().toLowerCase() || "";
             const statusOrder = { 'expired': 0, 'expiring today': 1, 'expiring soon': 1, 'active': 2, 'n/a': 3 };

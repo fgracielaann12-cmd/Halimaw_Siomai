@@ -218,7 +218,7 @@
         /* CONTAINER */
         .container {
             max-width: 780px;
-            padding: 30px 20px;
+            padding: 5px 20px 30px 20px;
         }
 
         /* CARD */
@@ -449,6 +449,12 @@
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
+    <div class="p-3 pb-0">
+        <a href="<?= site_url('items') ?>" class="btn btn-light shadow-sm border d-inline-flex align-items-center gap-2" style="border-radius: 8px; padding: 8px 16px; font-weight: 500; color: #4e73df;">
+            <i class="bi bi-arrow-left" style="font-size: 1.1rem;"></i>
+            <span>Back to Inventory</span>
+        </a>
+    </div>
     <div class="container">
         <!-- Flash Messages -->
         <?php if (session()->getFlashdata('errors')): ?>

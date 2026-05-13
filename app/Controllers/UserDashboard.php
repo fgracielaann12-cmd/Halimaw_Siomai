@@ -20,7 +20,7 @@ class Userdashboard extends BaseController
         $warningDays = 10;
 
         $updatedItems = [];
-        $items = $model->orderBy('created_at', 'ASC')->findAll();
+        $items = $model->orderBy('product_id', 'ASC')->findAll();
 
         foreach ($items as $item) {
             if (in_array($item['status'], ['manually deleted', 'auto deleted'])) {

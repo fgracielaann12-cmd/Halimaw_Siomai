@@ -1902,7 +1902,7 @@ if (!function_exists('getProductSKU')) {
     <!-- ✅ Customer Return Modal -->
     <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
                 <div class="modal-header p-3 border-0 position-relative" style="background-color: #2c3e50; border-top-left-radius: 12px; border-top-right-radius: 12px;">
                     <h5 class="modal-title fw-semibold text-white w-100 text-center" id="returnModalLabel" style="font-size: 1.15rem;">
                         <i class="bi bi-arrow-return-left me-2"></i>Process Customer Return

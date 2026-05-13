@@ -174,3 +174,28 @@ userId: 19
 Insert success: ID 37
 >>>>>>> d593f3b68d7012d8920aeb94a5e238f6a0fec424
 >>>>>>> Stashed changes
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => eec2cee16bab61af0133955fda2420e7
+    [item_id] => 5616
+    [action] => add
+    [quantity] => 5
+    [reason] => [Variation: Small] sampleee
+)
+
+userId: 4
+Insert success: ID 38
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => eec2cee16bab61af0133955fda2420e7
+    [item_id] => 5615
+    [action] => add
+    [quantity] => 10
+    [reason] => [Variation: Large] try
+
+)
+
+userId: 19
+Insert success: ID 39

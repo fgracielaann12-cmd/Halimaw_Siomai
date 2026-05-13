@@ -1307,15 +1307,9 @@ if (!function_exists('getProductSKU')) {
     <!-- ✅ Customer Return Modal -->
     <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-<<<<<<< Updated upstream
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
                 <div class="modal-header p-3 border-0 position-relative" style="background-color: #2c3e50; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                    <h5 class="modal-title fw-semibold text-white w-100 text-center" style="font-size: 1.15rem;">
-=======
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header p-3 border-0 position-relative" style="background-color: #2c3e50; border-top-left-radius: 12px; border-top-right-radius: 12px;">
                     <h5 class="modal-title fw-semibold text-white w-100 text-center" id="returnModalLabel" style="font-size: 1.15rem;">
->>>>>>> Stashed changes
                         <i class="bi bi-arrow-return-left me-2"></i>Process Customer Return
                     </h5>
                     <button type="button" class="btn-close btn-close-white position-absolute top-50 end-0 translate-middle-y me-3" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1324,48 +1318,10 @@ if (!function_exists('getProductSKU')) {
                     <form id="returnFormModal">
                         <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" id="returnCsrf">
                         
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold text-dark mb-2">
-                                    <i class="bi bi-receipt me-1 text-primary"></i> Transaction ID
-                                </label>
-                                <input type="text" class="form-control form-control-lg shadow-sm" id="returnTransactionId" placeholder="e.g. TXN-12345" required style="border-radius: 8px;">
-                                <small class="text-muted mt-1 d-block"><i class="bi bi-info-circle me-1"></i>Required to validate the purchase</small>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold text-dark mb-2">
-                                    <i class="bi bi-box me-1 text-primary"></i> Item Returned
-                                </label>
-                                <select class="form-select form-select-lg shadow-sm" id="returnItemModal" required style="border-radius: 8px;">
-                                    <option value="" disabled selected>Search for product...</option>
-                                    <?php if(isset($items) && !empty($items)): ?>
-                                        <?php foreach($items as $item): ?>
-                                            <!-- Normal Items -->
-                                            <option value="<?= esc($item['id']) ?>"><?= esc($item['name']) ?></option>
-                                            
-                                            <!-- Siomai Variations -->
-                                            <?php if(stripos($item['name'], 'siomai') !== false): ?>
-                                                <option value="<?= esc($item['id']) ?>" data-variation="Small"><?= esc($item['name']) ?> - Small</option>
-                                                <option value="<?= esc($item['id']) ?>" data-variation="Medium"><?= esc($item['name']) ?> - Medium</option>
-                                                <option value="<?= esc($item['id']) ?>" data-variation="Large"><?= esc($item['name']) ?> - Large</option>
-                                            <?php endif; ?>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                            </div>
-=======
-=======
->>>>>>> Stashed changes
                         <div class="mb-4">
                             <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
                                 <i class="bi bi-receipt me-1"></i> Transaction ID
                             </label>
-<<<<<<< Updated upstream
-                            <input type="text" id="returnTransactionId" class="form-control form-control-lg" required placeholder="Enter Transaction ID (e.g. TXN-12345 or OUT-6789)" style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
->>>>>>> Stashed changes
-=======
                             <input type="text" class="form-control form-control-lg" id="returnTransactionId" placeholder="Enter Transaction ID (e.g. TXN-12345)" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
                         </div>
 
@@ -1376,38 +1332,10 @@ if (!function_exists('getProductSKU')) {
                             <select class="form-select form-select-lg" id="returnItemModal" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
                                 <option value="" disabled selected>— Enter Transaction ID first —</option>
                             </select>
->>>>>>> Stashed changes
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
-                                <i class="bi bi-box me-1"></i> Select Item
-                            </label>
-                            <select id="returnItemModal" class="form-select form-select-lg" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
-                                <option value="" disabled selected>— Enter Transaction ID first —</option>
-                            </select>
-                        </div>
-                        
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
-<<<<<<< Updated upstream
-                                <label for="returnQtyModal" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
-                                    <i class="bi bi-hash me-1"></i> Quantity
-                                </label>
-                                <input type="number" id="returnQtyModal" class="form-control form-control-lg" min="1" placeholder="Enter amount" required
-                                       style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="returnReasonModal" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
-                                    <i class="bi bi-exclamation-triangle me-1"></i> Reason for Return
-                                </label>
-                                <select id="returnReasonModal" class="form-select form-select-lg" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
-                                    <option value="" disabled selected>— Select Reason —</option>
-                                    <option value="Wrong Order">Wrong Order</option>
-                                    <option value="Change of Mind">Change of Mind</option>
-                                    <option value="Quality Issue">Quality Issue</option>
-                                    <option value="Damaged Item">Damaged Item</option>
-=======
                                 <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
                                     <i class="bi bi-hash me-1"></i> Quantity
                                 </label>
@@ -1424,7 +1352,6 @@ if (!function_exists('getProductSKU')) {
                                     <option value="Item Damaged / Bad Quality">Item Damaged / Bad Quality</option>
                                     <option value="Foreign Object Found">Foreign Object Found</option>
                                     <option value="Under-cooked / Spoilage">Under-cooked / Spoilage</option>
->>>>>>> Stashed changes
                                 </select>
                             </div>
                         </div>
@@ -1482,8 +1409,7 @@ if (!function_exists('getProductSKU')) {
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
@@ -1559,6 +1485,21 @@ if (!function_exists('getProductSKU')) {
                 minimumResultsForSearch: -1
             });
         }
+
+        $('#returnModal').on('shown.bs.modal', function () {
+            $('#returnItemModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+            $('#returnReasonModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+        });
 
 
         // 🔄 CUSTOM DROPDOWN LOGIC
@@ -1735,8 +1676,7 @@ if (!function_exists('getProductSKU')) {
                 }
             });
         }
-<<<<<<< Updated upstream
-=======
+
         if ($('#returnItemModal').length) {
             $('#returnItemModal').select2({
                 theme: 'bootstrap-5',
@@ -1769,7 +1709,22 @@ if (!function_exists('getProductSKU')) {
                 minimumResultsForSearch: -1
             });
         });
->>>>>>> Stashed changes
+
+        $('#returnModal').on('shown.bs.modal', function () {
+            $('#returnItemModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+            $('#returnReasonModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+        });
+
 
         // ✅ RETURNS SUBMISSION
         const txnInput = document.getElementById('returnTransactionId');
@@ -1810,10 +1765,9 @@ if (!function_exists('getProductSKU')) {
                     } else {
                         alert('No items found for this Transaction ID. Please verify the ID.');
                         itemSelect.empty().append('<option value="" disabled selected>— No items found —</option>').trigger('change');
-<<<<<<< Updated upstream
-=======
+
                         lastFetchedTxn = '';
->>>>>>> Stashed changes
+
                     }
                 } catch (err) {
                     console.error(err);

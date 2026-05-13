@@ -19,7 +19,7 @@ class Items extends BaseController
         $warningDays = 10;
 
         $updatedItems = [];
-        $items = $model->orderBy('created_at', 'ASC')->findAll();
+        $items = $model->orderBy('product_id', 'ASC')->findAll();
 
         foreach ($items as $item) {
             // ✅ Skip already deleted items
@@ -143,7 +143,7 @@ class Items extends BaseController
         $warningDays = 10;
 
         $updatedItems = [];
-        $items = $model->orderBy('created_at', 'ASC')->findAll();
+        $items = $model->orderBy('product_id', 'ASC')->findAll();
 
         foreach ($items as $item) {
             if (in_array($item['status'], ['manually deleted', 'auto deleted'])) {
@@ -255,7 +255,7 @@ class Items extends BaseController
     {
         $model = new ItemModel();
         $updatedItems = [];
-        $items = $model->orderBy('created_at', 'ASC')->findAll();
+        $items = $model->orderBy('product_id', 'ASC')->findAll();
         $totalValue = 0;
         $today = date('Y-m-d');
         $warningDays = 10;

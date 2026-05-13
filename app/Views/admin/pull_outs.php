@@ -459,14 +459,11 @@
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
-    <div class="top-navbar">
-        <div class="d-flex align-items-center gap-3">
-            <button class="mobile-menu-toggle-inline d-lg-none" id="mobileMenuToggleInline">
-                <i class="bi bi-list"></i>
-            </button>
-            <h5 class="mb-0"><i class="bi bi-trash3 me-2" style="font-size: 1.25rem;"></i>Pull-Outs</h5>
-        </div>
-    </div>
+    <?= view('partials/admin_topbar', [
+        'title' => 'Pull-Outs',
+        'icon' => 'bi bi-trash3',
+        'hide_toggle' => true
+    ]) ?>
 
     <div class="container">
         <!-- Flash Messages -->
@@ -562,9 +559,10 @@
                         <td>
                             <?php
                             $reason = $r['pull_out_reason'];
-                            if ($reason === 'SPOILED' || stripos($reason, 'spoil') !== false) echo '<span class="badge bg-danger">Spoiled</span>';
-                            elseif ($reason === 'CONTAMINATED') echo '<span class="badge bg-warning text-dark">Contaminated</span>';
-                            elseif ($reason === 'DAMAGED_PACKAGING') echo '<span class="badge bg-secondary">Damaged Pkg</span>';
+                            if ($reason === 'Shortage') echo '<span class="badge bg-warning text-dark">Shortage</span>';
+                            elseif ($reason === 'Spoilage' || $reason === 'SPOILED' || stripos($reason, 'spoil') !== false) echo '<span class="badge bg-danger">Spoilage</span>';
+                            elseif ($reason === 'Damaged Packaging' || $reason === 'DAMAGED_PACKAGING') echo '<span class="badge bg-secondary">Damaged Pkg</span>';
+                            elseif ($reason === 'CONTAMINATED') echo '<span class="badge bg-info text-dark">Contaminated</span>';
                             elseif ($reason === 'CUSTOMER_RETURN') echo '<span class="badge bg-info text-dark">Customer Return</span>';
                             else echo '<span class="badge bg-dark">' . esc($reason) . '</span>';
                             ?>

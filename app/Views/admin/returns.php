@@ -310,18 +310,19 @@
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
-    <div class="top-navbar">
-        <div class="d-flex align-items-center gap-3">
-            <button class="mobile-menu-toggle-inline d-lg-none" id="mobileMenuToggleInline">
-                <i class="bi bi-list"></i>
-            </button>
-            <h5 class="mb-0"><i class="bi bi-arrow-return-left me-2 text-primary" style="font-size: 1.25rem;"></i>Customer Returns</h5>
-        </div>
-        
+    <?php
+    $extra_buttons = '
         <button class="btn btn-primary shadow-sm btn-sm px-3 py-2" data-bs-toggle="modal" data-bs-target="#returnModal" style="border-radius: 8px !important;">
             <i class="bi bi-plus-circle me-1"></i> Process Return
         </button>
-    </div>
+    ';
+    echo view('partials/admin_topbar', [
+        'title' => 'Customer Returns',
+        'icon' => 'bi bi-arrow-return-left text-primary',
+        'extra_buttons' => $extra_buttons,
+        'hide_toggle' => true
+    ]);
+    ?>
         
         <div class="container-fluid px-4 py-4">
             <!-- Dashboard Metrics -->
@@ -596,6 +597,62 @@ $(document).ready(function() {
     }
 
     // RETURNS SUBMISSION
+    const txnInput = document.getElementById('returnTransactionId');
+    const itemSelect = $('#returnItemModal');
+    const qtyInput = document.getElementById('returnQtyModal');
+
+    if (txnInput) {
+        // Clear item select initially to guide the user
+        itemSelect.empty().append('<option value="" disabled selected>— Enter Transaction ID first —</option>').trigger('change');
+
+        // Handle Transaction ID entry
+        txnInput.addEventListener('change', async function() {
+            const txnId = this.value.trim();
+            if (!txnId) {
+                itemSelect.empty().append('<option value="" disabled selected>— Enter Transaction ID first —</option>').trigger('change');
+                return;
+            }
+
+            try {
+                // Show loading state
+                itemSelect.empty().append('<option value="" disabled selected>— Fetching Items... —</option>').trigger('change');
+                
+                const response = await fetch(`<?= site_url('admin/sales/transaction-items') ?>/${txnId}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await response.json();
+
+                if (data.success && data.items.length > 0) {
+                    itemSelect.empty().append('<option value="" disabled selected>— Choose item from this transaction —</option>');
+                    data.items.forEach(item => {
+                        const optionText = `${item.product_name} (${item.pack})`;
+                        const newOption = new Option(optionText, item.product_id, false, false);
+                        // Store qty and variation for auto-fill
+                        $(newOption).attr('data-qty', item.quantity);
+                        $(newOption).attr('data-variation', item.pack);
+                        itemSelect.append(newOption);
+                    });
+                    itemSelect.trigger('change');
+                } else {
+                    alert('No items found for this Transaction ID. Please verify the ID.');
+                    itemSelect.empty().append('<option value="" disabled selected>— No items found —</option>').trigger('change');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error fetching transaction details.');
+            }
+        });
+    }
+
+    // Auto-fill Quantity when item is selected
+    itemSelect.on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        const qty = selectedOption.attr('data-qty');
+        if (qty) {
+            qtyInput.value = qty;
+        }
+    });
+
     const returnForm = document.getElementById("returnFormModal");
     if (returnForm) {
         returnForm.addEventListener("submit", async (e) => {

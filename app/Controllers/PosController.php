@@ -170,331 +170,230 @@ class PosController extends BaseController
         return 'Regular';
     }
 
-public function sell()
-{
-    $input = $this->request->getJSON(true);
-    $cart = $input['cart'] ?? null;
-    $paymentMethod = $input['payment_method'] ?? 'cash';
-    $customerName = $input['customer_name'] ?? null;
-    $customerEmail = $input['customer_email'] ?? null;
-    $applyVat = $input['apply_vat'] ?? false;
-    $vatType = $input['vat_type'] ?? 'included';
+    public function sell()
+    {
+        $input = $this->request->getJSON(true);
+        $cart = $input['cart'] ?? null;
+        $paymentMethod = $input['payment_method'] ?? 'cash';
+        $customerName = $input['customer_name'] ?? null;
+        $customerEmail = $input['customer_email'] ?? null;
+        $applyVat = $input['apply_vat'] ?? false;
+        $vatType = $input['vat_type'] ?? 'included';
 
-    if (!$cart) {
-        $cart = $this->request->getPost('cart');
-        if ($cart && is_string($cart)) {
-            $cart = json_decode($cart, true);
+        if (!$cart) {
+            $cart = $this->request->getPost('cart');
+            if ($cart && is_string($cart)) {
+                $cart = json_decode($cart, true);
+            }
+            $paymentMethod = $this->request->getPost('payment_method') ?? 'cash';
         }
-        $paymentMethod = $this->request->getPost('payment_method') ?? 'cash';
-    }
 
-    $paymentMethod = trim($paymentMethod) ?: 'cash';
-    $userId = session()->get('user_id');
-    
-    if (!$userId) {
-        return $this->response->setJSON([
-            'success' => false,
-            'message' => 'User not logged in'
-        ]);
-    }
+        $paymentMethod = trim($paymentMethod) ?: 'cash';
+        $userId = session()->get('user_id');
+        
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'User not logged in']);
+        }
 
-    if (!$cart || !is_array($cart) || empty($cart)) {
-        return $this->response->setJSON([
-            'success' => false,
-            'message' => 'Cart is empty or invalid'
-        ]);
-    }
+        if (!$cart || !is_array($cart) || empty($cart)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Cart is empty or invalid']);
+        }
 
-    $db = \Config\Database::connect();
-    $db->transBegin();
-    $totalSaleAmount = 0;
-    
-    // Use ItemModel for stock updates (consistent with AdminRequests)
-    $itemModel = new \App\Models\ItemModel();
-    $transactionModel = new \App\Models\TransactionModel();
-    $transactionId = 'OUT-' . date('Ymd') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        $db = \Config\Database::connect();
+        $itemModel = new \App\Models\ItemModel();
+        $transactionModel = new \App\Models\TransactionModel();
+        
+        $transactionId = 'OUT-' . date('Ymd') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        $totalSaleAmount = 0;
+        
+        $salesBatch = [];
+        $stockUpdates = [
+            'quantity' => [],
+            'pack_small_qty' => [],
+            'pack_medium_qty' => [],
+            'pack_biggest_qty' => []
+        ];
 
-    try {
-        foreach ($cart as $item) {
-            if (!isset($item['product_id'], $item['qty'], $item['price'])) {
-                throw new \Exception("Incomplete cart item data");
-            }
+        try {
+            $db->transStart();
 
-            $productIdRaw = $item['product_id'];
-            $displayQty = (int) $item['qty'];
-            $price = (float) $item['price'];
-            $type = $item['type'] ?? 'other';
-
-            if ($applyVat && $vatType === 'excluded') {
-                $price = $price * 1.12;
-            }
-
-            $product = null;
-            if (is_numeric($productIdRaw)) {
-                $product = $itemModel->find((int)$productIdRaw);
-            }
-            if (!$product) {
-                $product = $itemModel->where('product_id', $productIdRaw)->first();
-            }
-
-            if (!$product) {
-                throw new \Exception("Product ID {$productIdRaw} not found");
-            }
-
-            $realId = $product['id'];
-
-            // 🔑 CALCULATE REAL QUANTITY TO DEDUCT AND WHICH COLUMN TO DEDUCT FROM
-            $deductQty = $displayQty;
-            $stockColumn = 'quantity'; // default
-            
-            if ($type === 'siomai' && isset($item['pack'])) {
-                switch ($item['pack']) {
-                    case 'Small Pack':
-                        $stockColumn = 'pack_small_qty';
-                        break;
-                    case 'Medium Pack':
-                        $stockColumn = 'pack_medium_qty';
-                        break;
-                    case 'Large Pack':
-                        $stockColumn = 'pack_biggest_qty';
-                        break;
+            // 1. PRE-PROCESSING & VALIDATION
+            foreach ($cart as $item) {
+                if (!isset($item['product_id'], $item['qty'], $item['price'])) {
+                    throw new \Exception("Incomplete cart item data");
                 }
-            } elseif ($type === 'patty') {
-                $deductQty = $displayQty * 6;
+
+                $productIdRaw = $item['product_id'];
+                $displayQty = (int) $item['qty'];
+                $price = (float) $item['price'];
+                $type = $item['type'] ?? 'other';
+
+                if ($applyVat && $vatType === 'excluded') {
+                    $price = $price * 1.12;
+                }
+
+                $product = is_numeric($productIdRaw) ? $itemModel->find((int)$productIdRaw) : $itemModel->where('product_id', $productIdRaw)->first();
+
+                if (!$product) {
+                    throw new \Exception("Product ID {$productIdRaw} not found");
+                }
+
+                $realId = $product['id'];
+                $deductQty = $displayQty;
+                $stockColumn = 'quantity';
+                
+                if ($type === 'siomai' && isset($item['pack'])) {
+                    switch ($item['pack']) {
+                        case 'Small Pack': $stockColumn = 'pack_small_qty'; break;
+                        case 'Medium Pack': $stockColumn = 'pack_medium_qty'; break;
+                        case 'Large Pack': $stockColumn = 'pack_biggest_qty'; break;
+                    }
+                } elseif ($type === 'patty') {
+                    $deductQty = $displayQty * 6;
+                }
+
+                // Cumulative stock check in case same item appears multiple times
+                $baseStock = (int) ($product[$stockColumn] ?? 0);
+                $alreadyDeducted = isset($stockUpdates[$stockColumn][$realId]) ? ($baseStock - $stockUpdates[$stockColumn][$realId][$stockColumn]) : 0;
+                $currentAvailable = $baseStock - $alreadyDeducted;
+
+                if ($currentAvailable < $deductQty) {
+                    $productName = esc($product['name'] ?? 'Unknown Item');
+                    $packSuffix = isset($item['pack']) ? " ({$item['pack']})" : "";
+                    throw new \Exception("Insufficient stock for '{$productName}{$packSuffix}'. Available: {$currentAvailable}, Required: {$deductQty}");
+                }
+
+                $total = $price * $displayQty;
+                $totalSaleAmount += $total;
+
+                // Prepare Sales Batch Record
+                $salesBatch[] = [
+                    'transaction_id' => $transactionId,
+                    'user_id'        => $userId,
+                    'product_id'     => $realId,
+                    'quantity'       => $displayQty,
+                    'pack'           => $item['pack'] ?? ($type === 'patty' ? '6pcs' : null),
+                    'price'          => $price,
+                    'total'          => $total,
+                    'payment_method' => $paymentMethod,
+                    'customer_name'  => $customerName,
+                    'customer_email' => $customerEmail,
+                ];
+
+                // Prepare Stock Update Entry
+                $stockUpdates[$stockColumn][$realId] = [
+                    'id' => $realId,
+                    $stockColumn => $currentAvailable - $deductQty
+                ];
             }
 
-            $currentStock = (int) ($product[$stockColumn] ?? 0);
-            if ($currentStock < $deductQty) {
-                $productName = esc($product['name'] ?? 'Unknown Item');
-                $packSuffix = isset($item['pack']) ? " ({$item['pack']})" : "";
-                throw new \Exception("Insufficient stock for '{$productName}{$packSuffix}'. Available: {$currentStock}, Required: {$deductQty}");
-            }
-
-            $total = $price * $displayQty;
-            $totalSaleAmount += $total;
-
-            $saleData = [
+            // 2. ATOMIC DB EXECUTION
+            // A. Transaction Summary
+            $transactionModel->insert([
                 'transaction_id' => $transactionId,
                 'user_id'        => $userId,
-                'product_id'     => $realId,
-                'quantity'       => $displayQty, // This now reflects raw count of packs!
-                'pack'           => $item['pack'] ?? ($type === 'patty' ? '6pcs' : null),
-                'price'          => $price,
-                'total'          => $total,
+                'total_amount'   => $totalSaleAmount,
                 'payment_method' => $paymentMethod,
                 'customer_name'  => $customerName,
                 'customer_email' => $customerEmail,
-            ];
+                'vat_applied'    => $applyVat ? 1 : 0,
+                'vat_type'       => $vatType,
+                'created_at'     => date('Y-m-d H:i:s')
+            ]);
 
-            if (!$this->salesModel->insert($saleData)) {
-                throw new \Exception("Failed to record sale for item: " . ($product['name'] ?? $productIdRaw));
-            }
+            // B. Sales Details (Batch)
+            $this->salesModel->insertBatch($salesBatch);
 
-            // Deduct from inventory
-            $newStock = $currentStock - $deductQty;
-            
-            log_message('info', "Deducting Stock: Product ID {$realId} (Raw: {$productIdRaw}), Name: {$product['name']}, Column: {$stockColumn}, Old: {$currentStock}, Deduct: {$deductQty}, New: {$newStock}");
-
-            if (!$itemModel->update($realId, [$stockColumn => $newStock])) {
-                throw new \Exception("Failed to update inventory for: " . ($product['name'] ?? $productIdRaw));
-            }
-        }
-
-        $transactionData = [
-            'transaction_id' => $transactionId,
-            'user_id'        => $userId,
-            'total_amount'   => $totalSaleAmount,
-            'payment_method' => $paymentMethod,
-            'customer_name'  => $customerName,
-            'customer_email' => $customerEmail,
-            'vat_applied'    => $applyVat ? 1 : 0,
-            'vat_type'       => $vatType,
-            'created_at'     => date('Y-m-d H:i:s')
-        ];
-
-        if (!$transactionModel->insert($transactionData)) {
-            throw new \Exception("Failed to record transaction summary.");
-        }
-
-        if ($db->transStatus() === false) {
-            $db->transRollback();
-            throw new \Exception("Database transaction failed");
-        } else {
-            $db->transCommit();
-        }
-
-        // --- EMAIL RECEIPT LOGIC ---
-        if (!empty($customerEmail)) {
-            try {
-                $emailHelper = \Config\Services::email();
-                
-                // Manually load config to avoid CI4 .env silent mapping issues
-                $config = [
-                    'protocol'   => getenv('email.protocol') ?: 'smtp',
-                    'SMTPHost'   => getenv('email.SMTPHost') ?: 'smtp.gmail.com',
-                    'SMTPUser'   => getenv('email.SMTPUser'),
-                    'SMTPPass'   => getenv('email.SMTPPass'),
-                    'SMTPPort'   => (int)(getenv('email.SMTPPort') ?: 465),
-                    'SMTPCrypto' => getenv('email.SMTPCrypto') ?: 'ssl',
-                    'mailType'   => 'html',
-                    'charset'    => 'utf-8',
-                    'newline'    => "\r\n",
-                    'CRLF'       => "\r\n"
-                ];
-                $emailHelper->initialize($config);
-                
-                $dateFormatted = date('F j, Y, g:i A');
-                $customerGreeting = !empty($customerName) ? "Hi " . esc($customerName) . "," : "Hi Valued Customer,";
-                
-                $receiptHtml = '
-                <html>
-                <head>
-                    <style>
-                        body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 20px; }
-                        .receipt-container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-                        .header { background-color: #4e73df; color: #fff; text-align: center; padding: 30px 20px; }
-                        .header h1 { margin: 0; font-size: 24px; letter-spacing: 1px; }
-                        .header p { margin: 5px 0 0; opacity: 0.8; font-size: 14px; }
-                        .content { padding: 30px; }
-                        .greeting { font-size: 18px; margin-bottom: 20px; color: #2c3e50; }
-                        .table-wrapper { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                        .table-wrapper th, .table-wrapper td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
-                        .table-wrapper th { background-color: #f8f9fa; font-weight: 600; color: #5a5c69; text-transform: uppercase; font-size: 12px; }
-                        .table-wrapper td { font-size: 14px; color: #3a3b45; }
-                        .text-right { text-align: right !important; }
-                        .total-row { font-weight: bold; background-color: #f8f9fc; }
-                        .footer { text-align: center; padding: 20px; background: #f8f9fc; font-size: 12px; color: #858796; border-top: 1px solid #eee; }
-                    </style>
-                </head>
-                <body>
-                    <div class="receipt-container">
-                        <div class="header">
-                            <h1>HALIMAW SIOMAI</h1>
-                            <p>Electronic Receipt</p>
-                        </div>
-                        <div class="content">
-                            <div class="greeting">' . $customerGreeting . '<br><br>Thank you for your purchase! Here are the details of your order:</div>
-                            <div style="margin-bottom: 15px; font-size: 13px; color: #858796;">
-                                <b>Date:</b> ' . $dateFormatted . '<br>
-                                <b>Payment:</b> ' . strtoupper($paymentMethod) . '
-                            </div>
-                            <table class="table-wrapper">
-                                <thead>
-                                    <tr>
-                                        <th>Item</th>
-                                        <th style="text-align:center;">Qty</th>
-                                        <th class="text-right">Price</th>
-                                        <th class="text-right">Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>';
-
-                $rawTotal = 0;
-                foreach ($cart as $item) {
-                    $productId = (int) $item['product_id'];
-                    $product = $itemModel->find($productId);
-                    $itemName = esc($product ? $product['name'] : ($item['name'] ?? 'Item'));
-                    $pack = isset($item['pack']) ? " <small style='color:#888'>(" . esc($item['pack']) . ")</small>" : "";
-                    $qty = (int)$item['qty'];
-                    $basePrice = (float)$item['price'];
-                    $sub = $basePrice * $qty;
-                    $rawTotal += $sub;
-
-                    $receiptHtml .= '
-                                    <tr>
-                                        <td>' . $itemName . $pack . '</td>
-                                        <td style="text-align:center;">' . $qty . '</td>
-                                        <td class="text-right">₱' . number_format($basePrice, 2) . '</td>
-                                        <td class="text-right">₱' . number_format($sub, 2) . '</td>
-                                    </tr>';
+            // C. Inventory Adjustments (Batch per column group)
+            foreach ($stockUpdates as $column => $updates) {
+                if (!empty($updates)) {
+                    $itemModel->updateBatch(array_values($updates), 'id');
                 }
-                
-                $vatStr = '';
-                $grandTotalDisplay = $rawTotal;
-                if ($applyVat) {
-                    if ($vatType === 'included') {
-                        $vatableSales = $rawTotal / 1.12;
-                        $vat = $rawTotal - $vatableSales;
-                        $vatStr = '
-                                    <tr>
-                                        <td colspan="3" class="text-right" style="color:#858796;">Vatable Sales:</td>
-                                        <td class="text-right" style="color:#858796;">₱' . number_format($vatableSales, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="3" class="text-right" style="color:#858796;">12% VAT (Included):</td>
-                                        <td class="text-right" style="color:#858796;">₱' . number_format($vat, 2) . '</td>
-                                    </tr>';
-                    } else {
-                        $vat = $rawTotal * 0.12;
-                        $grandTotalDisplay = $rawTotal + $vat;
-                        $vatStr = '
-                                    <tr>
-                                        <td colspan="3" class="text-right" style="color:#858796;">Vatable Sales:</td>
-                                        <td class="text-right" style="color:#858796;">₱' . number_format($rawTotal, 2) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="3" class="text-right" style="color:#858796;">12% VAT (Added):</td>
-                                        <td class="text-right" style="color:#858796;">₱' . number_format($vat, 2) . '</td>
-                                    </tr>';
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                throw new \Exception("Database transaction failed to complete.");
+            }
+
+            // 3. EMAIL RECEIPT LOGIC (POST-COMMIT)
+            $emailError = '';
+            if (!empty($customerEmail)) {
+                try {
+                    $emailHelper = \Config\Services::email();
+                    $config = [
+                        'protocol'   => getenv('email.protocol') ?: 'smtp',
+                        'SMTPHost'   => getenv('email.SMTPHost') ?: 'smtp.gmail.com',
+                        'SMTPUser'   => getenv('email.SMTPUser'),
+                        'SMTPPass'   => getenv('email.SMTPPass'),
+                        'SMTPPort'   => (int)(getenv('email.SMTPPort') ?: 465),
+                        'SMTPCrypto' => getenv('email.SMTPCrypto') ?: 'ssl',
+                        'mailType'   => 'html', 'charset' => 'utf-8', 'newline' => "\r\n", 'CRLF' => "\r\n"
+                    ];
+                    $emailHelper->initialize($config);
+                    
+                    $receiptHtml = $this->renderReceiptHtml($customerName, $paymentMethod, $cart, $applyVat, $vatType, $totalSaleAmount, $itemModel);
+                    
+                    $emailHelper->setTo($customerEmail);
+                    $senderEmail = !empty($config['SMTPUser']) ? $config['SMTPUser'] : 'noreply@halimawsiomai.local';
+                    $emailHelper->setFrom($senderEmail, 'Halimaw Siomai POS');
+                    $emailHelper->setSubject('Your Electronic Receipt - Halimaw Siomai');
+                    $emailHelper->setMessage($receiptHtml);
+                    
+                    if (!$emailHelper->send(false)) {
+                        $emailError = $emailHelper->printDebugger(['headers']);
+                        log_message('error', 'Email Sending Failed: ' . $emailError);
                     }
+                } catch (\Exception $e) {
+                    $emailError = $e->getMessage();
                 }
+            }
 
-                $receiptHtml .= $vatStr;
-                $receiptHtml .= '
-                                    <tr class="total-row">
-                                        <td colspan="3" class="text-right" style="font-size: 16px;">Grand Total Due:</td>
-                                        <td class="text-right" style="font-size: 16px; color: #1cc88a;">₱' . number_format($grandTotalDisplay, 2) . '</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <p style="text-align: center; margin-top: 30px; font-size: 14px; color: #5a5c69;">
-                                We hope you enjoy your Halimaw Siomai! come back soon!
-                            </p>
-                        </div>
-                    </div>
-                </body>
-                </html>';
+            $responseMessage = 'Sale completed successfully!';
+            if (!empty($emailError)) $responseMessage .= " [Email failed: " . strip_tags($emailError) . "]";
 
-                $emailHelper->setTo($customerEmail);
-                
-                // IMPORTANT: Set sender equal to the authenticated SMTPUser to prevent Google bounce
-                $senderEmail = !empty($config['SMTPUser']) ? $config['SMTPUser'] : 'noreply@halimawsiomai.local';
-                $emailHelper->setFrom($senderEmail, 'Halimaw Siomai POS');
-                
-                $emailHelper->setSubject('Your Electronic Receipt - Halimaw Siomai');
-                $emailHelper->setMessage($receiptHtml);
-                $emailHelper->setMailType('html');
-                
-                $emailError = '';
-                if (!$emailHelper->send(false)) {
-                    $emailError = $emailHelper->printDebugger(['headers']);
-                    log_message('error', 'Email Sending Failed: ' . $emailError);
-                }
-            } catch (\Exception $e) {
-                $emailError = $e->getMessage();
-                log_message('error', 'Email Sending Exception: ' . $emailError);
+            return $this->response->setJSON([
+                'success' => true,
+                'total'   => round($totalSaleAmount, 2),
+                'message' => $responseMessage
+            ]);
+
+        } catch (\Exception $e) {
+            if ($db->transEnabled()) $db->transRollback();
+            log_message('error', 'POS Sale Error: ' . $e->getMessage());
+            return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    private function renderReceiptHtml($customerName, $paymentMethod, $cart, $applyVat, $vatType, $rawTotal, $itemModel) {
+        $dateFormatted = date('F j, Y, g:i A');
+        $customerGreeting = !empty($customerName) ? "Hi " . esc($customerName) . "," : "Hi Valued Customer,";
+        
+        $rows = '';
+        foreach ($cart as $item) {
+            $product = $itemModel->find((int)$item['product_id']);
+            $itemName = esc($product ? $product['name'] : ($item['name'] ?? 'Item'));
+            $pack = isset($item['pack']) ? " (" . esc($item['pack']) . ")" : "";
+            $sub = (float)$item['price'] * (int)$item['qty'];
+            $rows .= "<tr><td>{$itemName}{$pack}</td><td style='text-align:center;'>{$item['qty']}</td><td style='text-align:right;'>₱" . number_format($item['price'], 2) . "</td><td style='text-align:right;'>₱" . number_format($sub, 2) . "</td></tr>";
+        }
+        
+        $vatStr = '';
+        $grandTotalDisplay = $rawTotal;
+        if ($applyVat) {
+            if ($vatType === 'included') {
+                $vatableSales = $rawTotal / 1.12;
+                $vatStr = "<tr><td colspan='3' style='text-align:right;'>Vatable Sales:</td><td style='text-align:right;'>₱" . number_format($vatableSales, 2) . "</td></tr><tr><td colspan='3' style='text-align:right;'>12% VAT (Incl):</td><td style='text-align:right;'>₱" . number_format($rawTotal - $vatableSales, 2) . "</td></tr>";
+            } else {
+                $vat = $rawTotal * 0.12;
+                $grandTotalDisplay = $rawTotal + $vat;
+                $vatStr = "<tr><td colspan='3' style='text-align:right;'>Vatable Sales:</td><td style='text-align:right;'>₱" . number_format($rawTotal, 2) . "</td></tr><tr><td colspan='3' style='text-align:right;'>12% VAT (Added):</td><td style='text-align:right;'>₱" . number_format($vat, 2) . "</td></tr>";
             }
         }
-        // --- END EMAIL ---
 
-        $responseMessage = 'Sale completed successfully! Stocks updated.';
-        if (!empty($emailError)) {
-            $responseMessage .= " [Email failed: " . strip_tags($emailError) . "]";
-        }
-
-        return $this->response->setJSON([
-            'success' => true,
-            'total'   => round($totalSaleAmount, 2),
-            'message' => $responseMessage
-        ]);
-
-    } catch (\Exception $e) {
-        $db->transRollback();
-        log_message('error', 'POS Sale Error: ' . $e->getMessage());
-        return $this->response->setJSON([
-            'success' => false,
-            'message' => $e->getMessage()
-        ]);
+        return "<html><body style='font-family:sans-serif; padding:20px; color:#333;'><div style='max-width:600px; margin:auto; border:1px solid #eee; padding:20px; border-radius:8px;'><h2 style='text-align:center; color:#4e73df;'>HALIMAW SIOMAI</h2><p>{$customerGreeting}</p><p>Order Date: {$dateFormatted}<br>Payment: " . strtoupper($paymentMethod) . "</p><table style='width:100%; border-collapse:collapse;'><thead><tr style='background:#f8f9fa;'><th>Item</th><th style='text-align:center;'>Qty</th><th style='text-align:right;'>Price</th><th style='text-align:right;'>Subtotal</th></tr></thead><tbody>{$rows}{$vatStr}<tr style='font-weight:bold; background:#f8f9fc;'><td colspan='3' style='text-align:right;'>Total Due:</td><td style='text-align:right; color:#1cc88a;'>₱" . number_format($grandTotalDisplay, 2) . "</td></tr></tbody></table><p style='text-align:center; margin-top:30px;'>Thank you for your purchase!</p></div></body></html>";
     }
-}
+
 }

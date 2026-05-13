@@ -1268,20 +1268,15 @@ function isActive($paths) {
     </div>
 
     <div class="main-content">
-        <!-- TOP NAVBAR -->
-        <div class="top-navbar" style="padding-left: 20px;">
-            <div class="d-flex align-items-center gap-3">
-                <button class="mobile-menu-toggle" id="mobileMenuToggleInline">
-                    <i class="bi bi-list"></i>
+        <?= view('partials/admin_topbar', [
+            'title' => 'Admin POS',
+            'icon' => 'bi bi-calculator',
+            'extra_buttons' => '
+                <button class="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center" id="showTutorialBtn" title="Help" style="width: 32px; height: 32px; padding: 0;">
+                    <i class="bi bi-question-lg text-secondary" style="font-size: 1.2rem;"></i>
                 </button>
-                <h5 class="mb-0 d-flex align-items-center">
-                    <i class="bi bi-calculator me-2" style="font-size: 1.25rem;"></i>Admin POS
-                </h5>
-            </div>
-            <button class="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center" id="showTutorialBtn" title="Help" style="width: 32px; height: 32px; padding: 0;">
-                <i class="bi bi-question-lg text-secondary" style="font-size: 1.2rem;"></i>
-            </button>
-        </div>
+            '
+        ]) ?>
         <!-- Flash Messages -->
         <?php if (session()->getFlashdata('success')): ?>
             <div class="notification-alert success-alert">

@@ -490,56 +490,16 @@ class Items extends BaseController
             $imagePath = 'public/uploads/products/' . $newName;
         }
 
-        $enable_variations = $this->request->getPost('enable_variations');
+        $db = \Config\Database::connect();
+        try {
+            $db->transStart();
 
-        if ($enable_variations === '1') {
-            $labels = $this->request->getPost('var_label');
-            $suffixes = $this->request->getPost('var_sku_suffix');
-            $prices = $this->request->getPost('var_price');
-            $quantities = $this->request->getPost('var_quantity');
-
-            if ($labels) {
-                foreach ($labels as $index => $label) {
-                    $suffix = trim($suffixes[$index] ?? '');
-                    $var_product_id = $base_product_id . $suffix;
-                    $var_sku = $base_sku . $suffix;
-                    $var_price = trim($prices[$index] ?? '');
-                    if ($var_price === '') $var_price = $this->request->getPost('price') ?? 0.00;
-                    
-                    if ($itemModel->where('product_id', $var_product_id)->first()) {
-                        continue; // Skip if already exists
-                    }
-                    
-                    $data = [
-                        'product_id' => $var_product_id,
-                        'sku' => $var_sku,
-                        'name' => trim($this->request->getPost('name') . ' ' . $label),
-                        'quantity' => $quantities[$index] ?? 0,
-                        'price' => $var_price,
-                        'barcode' => '',
-                        'expiration_date' => $expiration_date,
-                        'category' => $category,
-                        'subcategory' => $subcategory ?: null,
-                        'auto_delete' => $auto_delete,
-                        'status' => 'active',
-                        'image_path' => $imagePath,
-                        'created_at' => date('Y-m-d H:i:s'),
-                        'is_variation_child' => 1,
-                        'variation_group_id' => $base_product_id
-                    ];
-                    if ($itemModel->insert($data) === false) {
-                        $errorMsg = !empty($itemModel->errors()) ? implode(', ', $itemModel->errors()) : 'Database error (missing column or constraint)';
-                        return redirect()->to('/items/add')->withInput()->with('error', 'Failed to add variation: ' . $errorMsg);
-                    }
-                }
-            }
-        } else {
-            $qty = $this->request->getPost('quantity') ?? 0;
-            $data = [
+            // Insert Parent Item
+            $parentData = [
                 'product_id' => $base_product_id,
                 'sku' => $base_sku,
                 'name' => $this->request->getPost('name'),
-                'quantity' => $qty,
+                'quantity' => ($enable_variations === '1') ? 0 : ($this->request->getPost('quantity') ?? 0),
                 'price' => $this->request->getPost('price') ?? 0.00,
                 'barcode' => '',
                 'expiration_date' => $expiration_date,
@@ -551,13 +511,69 @@ class Items extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
                 'is_variation_child' => 0,
             ];
-            if ($itemModel->insert($data) === false) {
-                $errorMsg = !empty($itemModel->errors()) ? implode(', ', $itemModel->errors()) : 'Database error (missing column or constraint)';
-                return redirect()->to('/items/add')->withInput()->with('error', 'Failed to add item: ' . $errorMsg);
-            }
-        }
 
-        return redirect()->to('/items')->with('success', 'Item added successfully!');
+            if ($itemModel->insert($parentData) === false) {
+                throw new \Exception(implode(', ', $itemModel->errors()));
+            }
+            
+            $parentId = $itemModel->getInsertID();
+
+            // Handle Variation Children (Batch Insert)
+            if ($enable_variations === '1') {
+                $labels = $this->request->getPost('var_label');
+                $suffixes = $this->request->getPost('var_sku_suffix');
+                $prices = $this->request->getPost('var_price');
+                $quantities = $this->request->getPost('var_quantity');
+
+                if ($labels) {
+                    $variationBatch = [];
+                    foreach ($labels as $index => $label) {
+                        $suffix = trim($suffixes[$index] ?? '');
+                        $var_name = trim($this->request->getPost('name') . ' ' . $label);
+                        
+                        // Unified SKU format: PRODUCT_NAME-SIZE_SUFFIX (e.g. Siomai-S)
+                        $var_sku = $this->request->getPost('name') . '-' . ($suffix ?: $label);
+
+                        $var_price = trim($prices[$index] ?? '');
+                        if ($var_price === '') $var_price = $this->request->getPost('price') ?? 0.00;
+
+                        $variationBatch[] = [
+                            'product_id' => $base_product_id . $suffix,
+                            'sku' => $var_sku,
+                            'name' => $var_name,
+                            'quantity' => $quantities[$index] ?? 0,
+                            'price' => $var_price,
+                            'barcode' => '',
+                            'expiration_date' => $expiration_date,
+                            'category' => $category,
+                            'subcategory' => $subcategory ?: null,
+                            'auto_delete' => $auto_delete,
+                            'status' => 'active',
+                            'image_path' => $imagePath,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'is_variation_child' => 1,
+                            'variation_group_id' => $parentId
+                        ];
+                    }
+
+                    if (!empty($variationBatch)) {
+                        $itemModel->insertBatch($variationBatch);
+                    }
+                }
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new \Exception('Database transaction failed to complete.');
+            }
+
+            return redirect()->to('/items')->with('success', 'Item and its variations added successfully!');
+
+        } catch (\Exception $e) {
+            if ($db->transEnabled()) $db->transRollback();
+            return redirect()->to('/items/add')->withInput()->with('error', 'Failed to add item: ' . $e->getMessage());
+        }
     }
 
     public function bulkUpload()
@@ -1191,16 +1207,88 @@ class Items extends BaseController
         ]);
     }
 
+    public function exportCsv()
+    {
+        $db = \Config\Database::connect();
+        $itemModel = new ItemModel();
+        
+        $filename = 'inventory_export_' . date('Y-m-d_H-i-s') . '.csv';
+
+        // Set headers for download
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $output = fopen('php://output', 'w');
+        
+        // CSV Header
+        fputcsv($output, [
+            'ID', 'Product ID', 'Name', 'Category', 'Subcategory', 
+            'Quantity', 'Price', 'Small Qty', 'Small Price', 
+            'Medium Qty', 'Medium Price', 'Large Qty', 'Large Price',
+            'Expiration Date', 'Status', 'Created At'
+        ]);
+
+        try {
+            $db->transStart();
+
+            $chunkSize = 200;
+            $offset = 0;
+
+            while (true) {
+                // Fetch in chunks to avoid memory exhaustion
+                $items = $itemModel->orderBy('id', 'ASC')
+                                   ->limit($chunkSize, $offset)
+                                   ->findAll();
+
+                if (empty($items)) break;
+
+                foreach ($items as $item) {
+                    fputcsv($output, [
+                        $item['id'],
+                        $item['product_id'] ?? '',
+                        $item['name'] ?? '',
+                        $item['category'] ?? '',
+                        $item['subcategory'] ?? '',
+                        $item['quantity'] ?? 0,
+                        $item['price'] ?? 0,
+                        $item['pack_small_qty'] ?? 0,
+                        $item['pack_small_price'] ?? 0,
+                        $item['pack_medium_qty'] ?? 0,
+                        $item['pack_medium_price'] ?? 0,
+                        $item['pack_biggest_qty'] ?? 0,
+                        $item['pack_biggest_price'] ?? 0,
+                        $item['expiration_date'] ?? '',
+                        $item['status'] ?? '',
+                        $item['created_at'] ?? ''
+                    ]);
+                }
+
+                // Flush the output buffer to stream data immediately
+                if (ob_get_level() > 0) ob_flush();
+                flush();
+                
+                $offset += $chunkSize;
+                if (count($items) < $chunkSize) break;
+            }
+
+            $db->transComplete();
+            
+        } catch (\Exception $e) {
+            if ($db->transEnabled()) $db->transRollback();
+            log_message('error', 'Inventory Export Error: ' . $e->getMessage());
+        }
+
+        fclose($output);
+        exit;
+    }
+
     public function exportSalesCsv()
     {
+        $db = \Config\Database::connect();
         $salesModel = new \App\Models\SalesModel();
-        $sales = $salesModel
-            ->select('sales.*, products.name as product_name, users.username as user_name')
-            ->join('products', 'products.id = sales.product_id', 'left')
-            ->join('users', 'users.id = sales.user_id', 'left')
-            ->orderBy('sales.created_at', 'DESC')
-            ->findAll();
-
+        
         $filename = 'sales_export_' . date('Y-m-d_H-i-s') . '.csv';
         header("Content-type: text/csv");
         header("Content-Disposition: attachment; filename={$filename}");
@@ -1209,19 +1297,53 @@ class Items extends BaseController
 
         $output = fopen('php://output', 'w');
         fputcsv($output, ['ID', 'Product', 'User', 'Pack', 'Qty', 'Price', 'Total', 'Payment', 'Date']);
-        foreach ($sales as $sale) {
-            fputcsv($output, [
-                $sale->id,
-                $sale->product_name ?? 'N/A',
-                $sale->user_name ?? 'N/A',
-                $sale->pack ?? '',
-                $sale->quantity,
-                $sale->price,
-                $sale->total,
-                $sale->payment_method ?? 'N/A',
-                $sale->created_at
-            ]);
+
+        try {
+            $db->transStart();
+
+            $chunkSize = 200;
+            $offset = 0;
+
+            while (true) {
+                $sales = $salesModel
+                    ->select('sales.*, items.name as product_name, users.username as user_name')
+                    ->join('items', 'items.id = sales.product_id', 'left')
+                    ->join('users', 'users.id = sales.user_id', 'left')
+                    ->orderBy('sales.created_at', 'DESC')
+                    ->limit($chunkSize, $offset)
+                    ->get()
+                    ->getResult(); // Using get()->getResult() for custom query with join
+
+                if (empty($sales)) break;
+
+                foreach ($sales as $sale) {
+                    fputcsv($output, [
+                        $sale->id,
+                        $sale->product_name ?? 'N/A',
+                        $sale->user_name ?? 'N/A',
+                        $sale->pack ?? '',
+                        $sale->quantity,
+                        $sale->price,
+                        $sale->total,
+                        $sale->payment_method ?? 'N/A',
+                        $sale->created_at
+                    ]);
+                }
+
+                if (ob_get_level() > 0) ob_flush();
+                flush();
+
+                $offset += $chunkSize;
+                if (count($sales) < $chunkSize) break;
+            }
+
+            $db->transComplete();
+
+        } catch (\Exception $e) {
+            if ($db->transEnabled()) $db->transRollback();
+            log_message('error', 'Sales Export Error: ' . $e->getMessage());
         }
+
         fclose($output);
         exit;
     }

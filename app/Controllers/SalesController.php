@@ -25,8 +25,10 @@ class SalesController extends BaseController
 
     public function index()
     {
-        // Mark sales as seen to clear the notification badge
+        // Mark sales as seen to clear the notification badge atomically
+        $this->salesModel->db->transStart();
         $this->salesModel->where('is_seen', 0)->set(['is_seen' => 1])->update();
+        $this->salesModel->db->transComplete();
 
         $sales = $this->salesModel
             ->select('sales.*, products.name as product_name, users.username as user_name')
@@ -181,5 +183,40 @@ class SalesController extends BaseController
             ->findAll();
 
         return $this->response->setJSON(['success' => true, 'items' => $items]);
+    }
+    /**
+     * API: Mark all unviewed sales as viewed.
+     * Implemented as a single batch UPDATE statement for performance.
+     */
+    public function markViewed()
+    {
+        $db = \Config\Database::connect();
+        try {
+            $db->transStart();
+
+            // Using Query Builder for a single-statement batch update
+            $builder = $db->table('sales');
+            $builder->where('is_seen', 0);
+            $builder->update(['is_seen' => 1]);
+
+            $affectedRows = $db->affectedRows();
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                throw new \Exception('Transaction failed to mark sales as viewed.');
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'count'   => $affectedRows,
+                'message' => 'Notification badges cleared successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            if ($db->transEnabled()) $db->transRollback();
+            return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 }

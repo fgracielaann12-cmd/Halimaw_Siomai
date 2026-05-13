@@ -1,0 +1,140 @@
+<?php
+$db = \Config\Database::connect();
+$salesNotif = $db->table('sales')->where('is_seen', 0)->countAllResults();
+$stockReqNotif = $db->table('stock_requests')->where('status', 'pending')->countAllResults();
+$today = date('Y-m-d');
+$expiringDate = date('Y-m-d', strtotime('+10 days'));
+$expiringNotif = $db->table('items')
+    ->where('expiration_date IS NOT NULL')
+    ->where('expiration_date !=', '0000-00-00')
+    ->where('expiration_date <=', $expiringDate)
+    ->where('expiration_date >=', $today)
+    ->where('is_expiring_seen', 0)
+    ->countAllResults();
+$expiredNotif = $db->table('items')
+    ->where('expiration_date IS NOT NULL')
+    ->where('expiration_date !=', '0000-00-00')
+    ->where('expiration_date <', $today)
+    ->where('is_expired_seen', 0)
+    ->countAllResults();
+
+$totalNotif = $salesNotif + $stockReqNotif + $expiringNotif + $expiredNotif;
+?>
+
+<div class="top-navbar" style="padding-left: 20px; padding-right: 20px;">
+    <div class="d-flex align-items-center gap-3">
+        <?php if (!(isset($hide_toggle) && $hide_toggle)): ?>
+            <button class="mobile-menu-toggle d-lg-none" id="mobileMenuToggleInline">
+                <i class="bi bi-list"></i>
+            </button>
+        <?php endif; ?>
+        <h5 class="mb-0">
+            <?php if (isset($icon)): ?>
+                <i class="<?= $icon ?> me-2" style="font-size: 1.25rem;"></i>
+            <?php endif; ?>
+            <?= $title ?? 'Admin' ?>
+        </h5>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+        <!-- Notification Bell -->
+        <div class="dropdown">
+            <button class="btn btn-light position-relative shadow-sm border" type="button" id="notifBell" data-bs-toggle="dropdown" aria-expanded="false" style="width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-bell-fill" style="font-size: 1.2rem; color: #4e73df;"></i>
+                <?php if ($totalNotif > 0): ?>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem; padding: 0.35em 0.6em;">
+                        <?= $totalNotif > 99 ? '99+' : $totalNotif ?>
+                    </span>
+                <?php endif; ?>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-0" aria-labelledby="notifBell" style="width: 300px; border-radius: 12px; overflow: hidden;">
+                <li class="p-3 border-bottom bg-light">
+                    <h6 class="mb-0 fw-bold">Notifications</h6>
+                </li>
+                <?php if ($totalNotif == 0): ?>
+                    <li class="p-4 text-center text-muted">
+                        <i class="bi bi-bell-slash d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                        No new notifications
+                    </li>
+                <?php else: ?>
+                    <?php if ($salesNotif > 0): ?>
+                        <li><a class="dropdown-item p-3 d-flex align-items-center gap-3 border-bottom" href="<?= site_url('admin/sales') ?>">
+                            <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                <i class="bi bi-receipt"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold"><?= $salesNotif ?> New Sales</div>
+                                <small class="text-muted">Unviewed transaction records</small>
+                            </div>
+                        </a></li>
+                    <?php endif; ?>
+                    <?php if ($stockReqNotif > 0): ?>
+                        <li><a class="dropdown-item p-3 d-flex align-items-center gap-3 border-bottom" href="<?= site_url('admin/stock-requests') ?>">
+                            <div class="bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                <i class="bi bi-cart-check"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold"><?= $stockReqNotif ?> Pending Requests</div>
+                                <small class="text-muted">Stock adjustments needing approval</small>
+                            </div>
+                        </a></li>
+                    <?php endif; ?>
+                    <?php if ($expiringNotif > 0): ?>
+                        <li><a class="dropdown-item p-3 d-flex align-items-center gap-3 border-bottom" href="<?= site_url('items/expiring-soon') ?>">
+                            <div class="bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold"><?= $expiringNotif ?> Expiring Soon</div>
+                                <small class="text-muted">Items expiring within 10 days</small>
+                            </div>
+                        </a></li>
+                    <?php endif; ?>
+                    <?php if ($expiredNotif > 0): ?>
+                        <li><a class="dropdown-item p-3 d-flex align-items-center gap-3 border-bottom" href="<?= site_url('items/deleted') ?>">
+                            <div class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                <i class="bi bi-x-circle"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold"><?= $expiredNotif ?> Expired Items</div>
+                                <small class="text-muted">Items past their expiration date</small>
+                            </div>
+                        </a></li>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <li class="bg-light p-2 text-center">
+                    <small class="text-muted">System Updates & Alerts</small>
+                </li>
+            </ul>
+        </div>
+
+        <?php if (isset($extra_buttons)) echo $extra_buttons; ?>
+
+        <!-- User Profile (Optional inclusion) -->
+        <?php if (isset($show_profile) && $show_profile): ?>
+            <div class="user-profile border-start ps-3 ms-2">
+                <div class="profile-initial">
+                    <?php 
+                    $username = session()->get('username') ?? 'User';
+                    echo strtoupper(substr($username, 0, 1));
+                    ?>
+                </div>
+                <div class="hide-mobile">
+                    <div class="profile-name fw-bold" style="font-size: 0.9rem; line-height: 1;"><?= esc($username) ?></div>
+                    <small class="profile-role text-muted" style="font-size: 0.75rem;"><?= esc(session()->get('role') ?? 'Admin') ?></small>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<style>
+/* Notification Dropdown Hover Effect */
+.dropdown-item:hover {
+    background-color: #f8f9fc !important;
+}
+.bg-primary-subtle { background-color: rgba(78, 115, 223, 0.1) !important; }
+.bg-warning-subtle { background-color: rgba(246, 194, 62, 0.1) !important; }
+.bg-info-subtle { background-color: rgba(54, 185, 204, 0.1) !important; }
+.bg-danger-subtle { background-color: rgba(231, 74, 59, 0.1) !important; }
+</style>

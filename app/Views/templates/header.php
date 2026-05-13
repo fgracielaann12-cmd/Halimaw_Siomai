@@ -591,19 +591,14 @@
 
     <?= view('partials/admin_sidebar') ?>
 
-    <!-- CONTENT WRAPPER -->
-    <div id="content">
-        <div class="top-navbar">
-            <div class="navbar-title-container">
-                <button class="mobile-menu-toggle-inline d-lg-none" id="mobileMenuToggleInline">
-                    <i class="bi bi-list"></i>
-                </button>
-                <h5><i class="bi bi-people me-2"></i><?= $title ?? 'Staff Management' ?></h5>
-            </div>
-            <?= $this->renderSection('header_actions') ?>
+        <div id="content">
+            <?= view('partials/admin_topbar', [
+                'title' => $title ?? 'Staff Management',
+                'icon' => $icon ?? 'bi bi-people',
+                'extra_buttons' => $this->renderSection('header_actions')
+            ]) ?>
+            <?= $this->renderSection('content') ?>
         </div>
-        <?= $this->renderSection('content') ?>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>

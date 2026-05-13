@@ -47,10 +47,11 @@ $routes->group('user', function ($routes) {
     $routes->post('submit-stock-request', 'UserRequestController::submitStockRequest');
 
     // Pull-Outs
-    $routes->post('submit-pull-out', 'PullOutController::submit');
+    $routes->post('submit-pull-out', 'PullOutController::submitPullOut');
 
     // Customer Returns
-    $routes->post('submit-return', 'ReturnsController::submit');
+    $routes->post('submit-return', 'ReturnsController::processReturn');
+    $routes->get('sales/transaction-items/(:segment)', 'SalesController::getTransactionItems/$1');
 
     // FAQs
     $routes->get('dashboard/faqs', 'UserDashboard::faqs');
@@ -71,6 +72,7 @@ $routes->group('admin', function ($routes) {
     // Sales Page
     $routes->get('sales', 'SalesController::index');
     $routes->get('sales/transactions', 'SalesController::transactions');
+    $routes->post('sales/mark-viewed', 'SalesController::markViewed');
     $routes->get('sales/transaction-items/(:segment)', 'SalesController::getTransactionItems/$1');
 
     // Stock Requests
@@ -143,6 +145,7 @@ $routes->group('items', function ($routes) {
     // Export routes
     $routes->get('export-sales-csv', 'Items::exportSalesCsv');
     $routes->get('export-logs-csv', 'Items::exportLogsCsv');
+    $routes->get('export-csv', 'Items::exportCsv');
 });
 
 // -------------------------------------------------------------

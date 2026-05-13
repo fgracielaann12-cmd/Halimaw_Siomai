@@ -20,68 +20,108 @@ class PullOutController extends BaseController
     }
 
     // --- STAFF API ---
-    public function submit()
+    public function submitPullOut()
     {
-        $request = service('request');
-
-        $itemId    = $request->getPost('item_id');
-        $variation = $request->getPost('variation');
-        $quantity  = (int)$request->getPost('quantity');
-        $reason    = $request->getPost('reason');
+        $db = \Config\Database::connect();
+        $userId = session()->get('user_id');
         
-        $category  = $request->getPost('category');
-        if (empty($category)) {
-            $category = ($reason === 'CUSTOMER_RETURN') ? 'Customer Return' : 'Food Waste';
-        }
-        
-        $note      = $request->getPost('note');
-        $userId    = session()->get('user_id');
-
-        if (!$itemId || !$quantity || !$reason) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Item, Quantity, and Reason are required.']);
-        }
-
-        $item = $this->itemModel->find($itemId);
-        if (!$item) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Item not found.']);
+        // Support both single and multiple pull-out items
+        $rawItems = $this->request->getPost('items');
+        if (empty($rawItems)) {
+            // Fallback for single item submission (classic form)
+            $rawItems = [[
+                'item_id'   => $this->request->getPost('item_id'),
+                'variation' => $this->request->getPost('variation'),
+                'quantity'  => (int)$this->request->getPost('quantity'),
+                'reason'    => $this->request->getPost('reason'),
+                'category'  => $this->request->getPost('category'),
+                'note'      => $this->request->getPost('note'),
+            ]];
         }
 
-        // Determine unit cost
-        $unitCost = $item['price'];
-        $varLower = strtolower($variation ?? '');
-        if ((strpos($varLower, 'small') !== false) && isset($item['pack_small_price'])) $unitCost = $item['pack_small_price'];
-        if ((strpos($varLower, 'medium') !== false) && isset($item['pack_medium_price'])) $unitCost = $item['pack_medium_price'];
-        if ((strpos($varLower, 'large') !== false) && isset($item['pack_biggest_price'])) $unitCost = $item['pack_biggest_price'];
+        try {
+            $db->transStart();
 
-        $totalLoss = $unitCost * $quantity;
+            $pullOutBatch = [];
 
-        // Handle Image Upload
-        $imagePath = null;
-        $file = $this->request->getFile('image');
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            $newName = $file->getRandomName();
-            $file->move(FCPATH . 'uploads/pullouts', $newName);
-            $imagePath = 'uploads/pullouts/' . $newName;
-        }
+            foreach ($rawItems as $input) {
+                $itemId = $input['item_id'] ?? null;
+                $quantity = (int)($input['quantity'] ?? 0);
+                $reason = $input['reason'] ?? '';
+                $variation = $input['variation'] ?? '';
 
-        $data = [
-            'product_id'      => $itemId, // Maps to items.id
-            'variation'       => $variation,
-            'quantity'        => $quantity,
-            'unit_cost'       => $unitCost,
-            'total_loss'      => $totalLoss,
-            'pull_out_reason' => $reason,
-            'category'        => $category,
-            'reason_note'     => $note,
-            'image_path'      => $imagePath,
-            'reported_by'     => $userId,
-            'status'          => 'PENDING'
-        ];
+                if (!$itemId || !$quantity || !$reason) {
+                    throw new \Exception('Item ID, Quantity, and Reason are required for all entries.');
+                }
 
-        if ($this->pullOutModel->insert($data)) {
-            return $this->response->setJSON(['success' => true, 'message' => 'Pull-out request submitted successfully.']);
-        } else {
-            return $this->response->setJSON(['success' => false, 'message' => 'Failed to submit pull-out request.']);
+                // Standardize Reasons
+                $validReasons = ['Shortage', 'Spoilage', 'Damaged Packaging'];
+                if (!in_array($reason, $validReasons)) {
+                    $reasonMap = [
+                        'shortage' => 'Shortage', 'spoilage' => 'Spoilage', 'spoiled' => 'Spoilage',
+                        'SPOILED' => 'Spoilage', 'damaged' => 'Damaged Packaging',
+                        'damaged packaging' => 'Damaged Packaging', 'DAMAGED_PACKAGING' => 'Damaged Packaging'
+                    ];
+                    $reason = $reasonMap[$reason] ?? $reason;
+                }
+
+                $item = $this->itemModel->find($itemId);
+                if (!$item) throw new \Exception("Item ID {$itemId} not found.");
+
+                // Determine Variation Column and Unit Cost
+                $varLower = strtolower($variation);
+                $unitCost = $item['price'];
+                if (strpos($varLower, 'small') !== false) {
+                    $unitCost = $item['pack_small_price'] ?? $unitCost;
+                } elseif (strpos($varLower, 'medium') !== false) {
+                    $unitCost = $item['pack_medium_price'] ?? $unitCost;
+                } elseif (strpos($varLower, 'large') !== false) {
+                    $unitCost = $item['pack_biggest_price'] ?? $unitCost;
+                }
+
+                $totalLoss = $unitCost * $quantity;
+
+                // Image Handling
+                $imagePath = null;
+                $file = $this->request->getFile('image');
+                if ($file && $file->isValid() && !$file->hasMoved()) {
+                    $newName = $file->getRandomName();
+                    $file->move(FCPATH . 'uploads/pullouts', $newName);
+                    $imagePath = 'uploads/pullouts/' . $newName;
+                }
+
+                $pullOutBatch[] = [
+                    'product_id'      => $itemId,
+                    'variation'       => $variation,
+                    'quantity'        => $quantity,
+                    'unit_cost'       => $unitCost,
+                    'total_loss'      => $totalLoss,
+                    'pull_out_reason' => $reason,
+                    'category'        => $input['category'] ?? 'Food Waste',
+                    'reason_note'     => $input['note'] ?? '',
+                    'image_path'      => $imagePath,
+                    'reported_by'     => $userId,
+                    'status'          => 'PENDING',
+                    'date_reported'   => date('Y-m-d H:i:s')
+                ];
+            }
+
+            // Insert pull-out records only — NO inventory deduction yet
+            // Inventory will be deducted when admin approves the request
+            if (!empty($pullOutBatch)) $this->pullOutModel->insertBatch($pullOutBatch);
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                throw new \Exception('Transaction failed to complete.');
+            }
+
+            return $this->response->setJSON(['success' => true, 'message' => count($pullOutBatch) . ' Pull-out(s) submitted for admin approval.']);
+
+        } catch (\Exception $e) {
+            if ($db->transEnabled()) $db->transRollback();
+            return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 

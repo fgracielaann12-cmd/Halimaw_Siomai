@@ -472,15 +472,10 @@
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
-    <!-- TOP NAVBAR -->
-    <div class="top-navbar" style="padding-left: 20px;">
-        <div class="d-flex align-items-center gap-3">
-            <button class="mobile-menu-toggle" id="mobileMenuToggleInline">
-                <i class="bi bi-list"></i>
-            </button>
-            <h5 class="mb-0"><i class="bi bi-clock-history me-2" style="font-size: 1.25rem;"></i>Expiring soon</h5>
-        </div>
-    </div>
+    <?= view('partials/admin_topbar', [
+        'title' => 'Expiring soon',
+        'icon' => 'bi bi-clock-history'
+    ]) ?>
 
     <div class="container">
         <!-- Flash Message -->

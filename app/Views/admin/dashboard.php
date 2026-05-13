@@ -732,28 +732,11 @@ function getSku($name, $variation = '') {
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
-    <!-- TOP NAVBAR WITH USER PROFILE -->
-    <div class="top-navbar" style="padding-left: 20px;">
-        <div class="d-flex align-items-center gap-3">
-            <button class="mobile-menu-toggle" id="mobileMenuToggleInline">
-                <i class="bi bi-list"></i>
-            </button>
-            <h5 class="mb-0"><i class="bi bi-speedometer2 me-2" style="font-size: 1.25rem;"></i>Admin Dashboard</h5>
-        </div>
-        <div class="user-profile">
-            <div class="profile-initial" id="profileInitial">
-                <?php 
-                $username = session()->get('username') ?? 'User';
-                $initials = substr($username, 0, 1);
-                echo strtoupper($initials);
-                ?>
-            </div>
-            <div>
-                <div class="profile-name"><?= esc(session()->get('username') ?? 'User') ?></div>
-                <small class="profile-role text-muted"><?= esc(session()->get('role') ?? 'Staff') ?></small>
-            </div>
-        </div>
-    </div>
+    <?= view('partials/admin_topbar', [
+        'title' => 'Admin Dashboard',
+        'icon' => 'bi bi-speedometer2',
+        'show_profile' => true
+    ]) ?>
 
     <div class="container">
         <?php

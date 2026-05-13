@@ -156,10 +156,16 @@ $totalNotif = $salesNotif + $stockReqNotif + $expiringNotif + $expiredNotif + $l
     max-width: calc(100vw - 30px) !important;
     border-radius: 12px !important;
     overflow: hidden;
+    /* OVERRIDE: Prevent slideDownFade from interfering with Popper.js positioning */
+    animation: none !important;
+    transform: none !important;
+    top: 100% !important; 
+    margin-top: 0.5rem !important;
 }
 
 .notification-item {
     white-space: normal !important;
+    word-break: break-word !important;
     transition: all 0.2s ease;
 }
 

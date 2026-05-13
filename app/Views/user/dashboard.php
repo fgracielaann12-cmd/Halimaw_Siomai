@@ -1667,10 +1667,7 @@ if (!function_exists('getProductSKU')) {
                 }
             });
         }
-<<<<<<< HEAD
-=======
 
->>>>>>> d593f3b68d7012d8920aeb94a5e238f6a0fec424
         // ✅ RETURNS SUBMISSION
         const txnInput = document.getElementById('returnTransactionId');
         const itemSelect = $('#returnItemModal');

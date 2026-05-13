@@ -880,11 +880,9 @@ function getSku($name, $variation = '') {
                         <th class="text-center align-middle hide-mobile">SKU</th>
                         <th class="text-center align-middle">Price</th>
                         <th class="text-center align-middle">Quantity</th>
-                        <th class="text-center align-middle hide-mobile">Value %</th>
                         <th class="text-center align-middle hide-mobile">Category</th>
                         <th class="text-center align-middle hide-mobile">Expiration Date</th>
                         <th class="text-center align-middle" style="width: 1%; white-space: nowrap;">Status</th>
-                        <th class="text-center align-middle hide-mobile">Date Entry</th>
                         <th class="text-center align-middle">Actions</th>
                     </tr>
                 </thead>
@@ -947,12 +945,6 @@ function getSku($name, $variation = '') {
                             <td class="text-center align-middle hide-mobile"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?></td>
                             <td class="text-center align-middle text-nowrap">₱<?= number_format($sz['p'], 2) ?></td>
                             <td class="text-center align-middle text-nowrap"><span><?= esc($sz['q']) ?></span> <small class="text-muted"><?= $sz['ql'] ?></small></td>
-                            <td class="text-center align-middle hide-mobile">
-                                <?php 
-                                $val = $sz['p'] * $sz['q'];
-                                echo $totalValue > 0 ? number_format(($val / $totalValue) * 100, 1) : '0';
-                                ?>%
-                            </td>
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
                             <td class="text-center align-middle hide-mobile">
                                 <?php if (!empty($item['expiration_date']) && $item['expiration_date'] !== '0000-00-00'): ?>
@@ -968,13 +960,6 @@ function getSku($name, $variation = '') {
                                     ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>">
                                     <?= $statusLabel ?>
                                 </span>
-                            </td>
-                            <td class="text-center align-middle hide-mobile">
-                                <?php if (!empty($item['created_at'])): ?>
-                                    <?= date('m/d/Y H:i', strtotime($item['created_at'])) ?>
-                                <?php else: ?>
-                                    &mdash;
-                                <?php endif; ?>
                             </td>
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
@@ -1000,28 +985,16 @@ function getSku($name, $variation = '') {
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr data-id="<?= $item['id'] ?>" data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>">
-<<<<<<< Updated upstream
-                            <td class="text-center align-middle"><?= esc($item['product_id']) ?></td>
+                            <td class="text-center align-middle hide-mobile"><?= esc($item['product_id']) ?></td>
                             <td class="text-center align-middle">
                                 <?= esc($item['name']) ?>
                                 <?php if (!empty($item['is_variation_child'])): ?>
                                     <br><span class="badge bg-info text-dark mt-1" style="font-size: 0.65rem;">Variation</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-center align-middle"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?></td>
-=======
-                            <td class="text-center align-middle hide-mobile"><?= esc($item['product_id']) ?></td>
-                            <td class="text-center align-middle"><?= esc($item['name']) ?></td>
                             <td class="text-center align-middle hide-mobile"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?></td>
->>>>>>> Stashed changes
                             <td class="text-center align-middle text-nowrap">₱<?= number_format($item['price'], 2) ?></td>
-                            <td class="text-center align-middle text-nowrap"><span><?= esc($item['quantity']) ?></span><?php if (stripos($item['name'], 'burger patty') !== false): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?></td>
-                            <td class="text-center align-middle hide-mobile">
-                                <?php 
-                                $val = $item['price'] * $item['quantity'];
-                                echo $totalValue > 0 ? number_format(($val / $totalValue) * 100, 1) : '0';
-                                ?>%
-                            </td>
+                            <td class="text-center align-middle text-nowrap"><span><?= esc($item['quantity']) ?></span></td>
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
                             <td class="text-center align-middle hide-mobile">
                                 <?php if (!empty($item['expiration_date']) && $item['expiration_date'] !== '0000-00-00'): ?>
@@ -1037,13 +1010,6 @@ function getSku($name, $variation = '') {
                                     ($status == 'na' ? 'bg-secondary' : 'bg-success')) ?>">
                                     <?= $statusLabel ?>
                                 </span>
-                            </td>
-                            <td class="text-center align-middle hide-mobile">
-                                <?php if (!empty($item['created_at'])): ?>
-                                    <?= date('m/d/Y H:i', strtotime($item['created_at'])) ?>
-                                <?php else: ?>
-                                    &mdash;
-                                <?php endif; ?>
                             </td>
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= csrf_token() ?>">
-    <title>Edit Item | Halimaw Siomai</title>
+    <title>Edit Item | Halimaw POS Inventory System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
@@ -467,55 +467,21 @@
             <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
         <?php endif; ?>
 
-        <?php $isSiomai = stripos($item['name'], 'siomai') !== false; ?>
-        <?php $targetSize = isset($_GET['size']) ? strtolower($_GET['size']) : null; ?>
-
         <!-- Edit Form -->
-        <form action="<?= base_url('items/update/' . $item['id'] . ($targetSize ? '?size=' . $targetSize : '')) ?>" method="post" class="card">
+        <form action="<?= base_url('items/update/' . $item['id']) ?>" method="post" class="card">
             <?= csrf_field() ?>
 
             <div class="mb-3">
                 <label for="product_id" class="form-label">Product ID</label>
                 <input type="text" class="form-control" id="product_id" name="product_id"
-                    value="<?= esc($targetSize ? $item['product_id'] . '-' . strtoupper(substr($targetSize, 0, 1)) : $item['product_id']) ?>" required>
+                    value="<?= esc($item['product_id']) ?>" required>
             </div>
 
             <div class="mb-3">
                 <label for="name" class="form-label">Item Name</label>
-                <input type="text" class="form-control" id="name" name="name" value="<?= esc($targetSize ? $item['name'] . ' (' . ucfirst($targetSize) . ')' : $item['name']) ?>"
-                    required>
+                <input type="text" class="form-control" id="name" name="name" value="<?= esc($item['name']) ?>" required>
             </div>
 
-            <?php if ($isSiomai && $targetSize): ?>
-                <?php
-                $qtyVal = 0;
-                $priceVal = 0;
-                $sizeLabel = ucfirst($targetSize);
-                if ($targetSize === 'small') {
-                    $qtyVal = $item['pack_small_qty'] ?? 0;
-                    $priceVal = $item['pack_small_price'] ?? 115;
-                } elseif ($targetSize === 'medium') {
-                    $qtyVal = $item['pack_medium_qty'] ?? 0;
-                    $priceVal = $item['pack_medium_price'] ?? 185;
-                } elseif ($targetSize === 'large') {
-                    $qtyVal = $item['pack_biggest_qty'] ?? 0;
-                    $priceVal = $item['pack_biggest_price'] ?? 335;
-                }
-                ?>
-                <input type="hidden" name="size" value="<?= esc($targetSize) ?>">
-                <div class="mb-3">
-                    <label for="quantity" class="form-label"><?= $sizeLabel ?> Pack Quantity</label>
-                    <input type="number" class="form-control" id="quantity" name="quantity"
-                        value="<?= esc($qtyVal) ?>" required>
-                </div>
-                <div class="mb-3">
-                    <label for="price" class="form-label"><?= $sizeLabel ?> Pack Price</label>
-                    <input type="number" step="0.01" class="form-control" id="price" name="price"
-                        value="<?= esc($priceVal) ?>" required>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!$targetSize): ?>
             <div class="mb-3">
                 <label for="quantity" class="form-label">Quantity</label>
                 <input type="number" class="form-control" id="quantity" name="quantity"
@@ -527,7 +493,6 @@
                 <input type="number" step="0.01" class="form-control" id="price" name="price"
                     value="<?= esc($item['price']) ?>" required>
             </div>
-            <?php endif; ?>
 
             <div class="mb-3">
                 <label for="expiration_date" class="form-label">Expiration Date</label>

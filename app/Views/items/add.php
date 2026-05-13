@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= csrf_token() ?>">
-    <title>Add Item | Halimaw Siomai</title>
+    <title>Add Item | Halimaw POS Inventory System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -504,69 +504,97 @@
         <div class="form-card">
             <!-- MANUAL ADD FORM -->
             <h2>Add New Item</h2>
+            <?php 
+                $errors = session()->getFlashdata('errors');
+                $error = session()->getFlashdata('error');
+            ?>
+            <?php if ($error): ?>
+                <div class="alert alert-danger rounded" style="font-size: 0.9rem;">
+                    <?= esc($error) ?>
+                </div>
+            <?php endif; ?>
             <form id="itemForm" method="post" action="<?= base_url('/items/store') ?>" enctype="multipart/form-data" novalidate>
                 <?= csrf_field() ?>
-                <input type="text" name="product_id" class="form-control" placeholder="Product ID" value="<?= esc($nextProductId ?? '') ?>" required readonly>
-                <input type="text" name="name" class="form-control" placeholder="Product Name" required>
-                <input type="text" name="sku" class="form-control" placeholder="SKU Code (e.g. PRK-SMAI-S12)" required>
+                <div class="mb-3">
+                    <input type="text" name="product_id" id="productIdInput" class="form-control <?= isset($errors['product_id']) ? 'is-invalid' : '' ?>" placeholder="e.g. P001" value="<?= esc($nextProductId ?? old('product_id')) ?>" maxlength="20" required>
+                    <?php if (isset($errors['product_id'])): ?><div class="invalid-feedback"><?= esc($errors['product_id']) ?></div><?php endif; ?>
+                    <small class="text-muted">Auto-generated suggestion. You may change this.</small>
+                </div>
+
+                <div class="mb-3">
+                    <input type="text" name="name" class="form-control <?= isset($errors['name']) ? 'is-invalid' : '' ?>" placeholder="Product Name" value="<?= old('name') ?>" required>
+                    <?php if (isset($errors['name'])): ?><div class="invalid-feedback"><?= esc($errors['name']) ?></div><?php endif; ?>
+                </div>
+
+                <div class="mb-3">
+                    <input type="text" name="sku" class="form-control <?= isset($errors['sku']) ? 'is-invalid' : '' ?>" placeholder="SKU Code (e.g. PRK-SMAI-S12)" value="<?= old('sku') ?>" required>
+                    <?php if (isset($errors['sku'])): ?><div class="invalid-feedback"><?= esc($errors['sku']) ?></div><?php endif; ?>
+                </div>
 
                 <!-- Size Variation Override Checkbox -->
                 <div class="form-check form-switch my-3 text-start ps-5">
-                    <input class="form-check-input" type="checkbox" id="enable_variations" name="enable_variations" value="1">
-                    <label class="form-check-label fw-bold text-secondary" for="enable_variations">Size Variation Override</label>
+                    <input class="form-check-input" type="checkbox" id="sizeVariationToggle" <?= old('size_variation') === '1' ? 'checked' : '' ?>>
+                    <label class="form-check-label fw-bold text-secondary" for="sizeVariationToggle">Size Variation Override</label>
                 </div>
+                <input type="hidden" name="size_variation" id="sizeVariationHidden" value="<?= old('size_variation') ?? '0' ?>">
 
                 <!-- Variations Section -->
-                <div class="card mb-3 border-0 shadow-sm" id="variations_section" style="display:none; background: #fafbfc; border-radius: 8px;">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="fw-bold text-secondary small">Product Size Variations</span>
-                            <button type="button" class="btn btn-sm btn-primary" id="add_size_variation_btn">
-                                <i class="bi bi-plus-lg me-1"></i> Add Size Variation
-                            </button>
-                        </div>
-
-                        <div class="table-responsive-custom">
-                            <table class="table table-bordered table-sm align-middle text-center mb-0" id="variationsTable">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th style="font-size: 0.75rem; padding: 4px;">Label (Size)</th>
-                                        <th style="font-size: 0.75rem; padding: 4px;">SKU Suffix</th>
-                                        <th style="font-size: 0.75rem; padding: 4px;">Price (₱)</th>
-                                        <th style="font-size: 0.75rem; padding: 4px;">Qty</th>
-                                        <th style="font-size: 0.75rem; padding: 4px; width: 35px;"><i class="bi bi-trash"></i></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="variations_table_body">
-                                    <!-- Dynamic size variation rows will appear here -->
-                                </tbody>
-                            </table>
-                        </div>
+                <div id="packFieldsContainer" style="display:<?= old('size_variation') === '1' ? 'block' : 'none' ?>;" class="card mb-3 border-0 shadow-sm p-3">
+                    <h6 class="text-secondary mb-3">Pack Sizes <small class="text-muted fw-normal">(add as many as you need)</small></h6>
+                    <div class="row mb-2 fw-bold text-secondary" style="font-size:0.82rem;">
+                        <div class="col-4">Label</div>
+                        <div class="col-3">Qty</div>
+                        <div class="col-4">Price (₱)</div>
+                        <div class="col-1"></div>
                     </div>
+                    <div id="packRowsWrapper">
+                        <!-- Pack rows injected by JS -->
+                    </div>
+                    <button type="button" id="addPackRowBtn" class="btn btn-sm btn-outline-primary mt-2" style="border-radius:8px;">
+                        <i class="bi bi-plus-lg me-1"></i> Add Size
+                    </button>
                 </div>
 
-                <input type="number" name="quantity" class="form-control" placeholder="Total Quantity" min="0" required>
-                <input type="number" step="0.01" name="price" class="form-control" placeholder="Price (₱)" min="0" required>
+                <div class="mb-3" id="quantityContainer">
+                    <input type="number" id="quantityInput" name="quantity" class="form-control <?= isset($errors['quantity']) ? 'is-invalid' : '' ?>" placeholder="Total Quantity" min="0" value="<?= old('quantity') ?>" required>
+                    <?php if (isset($errors['quantity'])): ?><div class="invalid-feedback"><?= esc($errors['quantity']) ?></div><?php endif; ?>
+                </div>
 
-                <input type="date" name="expiration_date" id="expiration_date" class="form-control" placeholder="mm/dd/yyyy">
+                <div class="mb-3" id="priceContainer">
+                    <input type="number" step="0.01" id="priceInput" name="price" class="form-control <?= isset($errors['price']) ? 'is-invalid' : '' ?>" placeholder="Price (₱)" min="0" value="<?= old('price') ?>" required>
+                    <?php if (isset($errors['price'])): ?><div class="invalid-feedback"><?= esc($errors['price']) ?></div><?php endif; ?>
+                </div>
+                
+                <div id="totalQtyDisplay" class="form-control bg-light text-muted mb-3" style="display:none;">
+                    Total Qty: <strong id="totalQtyValue">0</strong> <small>(auto-calculated from pack sizes)</small>
+                </div>
+                <input type="hidden" name="quantity" id="totalQtyHidden" value="0" disabled>
 
-                <select name="category" id="category" class="form-select" required>
-                    <option value="">Select Category</option>
-                    <option value="Food">Food</option>
-                    <option value="Non-Food">Non-Food</option>
-                    <option value="Condiments">Condiments</option>
-                </select>
+                <div class="mb-3">
+                    <input type="date" name="expiration_date" id="expiration_date" class="form-control <?= isset($errors['expiration_date']) ? 'is-invalid' : '' ?>" placeholder="mm/dd/yyyy" value="<?= old('expiration_date') ?>">
+                    <?php if (isset($errors['expiration_date'])): ?><div class="invalid-feedback"><?= esc($errors['expiration_date']) ?></div><?php endif; ?>
+                </div>
 
-                <div id="subcategoryContainer" style="display:none;">
+                <div class="mb-3">
+                    <select name="category" id="category" class="form-select <?= isset($errors['category']) ? 'is-invalid' : '' ?>" required>
+                        <option value="">Select Category</option>
+                        <option value="Food" <?= old('category') === 'Food' ? 'selected' : '' ?>>Food</option>
+                        <option value="Non-Food" <?= old('category') === 'Non-Food' ? 'selected' : '' ?>>Non-Food</option>
+                        <option value="Condiments" <?= old('category') === 'Condiments' ? 'selected' : '' ?>>Condiments</option>
+                    </select>
+                    <?php if (isset($errors['category'])): ?><div class="invalid-feedback"><?= esc($errors['category']) ?></div><?php endif; ?>
+                </div>
+
+                <div id="subcategoryContainer" style="display:none;" class="mb-3">
                     <select name="subcategory" id="subcategory" class="form-select">
                         <option value="">Select Subcategory</option>
-                        <option value="Expirable">Expirable</option>
-                        <option value="Non-Expirable">Non-Expirable</option>
+                        <option value="Expirable" <?= old('subcategory') === 'Expirable' ? 'selected' : '' ?>>Expirable</option>
+                        <option value="Non-Expirable" <?= old('subcategory') === 'Non-Expirable' ? 'selected' : '' ?>>Non-Expirable</option>
                     </select>
                 </div>
 
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="auto_delete" id="auto_delete">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" name="auto_delete" id="auto_delete" <?= old('auto_delete') ? 'checked' : '' ?>>
                     <label class="form-check-label" for="auto_delete">Auto Delete on Expiry</label>
                 </div>
 
@@ -586,8 +614,6 @@
                         <i class="bi bi-x-circle remove-file-btn" id="removeImageBtn"></i>
                     </div>
                 </div>
-
-
 
                 <button class="submit-button" type="submit">Add New Item</button>
             </form>
@@ -610,7 +636,7 @@
                     </div>
                     <div class="form-text mt-2 text-muted">
                         Format: <b>product_id, name, sku, price, quantity, category, expiration_date, auto_delete, image_path</b><br>
-                        <small>Download <a href="<?= base_url('downloads/sample_inventory_template.csv') ?>" class="text-primary" download>sample template</a></small>
+                        <small>Download <a href="<?= base_url('items/download-sample-template') ?>" class="text-primary" onclick="event.stopPropagation()" download>sample template</a></small>
                     </div>
                 </div>
                 <button class="submit-button mt-3" type="submit">Upload CSV File</button>
@@ -652,6 +678,108 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    const sizeVariationToggle = document.getElementById('sizeVariationToggle');
+    const quantityInput = document.getElementById('quantityInput');
+    const priceInput = document.getElementById('priceInput');
+    const totalQtyDisplay = document.getElementById('totalQtyDisplay');
+    const totalQtyHidden = document.getElementById('totalQtyHidden');
+    const packRowsWrapper = document.getElementById('packRowsWrapper');
+    const addPackRowBtn  = document.getElementById('addPackRowBtn');
+
+    /* ---- Dynamic Pack Row Builder ---- */
+    function createPackRow(defaultLabel = '') {
+        const wrapper = document.getElementById('packRowsWrapper');
+        const idx = wrapper.children.length;
+        const row = document.createElement('div');
+        row.className = 'pack-row row mb-2 align-items-center';
+        row.innerHTML = `
+            <div class="col-4">
+                <input type="text" name="variations[${idx}][label]" class="form-control pack-label-input" 
+                       placeholder="e.g. Small" maxlength="30" 
+                       value="${defaultLabel}" required
+                       pattern="[A-Za-z0-9 \\-]+" title="Letters, numbers, spaces and hyphens only">
+            </div>
+            <div class="col-3">
+                <input type="number" name="variations[${idx}][qty]" class="form-control pack-qty-input" placeholder="Qty" min="0" required>
+            </div>
+            <div class="col-4">
+                <input type="number" name="variations[${idx}][price]" class="form-control pack-price-input" placeholder="Price" step="0.01" min="0" required>
+            </div>
+            <div class="col-1">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-pack-row" title="Remove">
+                    <i class="bi bi-dash"></i>
+                </button>
+            </div>`;
+        wrapper.appendChild(row);
+        updateRemoveBtns();
+        // Attach qty listener for live recalc
+        row.querySelector('.pack-qty-input').addEventListener('input', recalcTotal);
+    }
+
+    function updateRemoveBtns() {
+        const rows = packRowsWrapper.querySelectorAll('.pack-row');
+        rows.forEach(r => {
+            r.querySelector('.remove-pack-row').disabled = (rows.length === 1);
+        });
+    }
+
+    function recalcTotal() {
+        let total = 0;
+        packRowsWrapper.querySelectorAll('.pack-qty-input').forEach(inp => {
+            total += parseInt(inp.value) || 0;
+        });
+        document.getElementById('totalQtyValue').textContent = total;
+        if (totalQtyHidden) totalQtyHidden.value = total;
+    }
+
+    // Default rows on page load
+    ['Small', 'Medium', 'Large'].forEach(label => createPackRow(label));
+
+    addPackRowBtn.addEventListener('click', () => createPackRow(''));
+
+    packRowsWrapper.addEventListener('click', e => {
+        const btn = e.target.closest('.remove-pack-row');
+        if (!btn) return;
+        const rows = packRowsWrapper.querySelectorAll('.pack-row');
+        if (rows.length > 1) {
+            btn.closest('.pack-row').remove();
+            updateRemoveBtns();
+            recalcTotal();
+        }
+    });
+
+    if (sizeVariationToggle) {
+        sizeVariationToggle.addEventListener('change', function() {
+            document.getElementById('packFieldsContainer').style.display = this.checked ? 'block' : 'none';
+            document.getElementById('sizeVariationHidden').value = this.checked ? '1' : '0';
+
+            if (this.checked) {
+                quantityInput.style.display = 'none';
+                quantityInput.required = false;
+                quantityInput.disabled = true;
+
+                priceInput.style.display = 'none';
+                priceInput.required = false;
+                priceInput.disabled = true;
+
+                totalQtyDisplay.style.display = 'block';
+                totalQtyHidden.disabled = false;
+                recalcTotal();
+            } else {
+                quantityInput.style.display = 'block';
+                quantityInput.required = true;
+                quantityInput.disabled = false;
+
+                priceInput.style.display = 'block';
+                priceInput.required = true;
+                priceInput.disabled = false;
+
+                totalQtyDisplay.style.display = 'none';
+                totalQtyHidden.disabled = true;
+            }
+        });
+    }
 
     // Form Logic
     const categorySelect = document.getElementById('category');
@@ -731,7 +859,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileNameText = document.getElementById('fileName');
     const removeFileBtn = document.getElementById('removeFileBtn');
 
-    dropArea.addEventListener('click', () => fileInput.click());
+    dropArea.addEventListener('click', e => {
+        if (e.target.tagName === 'A') return;
+        fileInput.click();
+    });
     dropArea.addEventListener('dragover', e => { 
         e.preventDefault(); 
         dropArea.classList.add('dragover'); 
@@ -850,95 +981,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         reader.readAsDataURL(file);
     }
-
-    // Variations Logic
-    const enableVariations = document.getElementById('enable_variations');
-    const variationsSection = document.getElementById('variations_section');
-    const addSizeVariationBtn = document.getElementById('add_size_variation_btn');
-    const variationsTableBody = document.getElementById('variations_table_body');
-    const mainPrice = document.querySelector('input[name="price"]');
-    const mainQuantity = document.querySelector('input[name="quantity"]');
-
-    function createEditableVariationRow(label = '', suffix = '', price = '', quantity = '') {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td class="p-0 align-middle">
-                <input type="text" name="var_label[]" class="form-control m-0 border-0 bg-transparent text-center px-1" placeholder="(Size)" value="${label}" required style="box-shadow: none; font-size: 0.8rem;">
-            </td>
-            <td class="p-0 align-middle">
-                <input type="text" name="var_sku_suffix[]" class="form-control m-0 border-0 bg-transparent text-center px-1" placeholder="-S" value="${suffix}" style="box-shadow: none; font-size: 0.8rem;">
-            </td>
-            <td class="p-0 align-middle">
-                <input type="number" step="0.01" name="var_price[]" class="form-control m-0 border-0 bg-transparent text-center px-1" placeholder="Base" value="${price}" style="box-shadow: none; font-size: 0.8rem;">
-            </td>
-            <td class="p-0 align-middle">
-                <input type="number" name="var_quantity[]" class="form-control m-0 border-0 bg-transparent text-center px-1" placeholder="0" value="${quantity}" required style="box-shadow: none; font-size: 0.8rem;">
-            </td>
-            <td class="p-0 align-middle text-center">
-                <button type="button" class="btn btn-sm text-danger remove-var-btn p-1 m-0 border-0" title="Remove" style="font-size: 1rem;">
-                    <i class="bi bi-x-circle-fill"></i>
-                </button>
-            </td>
-        `;
-
-        tr.querySelector('.remove-var-btn').addEventListener('click', function() {
-            tr.remove();
-            toggleMainFormFieldsRequired();
-        });
-
-        return tr;
-    }
-
-    function addEditableSizeRow(label = '', suffix = '', price = '', quantity = '') {
-        const tr = createEditableVariationRow(label, suffix, price, quantity);
-        variationsTableBody.appendChild(tr);
-        toggleMainFormFieldsRequired();
-    }    function toggleMainFormFieldsRequired() {
-        const isEnabled = enableVariations.checked;
-
-        if (isEnabled) {
-            mainPrice.required = false;
-            mainQuantity.required = false;
-            mainPrice.disabled = true;
-            mainQuantity.disabled = true;
-            mainPrice.value = '';
-            mainQuantity.value = '';
-        } else {
-            mainPrice.required = true;
-            mainQuantity.required = true;
-            mainPrice.disabled = false;
-            mainQuantity.disabled = false;
-        }
-    }
-
-    enableVariations.addEventListener('change', function() {
-        const isEnabled = this.checked;
-        variationsSection.style.display = isEnabled ? 'block' : 'none';
-
-        if (isEnabled && variationsTableBody.children.length === 0) {
-            // Pre-load default standard variations as fully editable fields
-            addEditableSizeRow('(Large)', '-L', '', '');
-            addEditableSizeRow('(Medium)', '-M', '', '');
-            addEditableSizeRow('(Small)', '-S', '', '');
-            addEditableSizeRow('', '', '', ''); // Default singular size row
-        }
-
-        toggleMainFormFieldsRequired();
-    });
-
-    addSizeVariationBtn.addEventListener('click', function() {
-        if (!enableVariations.checked) {
-            alert('Please enable Size Variation Override first!');
-            return;
-        }
-        // Prepend an empty editable row of inputs at the TOP of the table
-        addEditableSizeRow('', '', '', '');
-    });
-
-    // Run on initial page load to ensure correct state
-    enableVariations.checked = false;
-    variationsSection.style.display = 'none';
-    toggleMainFormFieldsRequired();
 });
 </script>
 </body>

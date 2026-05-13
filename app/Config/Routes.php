@@ -137,6 +137,9 @@ $routes->group('items', function ($routes) {
 
     // ✅ BULK UPLOAD ROUTE (ADDED)
     $routes->post('bulk-upload', 'Items::bulkUpload');
+    
+    // ✅ DOWNLOAD SAMPLE TEMPLATE ROUTE (ADDED)
+    $routes->get('download-sample-template', 'Items::downloadSampleTemplate');
 
     // 🔄 Fallback for missing referer issues on failed form submits
     $routes->get('store', function() { return redirect()->to('/items/add'); });

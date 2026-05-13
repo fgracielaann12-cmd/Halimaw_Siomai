@@ -88,16 +88,8 @@ $requests = $builder->get()->getResultArray();
                 if (!isset($itemsMap[$itemId])) continue;
 
                 $item = $itemsMap[$itemId];
-                $reason = $req['reason'] ?? '';
+                // All items (including variation children) use their own 'quantity' column
                 $qtyField = 'quantity';
-                
-                // Variation logic to determine correct column (Small, Medium, Large)
-                if (preg_match('/\[Variation:\s*(Small|Medium|Large)\]/i', $reason, $matches)) {
-                    $varType = strtolower($matches[1]);
-                    if ($varType === 'small') $qtyField = 'pack_small_qty';
-                    elseif ($varType === 'medium') $qtyField = 'pack_medium_qty';
-                    elseif ($varType === 'large') $qtyField = 'pack_biggest_qty';
-                }
 
                 $oldQty = (int) ($item[$qtyField] ?? 0);
                 $qty = abs((int)$req['quantity']);

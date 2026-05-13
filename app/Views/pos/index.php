@@ -21,7 +21,7 @@ function isActive($paths) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halimaw Siomai Admin POS</title>
+    <title>Halimaw POS Inventory System Admin POS</title>
     <!-- Bootstrap 5.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -1225,7 +1225,7 @@ function isActive($paths) {
     <div class="pos-tutorial" id="posTutorial">
         <div class="tutorial-content">
             <button class="close-tutorial" id="closeTutorial">&times;</button>
-            <h3>Welcome to Halimaw Siomai POS!</h3>
+            <h3>Welcome to Halimaw POS Inventory System!</h3>
             <div class="tutorial-steps">
                 <div class="tutorial-step">
                     <div class="step-number">1</div>
@@ -1296,121 +1296,46 @@ function isActive($paths) {
             <!-- POS ITEMS -->
             <div class="pos-items">
                 <div class="pos-grid">
-                    <?php
-                    // 🔑 SPLIT INTO SIOMAI, PATTY, OTHER
-                    $siomaiProducts = [];
-                    $pattyProducts = [];
-                    $otherProducts = [];
-
-                    foreach ($products as $product) {
-                        if (($product['quantity'] ?? 0) <= 0) continue;
-
-                        $nameLower = strtolower($product['name']);
-                        $isCustomVar = !empty($product['is_custom_variation']);
-                        $hasPackPrices = (!empty($product['pack_small_price']) && $product['pack_small_price'] > 0);
-                        
-                        // Fix Bug 1: Only show siomai pack options if it actually has pack data (Legacy system)
-                        // Fix Bug 2: Move grouped variations to 'other' to use the custom_variation modal
-                        $isSiomai = (strpos($nameLower, 'siomai') !== false && $hasPackPrices && !$isCustomVar);
-                        $isPatty = (strpos($nameLower, 'burger patty') !== false || strpos($nameLower, 'patty') !== false) && !$isCustomVar;
-
-                        if ($isSiomai) {
-                            $siomaiProducts[] = $product;
-                        } elseif ($isPatty) {
-                            $pattyProducts[] = $product;
-                        } else {
-                            $otherProducts[] = $product;
-                        }
-                    }
-
-                    // 🔸 Render Siomai (with pack dropdown)
-                    foreach ($siomaiProducts as $product):
-                        $imgSrc = !empty($product['image_path']) ? base_url($product['image_path']) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
+                    <?php foreach ($products as $product): ?>
+                        <?php 
+                        $imgSrc = !empty($product['image_path']) ? base_url('uploads/' . esc($product['image_path'])) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
                         $stock = (int) ($product['quantity'] ?? 0);
                         $isLowStock = $stock <= 10;
-                    ?>
-                        <div class="pos-item-card <?= $stock <= 0 ? 'out-of-stock' : '' ?>"
-                             onclick="openShopeeModal(this)"
-                             data-name="<?= esc($product['name']) ?>"
-                             data-type="siomai"
-                             data-product-id="<?= $product['id'] ?>"
-                             data-stock="<?= $stock ?>"
-                             data-image="<?= $imgSrc ?>"
-                             data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
-                             data-prices='{"Small Pack":<?=($product['pack_small_price'] ?? 115)?>,"Medium Pack":<?=($product['pack_medium_price'] ?? 185)?>,"Large Pack":<?=($product['pack_biggest_price'] ?? 335)?>}'
-                             data-packstocks='{"Small Pack":<?=($product['pack_small_qty'] ?? 0)?>,"Medium Pack":<?=($product['pack_medium_qty'] ?? 0)?>,"Large Pack":<?=($product['pack_biggest_qty'] ?? 0)?>}'>
-                            
-                            <img src="<?= $imgSrc ?>" alt="<?= esc($product['name']) ?>">
-                            <h6><?= esc($product['name']) ?></h6>
-                        </div>
-                            <?php endforeach; ?>
+                        ?>
 
-                            <!-- 🔸 Render Patty (no dropdown, but type=patty) -->
-                            <?php foreach ($pattyProducts as $product):
-                            $imgSrc = !empty($product['image_path']) ? base_url($product['image_path']) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
-                            $stock = (int) ($product['quantity'] ?? 0);
-                            $isLowStock = $stock <= 10;
-                            $price = 190.00; // Fixed price
-                            ?>
-                            <div class="pos-item-card <?= $stock <= 0 ? 'out-of-stock' : '' ?>"
-                             onclick="openShopeeModal(this)"
-                             data-name="<?= esc($product['name']) ?>"
-                             data-type="patty"
-                             data-product-id="<?= $product['id'] ?>"
-                             data-stock="<?= $stock ?>"
-                             data-image="<?= $imgSrc ?>"
-                             data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
-                             data-price="<?= $price ?>">
-
-                            <img src="<?= $imgSrc ?>" alt="<?= esc($product['name']) ?>">
-                            <h6><?= esc($product['name']) ?></h6>
+                        <?php if (!empty($product['is_custom_variation'])): ?>
+                            <!-- VARIATION GROUP CARD -->
+                            <div class="pos-item-card <?= $stock <= 0 ? 'out-of-stock' : '' ?>" 
+                                 onclick="openShopeeModal(this)"
+                                 data-type="variation"
+                                 data-group-id="<?= esc($product['product_id']) ?>"
+                                 data-name="<?= esc($product['name']) ?>"
+                                 data-image="<?= $imgSrc ?>"
+                                 data-variations="<?= esc($product['custom_variations']) ?>">
+                                <img src="<?= $imgSrc ?>"
+                                     onerror="this.src='<?= base_url('images/placeholder.png') ?>'" 
+                                     alt="<?= esc($product['name']) ?>">
+                                <h6><?= esc($product['name']) ?></h6>
                             </div>
-                            <?php endforeach; ?>
-
-                            <!-- 🔸 Render Other Products -->
-                            <?php foreach ($otherProducts as $product):
-                            $imgSrc = !empty($product['image_path']) ? base_url($product['image_path']) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
-                            $stock = (int) ($product['quantity'] ?? 0);
-                            $isLowStock = $stock <= 10;
-                            $nameLower = strtolower($product['name']);
-                            $price = $product['price'] ?? 0;
-                            
-                            $isCustomVar = !empty($product['is_custom_variation']);
-
-                            // 🔥 SET CORRECT PRICE FOR KEY ITEMS
-                            if (strpos($nameLower, 'burger patty') !== false) {
-                            $price = 190.00;
-                            } elseif (strpos($nameLower, 'pastil') !== false) {
-                            $price = 180.00;
-                            } elseif (strpos($nameLower, 'chili garlic') !== false) {
-                            $price = 120.00;
-                            } elseif (strpos($nameLower, 'toyomansi') !== false) {
-                            $price = 65.00;
-                            }
-                            
-                            $itemType = 'other';
-                            if (strpos($nameLower, 'patty') !== false) {
-                                $itemType = 'patty';
-                            }
-                            if ($isCustomVar) {
-                                $itemType = 'custom_variation';
-                            }
-                            ?>
+                        <?php else: ?>
+                            <!-- REGULAR ITEM CARD -->
                             <div class="pos-item-card <?= $stock <= 0 ? 'out-of-stock' : '' ?>"
-                            onclick="openShopeeModal(this)"
-                            data-name="<?= esc($product['name']) ?>"
-                            data-type="<?= $itemType ?>"
-                            data-product-id="<?= $product['id'] ?>"
-                            data-stock="<?= $stock ?>"
-                            data-image="<?= $imgSrc ?>"
-                            data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
-                            data-price="<?= $price ?>"
-                            <?= $isCustomVar ? "data-variations='" . esc($product['custom_variations']) . "'" : "" ?>>
+                                 onclick="openShopeeModal(this)"
+                                 data-type="single"
+                                 data-product-id="<?= esc($product['id']) ?>"
+                                 data-name="<?= esc($product['name']) ?>"
+                                 data-price="<?= esc($product['price'] ?? 0) ?>"
+                                 data-stock="<?= esc($stock) ?>"
+                                 data-image="<?= $imgSrc ?>">
+                                <img src="<?= $imgSrc ?>"
+                                     onerror="this.src='<?= base_url('images/placeholder.png') ?>'"
+                                     alt="<?= esc($product['name']) ?>">
+                                <h6><?= esc($product['name']) ?></h6>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
 
-                            <img src="<?= $imgSrc ?>" alt="<?= esc($product['name']) ?>">
-                            <h6><?= esc($product['name']) ?></h6>
-                            </div><?php endforeach; ?>
-                    <?php if (empty($siomaiProducts) && empty($pattyProducts) && empty($otherProducts)): ?>
+                    <?php if (empty($products)): ?>
                         <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--secondary);">
                             <i class="bi bi-inbox" style="font-size: 2rem; margin-bottom: 10px;"></i>
                             <p>No items available in stock.</p>
@@ -1881,71 +1806,14 @@ function isActive($paths) {
             const varContainer = document.getElementById('smVariations');
             varContainer.innerHTML = '';
 
-            if (type === 'siomai') {
-                document.getElementById('smStockLabel').textContent = "Left";
-                varRow.style.display = 'flex';
-                const prices = JSON.parse(card.dataset.prices);
-                const packStocks = JSON.parse(card.dataset.packstocks);
-                let first = true;
-                
-                for (const [pack, price] of Object.entries(prices)) {
-                    const btn = document.createElement('button');
-                    btn.textContent = pack;
-                    
-                    const localStock = packStocks[pack] || 0;
-                    if(localStock <= 0) {
-                        btn.style.opacity = '0.5';
-                        btn.style.cursor = 'not-allowed';
-                        btn.disabled = true;
-                    }
-
-                    function updatePiecesDisplay(p) {
-                        document.getElementById('smPiecesRow').style.display = 'flex';
-                        if (p === 'Small Pack') document.getElementById('smPieces').textContent = '12 pcs';
-                        else if (p === 'Medium Pack') document.getElementById('smPieces').textContent = '20 pcs';
-                        else if (p === 'Large Pack') document.getElementById('smPieces').textContent = '40 pcs';
-                        else document.getElementById('smPieces').textContent = '';
-                    }
-
-                    if (first && localStock > 0) {
-                        btn.classList.add('active');
-                        currentModalItem.pack = pack;
-                        currentModalItem.price = parseFloat(price);
-                        currentModalItem.stock = parseInt(localStock);
-                        currentModalItem.packSize = 1;
-                        document.getElementById('smStock').textContent = localStock + " packs";
-                        updatePiecesDisplay(pack);
-                        first = false;
-                    }
-                    
-                    btn.onclick = () => {
-                        varContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        currentModalItem.pack = pack;
-                        currentModalItem.price = parseFloat(price);
-                        currentModalItem.stock = parseInt(localStock);
-                        currentModalItem.packSize = 1;
-                        document.getElementById('smStock').textContent = localStock + " packs";
-                        document.getElementById('smQtyInput').value = 1; // reset validation
-                        updatePiecesDisplay(pack);
-                        updateSmPriceDisplay();
-                    };
-                    varContainer.appendChild(btn);
-                }
-                
-                if (first) {
-                    document.getElementById('smStock').textContent = "0 packs";
-                    currentModalItem.stock = 0;
-                    document.getElementById('smPiecesRow').style.display = 'none';
-                }
-            } else if (type === 'custom_variation') {
+            if (type === 'variation') {
                 document.getElementById('smStockLabel').textContent = "Left";
                 varRow.style.display = 'flex';
                 
-                const customVars = JSON.parse(card.dataset.variations || '[]');
+                const variations = JSON.parse(card.dataset.variations || '[]');
                 let first = true;
                 
-                for (const v of customVars) {
+                for (const v of variations) {
                     const btn = document.createElement('button');
                     btn.textContent = v.label;
                     
@@ -1962,7 +1830,7 @@ function isActive($paths) {
                         currentModalItem.stock = parseInt(v.stock);
                         currentModalItem.packSize = 1;
                         currentModalItem.productId = parseInt(v.id);
-                        document.getElementById('smStock').textContent = v.stock + " left";
+                        document.getElementById('smStock').textContent = v.stock + " packs";
                         first = false;
                     }
                     
@@ -1974,7 +1842,7 @@ function isActive($paths) {
                         currentModalItem.stock = parseInt(v.stock);
                         currentModalItem.packSize = 1;
                         currentModalItem.productId = parseInt(v.id);
-                        document.getElementById('smStock').textContent = v.stock + " left";
+                        document.getElementById('smStock').textContent = v.stock + " packs";
                         document.getElementById('smQtyInput').value = 1;
                         updateSmPriceDisplay();
                     };
@@ -1982,22 +1850,16 @@ function isActive($paths) {
                 }
                 
                 if (first) {
-                    document.getElementById('smStock').textContent = "0 left";
+                    document.getElementById('smStock').textContent = "0 packs";
                     currentModalItem.stock = 0;
                 }
                 document.getElementById('smPiecesRow').style.display = 'none';
             } else {
                 document.getElementById('smStockLabel').textContent = "Left";
                 varRow.style.display = 'none';
-                
+                document.getElementById('smPiecesRow').style.display = 'none';
                 currentModalItem.price = parseFloat(card.dataset.price);
-                if (type === 'patty') {
-                    currentModalItem.packSize = 1;
-                    document.getElementById('smPiecesRow').style.display = 'flex';
-                    document.getElementById('smPieces').textContent = '6 pcs';
-                } else {
-                    document.getElementById('smPiecesRow').style.display = 'none';
-                }
+                document.getElementById('smStock').textContent = currentModalItem.stock + " in stock";
             }
 
             updateSmPriceDisplay();

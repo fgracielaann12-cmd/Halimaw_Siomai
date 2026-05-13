@@ -93,15 +93,10 @@ class ReturnsController extends BaseController
         try {
             $db->transStart();
 
-            $returnBatch = [];
-            $pullOutBatch = [];
-            $restockUpdates = [
-                'quantity' => [],
-                'pack_small_qty' => [],
-                'pack_medium_qty' => [],
-                'pack_biggest_qty' => []
-            ];
-            $itemLogs = [];
+            $returnBatch    = [];
+            $pullOutBatch   = [];
+            $restockUpdates = []; // keyed by item id
+            $itemLogs       = [];
 
             foreach ($rawItems as $input) {
                 $txnId = $input['transaction_id'] ?? null;
@@ -142,35 +137,26 @@ class ReturnsController extends BaseController
                 ];
 
                 if ($condition === 'RESTOCKABLE') {
-                    // Restock Logic (Grouped for updateBatch)
-                    $varLower = strtolower($variation);
-                    $qtyCol = 'quantity';
-                    if (strpos($varLower, 'small') !== false) $qtyCol = 'pack_small_qty';
-                    elseif (strpos($varLower, 'medium') !== false) $qtyCol = 'pack_medium_qty';
-                    elseif (strpos($varLower, 'large') !== false) $qtyCol = 'pack_biggest_qty';
-
-                    $currentQty = (int)($item[$qtyCol] ?? 0);
-                    if (isset($restockUpdates[$qtyCol][$itemId])) {
-                        $currentQty = $restockUpdates[$qtyCol][$itemId][$qtyCol];
+                    // Always restore to the item's own quantity column.
+                    // item_id already points to the exact sibling child.
+                    $currentQty = (int)($item['quantity'] ?? 0);
+                    if (isset($restockUpdates[$itemId])) {
+                        $currentQty = $restockUpdates[$itemId]['quantity'];
                     }
 
                     $newQty = $currentQty + $quantity;
-                    $restockUpdates[$qtyCol][$itemId] = ['id' => $itemId, $qtyCol => $newQty];
-                    
+                    $restockUpdates[$itemId] = ['id' => $itemId, 'quantity' => $newQty];
+
                     $itemLogs[] = [
                         'item_id'    => $itemId,
-                        'old_data'   => json_encode([$qtyCol => $currentQty]),
-                        'new_data'   => json_encode([$qtyCol => $newQty]),
+                        'old_data'   => json_encode(['quantity' => $currentQty]),
+                        'new_data'   => json_encode(['quantity' => $newQty]),
                         'updated_by' => "System (Return Restock - TXN: {$txnId})",
                         'updated_at' => date('Y-m-d H:i:s')
                     ];
                 } else {
-                    // Non-restockable -> Escalated to Pull-Out (Damaged Packaging)
+                    // Non-restockable → Escalated to Pull-Out (use item's own price)
                     $unitCost = $item['price'];
-                    $varLower = strtolower($variation);
-                    if (strpos($varLower, 'small') !== false) $unitCost = $item['pack_small_price'] ?? $unitCost;
-                    elseif (strpos($varLower, 'medium') !== false) $unitCost = $item['pack_medium_price'] ?? $unitCost;
-                    elseif (strpos($varLower, 'large') !== false) $unitCost = $item['pack_biggest_price'] ?? $unitCost;
 
                     $pullOutBatch[] = [
                         'product_id'      => $itemId,
@@ -189,11 +175,10 @@ class ReturnsController extends BaseController
             }
 
             // Commit Batch Operations
-            if (!empty($returnBatch)) $this->returnModel->insertBatch($returnBatch);
+            if (!empty($returnBatch))  $this->returnModel->insertBatch($returnBatch);
             if (!empty($pullOutBatch)) $this->pullOutModel->insertBatch($pullOutBatch);
-            
-            foreach ($restockUpdates as $col => $updates) {
-                if (!empty($updates)) $this->itemModel->updateBatch(array_values($updates), 'id');
+            if (!empty($restockUpdates)) {
+                $this->itemModel->updateBatch(array_values($restockUpdates), 'id');
             }
             if (!empty($itemLogs)) $this->itemLogModel->insertBatch($itemLogs);
 

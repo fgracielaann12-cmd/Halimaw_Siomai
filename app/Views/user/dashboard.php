@@ -807,9 +807,11 @@ if (!function_exists('getProductSKU')) {
     <nav id="sidebar">
         <a class="navbar-brand" href="#">
             <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo">
-            <span>Halimaw Siomai</span>
-        </a>
-        <ul class="nav flex-column px-2 mt-3">
+            <div class="sidebar-brand-text">
+                HALIMAW POS<br>
+                <small style="font-size: 0.65rem; opacity: 0.8; font-weight: 600;">INVENTORY SYSTEM</small>
+            </div>
+        </a>        <ul class="nav flex-column px-2 mt-3">
             <li class="nav-item">
                 <a class="nav-link <?= isActive(['user/dashboard', '', 'dashboard']) ?>" href="<?= site_url('user/dashboard') ?>">
                     <i class="bi bi-house-door"></i> Dashboard
@@ -1312,9 +1314,9 @@ if (!function_exists('getProductSKU')) {
                                             
                                             <!-- Siomai Variations -->
                                             <?php if(stripos($item['name'], 'siomai') !== false): ?>
-                                                <option value="<?= esc($item['id']) ?>" data-variation="Small Pack"><?= esc($item['name']) ?> - Small Pack</option>
-                                                <option value="<?= esc($item['id']) ?>" data-variation="Medium Pack"><?= esc($item['name']) ?> - Medium Pack</option>
-                                                <option value="<?= esc($item['id']) ?>" data-variation="Large Pack"><?= esc($item['name']) ?> - Large Pack</option>
+                                                <option value="<?= esc($item['id']) ?>" data-variation="Small"><?= esc($item['name']) ?> - Small</option>
+                                                <option value="<?= esc($item['id']) ?>" data-variation="Medium"><?= esc($item['name']) ?> - Medium</option>
+                                                <option value="<?= esc($item['id']) ?>" data-variation="Large"><?= esc($item['name']) ?> - Large</option>
                                             <?php endif; ?>
                                         <?php endforeach; ?>
                                     <?php endif; ?>

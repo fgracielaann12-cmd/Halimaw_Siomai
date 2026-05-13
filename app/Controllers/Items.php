@@ -327,40 +327,62 @@ class Items extends BaseController
 
     public function add()
     {
-        $itemModel = new ItemModel();
-        
-        $items = $itemModel->like('product_id', 'P', 'after')->findAll();
-        $maxNum = 0;
-        
-        foreach ($items as $item) {
-            if (preg_match('/^P(\d+)$/i', $item['product_id'], $matches)) {
-                $num = (int) $matches[1];
-                if ($num > $maxNum) {
-                    $maxNum = $num;
-                }
-            }
-        }
-        
-        $nextProductId = 'P' . str_pad($maxNum + 1, 3, '0', STR_PAD_LEFT);
-        
+        $nextProductId = $this->getNextProductId();
         return view('items/add', ['nextProductId' => $nextProductId]);
+    }
+
+    /**
+     * Reliably finds the next P-prefixed Product ID.
+     * Considers variation suffixes (e.g., P001-SML -> P001) to find the true max.
+     */
+    private function getNextProductId(): string
+    {
+        $db = \Config\Database::connect();
+        // Extract base ID by stripping anything after the first hyphen
+        // then sort numerically by the part after 'P'
+        $query = $db->query("
+            SELECT product_id 
+            FROM items 
+            WHERE product_id REGEXP '^P[0-9]+'
+            ORDER BY CAST(
+                SUBSTRING(
+                    product_id, 2, 
+                    IF(LOCATE('-', product_id) > 0, LOCATE('-', product_id) - 2, LENGTH(product_id))
+                ) AS UNSIGNED
+            ) DESC 
+            LIMIT 1
+        ");
+
+        $result = $query->getRow();
+
+        if (!$result) {
+            return 'P001';
+        }
+
+        // Strip suffix if any: P001-SML -> P001
+        $baseId = preg_replace('/-.*$/', '', $result->product_id);
+        
+        // Extract number: P001 -> 1
+        $num = (int) substr($baseId, 1);
+        $nextNum = $num + 1;
+
+        return 'P' . str_pad($nextNum, 3, '0', STR_PAD_LEFT);
     }
 
     public function store()
     {
         helper(['form', 'filesystem']);
         $itemModel = new ItemModel();
+        $db = \Config\Database::connect();
+
         $file = $this->request->getFile('bulk_file');
 
         // --- Handle BULK upload ---
         if ($file && $file->isValid() && !$file->hasMoved()) {
             $ext = strtolower($file->getClientExtension());
-
             require_once ROOTPATH . 'vendor/autoload.php';
-
             $rows = [];
 
-            // Excel files
             if (in_array($ext, ['xlsx', 'xls'])) {
                 $reader = $ext === 'xlsx'
                     ? new \PhpOffice\PhpSpreadsheet\Reader\Xlsx()
@@ -372,7 +394,6 @@ class Items extends BaseController
                     $rows[] = array_values($r);
                 }
             } else {
-                // CSV
                 $tmp = $file->getTempName();
                 if (($handle = fopen($tmp, 'r')) !== false) {
                     while (($data = fgetcsv($handle, 0, ',')) !== false) {
@@ -392,7 +413,6 @@ class Items extends BaseController
 
             $count = 0;
             $skipped = 0;
-
             foreach ($rows as $row) {
                 $product_id = trim($row[0] ?? '');
                 $name = trim($row[1] ?? '');
@@ -443,27 +463,63 @@ class Items extends BaseController
         }
 
         // --- Handle SINGLE manual add ---
-        $product_id = $this->request->getPost('product_id');
+        $isVariation = $this->request->getPost('size_variation') === '1';
 
-        if ($itemModel->where('product_id', $product_id)->first()) {
-            return redirect()->to('/items/add')->with('error', 'Product ID already exists. Please use a unique one.');
-        }
-
+        // Validation Rules
         $rules = [
-            'product_id' => 'required',
-            'name' => 'required|min_length[2]',
-            'category' => 'required'
+            'product_id'      => 'required|max_length[50]',
+            'name'            => 'required|min_length[2]|max_length[255]',
+            'sku'             => 'required|max_length[100]|is_unique[items.sku]',
+            'category'        => 'required',
+            'expiration_date' => 'permit_empty|valid_date',
         ];
 
-        if ($this->request->getPost('enable_variations') !== '1') {
-            $rules['quantity'] = 'required|numeric|greater_than[0]';
-            $rules['price'] = 'required|numeric|greater_than_equal_to[0]';
+        if (!$isVariation) {
+            $rules['quantity'] = 'required|integer|greater_than_equal_to[0]';
+            $rules['price']    = 'required|decimal|greater_than_equal_to[0]';
         }
 
         if (!$this->validate($rules)) {
-            return redirect()->to('/items/add')->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        // Additional Manual Checks (Uniqueness for both parent and potential children)
+        $product_id = $this->request->getPost('product_id');
+        $base_sku = $this->request->getPost('sku');
+        $name = $this->request->getPost('name');
+
+        if (!$isVariation) {
+            if ($itemModel->where('product_id', $product_id)->first()) {
+                return redirect()->back()->withInput()->with('error', 'Product ID "' . $product_id . '" already exists.');
+            }
+        } else {
+            $variationsPost = $this->request->getPost('variations') ?? [];
+            if (empty($variationsPost)) {
+                return redirect()->back()->withInput()->with('error', 'Please add at least one pack size variation.');
+            }
+
+            $collisions = [];
+            foreach ($variationsPost as $v) {
+                $suffix = $this->generateVariationSuffix($v['label'] ?? '');
+                if ($suffix === '') continue;
+
+                $childId = $product_id . '-' . $suffix;
+                $childSku = $base_sku . '-' . $suffix;
+
+                if ($itemModel->where('product_id', $childId)->first()) {
+                    $collisions[] = "ID: $childId";
+                }
+                if ($itemModel->where('sku', $childSku)->first()) {
+                    $collisions[] = "SKU: $childSku";
+                }
+            }
+
+            if (!empty($collisions)) {
+                return redirect()->back()->withInput()->with('error', 'These variations already exist: ' . implode(', ', $collisions) . '. Please use a different Product ID or SKU.');
+            }
+        }
+
+        // Prepare Data
         $category = $this->request->getPost('category');
         $subcategory = $this->request->getPost('subcategory');
         $expiration_date = $this->request->getPost('expiration_date');
@@ -474,106 +530,112 @@ class Items extends BaseController
             $auto_delete = 1;
         }
 
-        $base_product_id = $this->request->getPost('product_id');
-        $base_sku = $this->request->getPost('sku');
-
         $imageFile = $this->request->getFile('product_image');
         $imagePath = null;
+
+        // Image upload BEFORE transaction
         if ($imageFile && $imageFile->isValid() && !$imageFile->hasMoved()) {
-            $ext = $imageFile->getClientExtension();
-            $newName = $base_product_id . '.' . $ext;
-            // Create folder if not exists
-            if (!is_dir(FCPATH . 'public/uploads/products')) {
-                mkdir(FCPATH . 'public/uploads/products', 0777, true);
+            $ext = strtolower($imageFile->getClientExtension());
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                $imageFile->move(FCPATH . 'uploads');
+                $imagePath = $imageFile->getName();
             }
-            $imageFile->move(FCPATH . 'public/uploads/products', $newName, true);
-            $imagePath = 'public/uploads/products/' . $newName;
         }
 
-        $db = \Config\Database::connect();
         try {
             $db->transStart();
 
-            // Insert Parent Item
-            $parentData = [
-                'product_id' => $base_product_id,
-                'sku' => $base_sku,
-                'name' => $this->request->getPost('name'),
-                'quantity' => ($enable_variations === '1') ? 0 : ($this->request->getPost('quantity') ?? 0),
-                'price' => $this->request->getPost('price') ?? 0.00,
-                'barcode' => '',
-                'expiration_date' => $expiration_date,
-                'category' => $category,
-                'subcategory' => $subcategory ?: null,
-                'auto_delete' => $auto_delete,
-                'status' => 'active',
-                'image_path' => $imagePath,
-                'created_at' => date('Y-m-d H:i:s'),
-                'is_variation_child' => 0,
-            ];
+            if (!$isVariation) {
+                $itemData = [
+                    'product_id'         => $product_id,
+                    'sku'                => $base_sku,
+                    'name'               => $name,
+                    'quantity'           => $this->request->getPost('quantity') ?? 0,
+                    'price'              => $this->request->getPost('price') ?? 0.00,
+                    'barcode'            => '',
+                    'expiration_date'    => $expiration_date,
+                    'category'           => $category,
+                    'subcategory'        => $subcategory ?: null,
+                    'auto_delete'        => $auto_delete,
+                    'status'             => 'active',
+                    'image_path'         => $imagePath,
+                    'created_at'         => date('Y-m-d H:i:s'),
+                    'is_variation_child' => 0,
+                    'variation_group_id' => null,
+                    'variation_label'    => null,
+                ];
 
-            if ($itemModel->insert($parentData) === false) {
-                throw new \Exception(implode(', ', $itemModel->errors()));
-            }
-            
-            $parentId = $itemModel->getInsertID();
+                if ($itemModel->insert($itemData) === false) {
+                    throw new \Exception(implode(', ', $itemModel->errors()));
+                }
+            } else {
+                $groupId = uniqid('VG-', true);
+                $variationBatch = [];
 
-            // Handle Variation Children (Batch Insert)
-            if ($enable_variations === '1') {
-                $labels = $this->request->getPost('var_label');
-                $suffixes = $this->request->getPost('var_sku_suffix');
-                $prices = $this->request->getPost('var_price');
-                $quantities = $this->request->getPost('var_quantity');
+                foreach ($variationsPost as $v) {
+                    $label = trim(strip_tags((string)($v['label'] ?? '')));
+                    $suffix = $this->generateVariationSuffix($label);
+                    if ($suffix === '') continue;
 
-                if ($labels) {
-                    $variationBatch = [];
-                    foreach ($labels as $index => $label) {
-                        $suffix = trim($suffixes[$index] ?? '');
-                        $var_name = trim($this->request->getPost('name') . ' ' . $label);
-                        
-                        // Unified SKU format: PRODUCT_NAME-SIZE_SUFFIX (e.g. Siomai-S)
-                        $var_sku = $this->request->getPost('name') . '-' . ($suffix ?: $label);
+                    $variationBatch[] = [
+                        'product_id'         => $product_id . '-' . $suffix,
+                        'sku'                => $base_sku . '-' . $suffix,
+                        'name'               => $name, // Keep base name
+                        'quantity'           => (int)($v['qty'] ?? 0),
+                        'price'              => (float)($v['price'] ?? 0),
+                        'barcode'            => '',
+                        'expiration_date'    => $expiration_date,
+                        'category'           => $category,
+                        'subcategory'        => $subcategory ?: null,
+                        'auto_delete'        => $auto_delete,
+                        'status'             => 'active',
+                        'image_path'         => $imagePath,
+                        'created_at'         => date('Y-m-d H:i:s'),
+                        'is_variation_child' => 1,
+                        'variation_group_id' => $groupId,
+                        'variation_label'    => $label,
+                    ];
+                }
 
-                        $var_price = trim($prices[$index] ?? '');
-                        if ($var_price === '') $var_price = $this->request->getPost('price') ?? 0.00;
+                if (empty($variationBatch)) {
+                    throw new \Exception('No valid size rows were provided.');
+                }
 
-                        $variationBatch[] = [
-                            'product_id' => $base_product_id . $suffix,
-                            'sku' => $var_sku,
-                            'name' => $var_name,
-                            'quantity' => $quantities[$index] ?? 0,
-                            'price' => $var_price,
-                            'barcode' => '',
-                            'expiration_date' => $expiration_date,
-                            'category' => $category,
-                            'subcategory' => $subcategory ?: null,
-                            'auto_delete' => $auto_delete,
-                            'status' => 'active',
-                            'image_path' => $imagePath,
-                            'created_at' => date('Y-m-d H:i:s'),
-                            'is_variation_child' => 1,
-                            'variation_group_id' => $parentId
-                        ];
-                    }
-
-                    if (!empty($variationBatch)) {
-                        $itemModel->insertBatch($variationBatch);
-                    }
+                if ($itemModel->insertBatch($variationBatch) === false) {
+                    throw new \Exception(implode(', ', $itemModel->errors()));
                 }
             }
 
             $db->transComplete();
 
             if ($db->transStatus() === false) {
-                throw new \Exception('Database transaction failed to complete.');
+                $error = $db->error();
+                log_message('error', 'Items::store() transaction failed: ' . json_encode($error));
+                throw new \Exception('Database transaction failed to complete. ' . ($error['message'] ?? ''));
             }
 
-            return redirect()->to('/items')->with('success', 'Item and its variations added successfully!');
+            return redirect()->to('/items')->with('success', 'Item added successfully!');
 
         } catch (\Exception $e) {
-            if ($db->transEnabled()) $db->transRollback();
-            return redirect()->to('/items/add')->withInput()->with('error', 'Failed to add item: ' . $e->getMessage());
+            $db->transRollback();
+            log_message('error', 'Items::store() exception: ' . $e->getMessage());
+            
+            $msg = (ENVIRONMENT === 'development') ? $e->getMessage() : 'Failed to add item.';
+            return redirect()->back()->withInput()->with('error', $msg);
         }
+    }
+
+    public function downloadSampleTemplate()
+    {
+        $filename = "bulk_upload_template.csv";
+        header("Content-Type: text/csv");
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        
+        $output = fopen("php://output", "w");
+        fputcsv($output, ['product_id', 'name', 'sku', 'price', 'quantity', 'category', 'expiration_date', 'auto_delete', 'image_path']);
+        fputcsv($output, ['P010', 'Pork Siomai', 'PRK-SMAI-S12', '115.00', '100', 'Food', '2027-12-12', '0', '']);
+        fclose($output);
+        exit();
     }
 
     public function bulkUpload()
@@ -723,15 +785,8 @@ class Items extends BaseController
         $logModel = new ItemLogModel();
         $oldData = $model->find($id);
 
-        $size = $this->request->getPost('size') ?: $this->request->getGet('size');
-
         $prodId = $this->request->getPost('product_id');
         $name = $this->request->getPost('name');
-
-        if ($size) {
-            $prodId = preg_replace('/-S|-M|-L$/i', '', $prodId);
-            $name = preg_replace('/\s*\(Small\)|\s*\(Medium\)|\s*\(Large\)$/i', '', $name);
-        }
 
         $newData = [
             'product_id' => $prodId,
@@ -741,45 +796,18 @@ class Items extends BaseController
             'category' => $this->request->getPost('category'),
             'subcategory' => $this->request->getPost('subcategory') ?: null,
             'auto_delete' => $this->request->getPost('auto_delete') ? 1 : 0,
+            'quantity' => $this->request->getPost('quantity'),
+            'price' => $this->request->getPost('price'),
         ];
 
-        if ($size) {
-            $qty = $this->request->getPost('quantity');
-            $prc = $this->request->getPost('price');
-
-            if ($size === 'small') {
-                $newData['pack_small_qty'] = $qty;
-                $newData['pack_small_price'] = $prc;
-                $newData['pack_medium_qty'] = $oldData['pack_medium_qty'] ?? 0;
-                $newData['pack_medium_price'] = $oldData['pack_medium_price'] ?? 185;
-                $newData['pack_biggest_qty'] = $oldData['pack_biggest_qty'] ?? 0;
-                $newData['pack_biggest_price'] = $oldData['pack_biggest_price'] ?? 335;
-            } elseif ($size === 'medium') {
-                $newData['pack_medium_qty'] = $qty;
-                $newData['pack_medium_price'] = $prc;
-                $newData['pack_small_qty'] = $oldData['pack_small_qty'] ?? 0;
-                $newData['pack_small_price'] = $oldData['pack_small_price'] ?? 115;
-                $newData['pack_biggest_qty'] = $oldData['pack_biggest_qty'] ?? 0;
-                $newData['pack_biggest_price'] = $oldData['pack_biggest_price'] ?? 335;
-            } elseif ($size === 'large') {
-                $newData['pack_biggest_qty'] = $qty;
-                $newData['pack_biggest_price'] = $prc;
-                $newData['pack_small_qty'] = $oldData['pack_small_qty'] ?? 0;
-                $newData['pack_small_price'] = $oldData['pack_small_price'] ?? 115;
-                $newData['pack_medium_qty'] = $oldData['pack_medium_qty'] ?? 0;
-                $newData['pack_medium_price'] = $oldData['pack_medium_price'] ?? 185;
+        // Image Update Handling
+        $imageFile = $this->request->getFile('product_image');
+        if ($imageFile && $imageFile->isValid() && !$imageFile->hasMoved()) {
+            $ext = $imageFile->getClientExtension();
+            if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp'])) {
+                $imageFile->move(FCPATH . 'uploads');
+                $newData['image_path'] = $imageFile->getName();
             }
-            $newData['quantity'] = $oldData['quantity'] ?? 0;
-            $newData['price'] = $oldData['price'] ?? 0.00;
-        } else {
-            $newData['quantity'] = $this->request->getPost('quantity');
-            $newData['price'] = $this->request->getPost('price');
-            $newData['pack_small_qty'] = $this->request->getPost('pack_small_qty') ?: 0;
-            $newData['pack_small_price'] = $this->request->getPost('pack_small_price') ?: 115;
-            $newData['pack_medium_qty'] = $this->request->getPost('pack_medium_qty') ?: 0;
-            $newData['pack_medium_price'] = $this->request->getPost('pack_medium_price') ?: 185;
-            $newData['pack_biggest_qty'] = $this->request->getPost('pack_biggest_qty') ?: 0;
-            $newData['pack_biggest_price'] = $this->request->getPost('pack_biggest_price') ?: 335;
         }
 
         $model->update($id, $newData);
@@ -1276,7 +1304,7 @@ class Items extends BaseController
             $db->transComplete();
             
         } catch (\Exception $e) {
-            if ($db->transEnabled()) $db->transRollback();
+            $db->transRollback();
             log_message('error', 'Inventory Export Error: ' . $e->getMessage());
         }
 
@@ -1340,11 +1368,37 @@ class Items extends BaseController
             $db->transComplete();
 
         } catch (\Exception $e) {
-            if ($db->transEnabled()) $db->transRollback();
+            $db->transRollback();
             log_message('error', 'Sales Export Error: ' . $e->getMessage());
         }
 
         fclose($output);
         exit;
+    }
+
+    /**
+     * Generates a clean, label-based suffix for variations.
+     * "Small" -> "SML", "Extra Large" -> "EL"
+     */
+    private function generateVariationSuffix(string $label): string
+    {
+        $label = trim($label);
+        // Remove special characters, keep only alpha-numeric and spaces
+        $cleanLabel = preg_replace('/[^A-Za-z0-9 ]/', '', $label);
+        $words = preg_split('/\s+/', $cleanLabel, -1, PREG_SPLIT_NO_EMPTY);
+
+        if (count($words) === 1) {
+            $word = $words[0];
+            if (strlen($word) <= 2) {
+                return strtoupper($word);
+            }
+            // "Small" -> "SML"
+            return strtoupper(substr($word, 0, 1) . substr(preg_replace('/[aeiou]/i', '', substr($word, 1)), 0, 2));
+        } else {
+            // "Extra Large" -> "EL"
+            return strtoupper(implode('', array_map(function ($w) {
+                return substr($w, 0, 1);
+            }, $words)));
+        }
     }
 }

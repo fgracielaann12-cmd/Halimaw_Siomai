@@ -9,6 +9,12 @@ class AddMissingColumnsToItems extends Migration
     public function up()
     {
         $fields = [
+            'sku' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 100,
+                'null'       => true,
+                'after'      => 'product_id'
+            ],
             'image_path' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 255,
@@ -99,6 +105,7 @@ class AddMissingColumnsToItems extends Migration
     public function down()
     {
         $columns = [
+            'sku',
             'image_path',
             'subcategory',
             'pack_small_qty',

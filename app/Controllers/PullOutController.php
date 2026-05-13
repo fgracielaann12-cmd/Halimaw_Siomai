@@ -68,16 +68,8 @@ class PullOutController extends BaseController
                 $item = $this->itemModel->find($itemId);
                 if (!$item) throw new \Exception("Item ID {$itemId} not found.");
 
-                // Determine Variation Column and Unit Cost
-                $varLower = strtolower($variation);
+                // Unit cost comes from the item's own price (it is already the specific child)
                 $unitCost = $item['price'];
-                if (strpos($varLower, 'small') !== false) {
-                    $unitCost = $item['pack_small_price'] ?? $unitCost;
-                } elseif (strpos($varLower, 'medium') !== false) {
-                    $unitCost = $item['pack_medium_price'] ?? $unitCost;
-                } elseif (strpos($varLower, 'large') !== false) {
-                    $unitCost = $item['pack_biggest_price'] ?? $unitCost;
-                }
 
                 $totalLoss = $unitCost * $quantity;
 
@@ -156,13 +148,10 @@ class PullOutController extends BaseController
             return redirect()->back()->with('error', 'Product not found.');
         }
 
-        $variation = strtolower($pullOut['variation'] ?? '');
+        // Always deduct from the item's own quantity (sibling model)
         $qtyCol = 'quantity';
-        if (strpos($variation, 'small') !== false) $qtyCol = 'pack_small_qty';
-        if (strpos($variation, 'medium') !== false) $qtyCol = 'pack_medium_qty';
-        if (strpos($variation, 'large') !== false) $qtyCol = 'pack_biggest_qty';
 
-        if (!isset($item[$qtyCol]) || $item[$qtyCol] < $pullOut['quantity']) {
+        if (($item[$qtyCol] ?? 0) < $pullOut['quantity']) {
             return redirect()->back()->with('error', 'Insufficient stock to approve this pull-out.');
         }
 

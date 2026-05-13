@@ -166,7 +166,10 @@ $expiredNotif = $db->table('items')
 <nav id="sidebar">
     <a class="navbar-brand" href="<?= site_url('items') ?>">
         <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo">
-        <span>Halimaw Siomai</span>
+        <div class="sidebar-brand-text">
+            HALIMAW POS<br>
+            <small style="font-size: 0.65rem; opacity: 0.8; font-weight: 600;">INVENTORY SYSTEM</small>
+        </div>
     </a>
     <ul class="nav flex-column px-2 mt-3">
         <?php

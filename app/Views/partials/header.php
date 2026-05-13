@@ -4,7 +4,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?= isset($title) ? esc($title) : 'Inventory' ?></title>
+<title><?= isset($title) ? esc($title) : 'Halimaw POS Inventory System' ?></title>
+<link rel="icon" type="image/png" href="<?= base_url('public/Images/Inventa.png') ?>">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>body{background:#f8f9fa;} .nav-role {margin-bottom:20px;} .card {border-radius: 5px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);}</style>

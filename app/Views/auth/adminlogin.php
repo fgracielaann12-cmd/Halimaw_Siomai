@@ -175,10 +175,9 @@
 
         <!-- Logo -->
         <div class="logo-container">
-            <img src="<?= base_url('public/Images/Inventa.png') ?>" class="logo" alt="Halimaw Siomai Logo">
-        </div>
-
-        <h2 class="login-title">Halimaw Siomai</h2>
+            <img src="<?= base_url('public/Images/Inventa.png') ?>" class="logo" alt="Inventa Logo" style="width: 120px; height: auto;">
+            </div>
+            <h2 class="login-title">Halimaw POS Inventory Siomai</h2>
         <p class="login-subtitle">POS Inventory Management System</p>
 
         <!-- Flash Messages -->

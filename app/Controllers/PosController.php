@@ -19,14 +19,8 @@ class PosController extends BaseController
 
     public function adminIndex()
     {
-        // Fix Bug 2: Explicitly fetch regular items and variations
         $products = $this->productModel
-            ->groupStart()
-                ->where('quantity >', 0)
-                ->orWhere('pack_small_qty >', 0)
-                ->orWhere('pack_medium_qty >', 0)
-                ->orWhere('pack_biggest_qty >', 0)
-            ->groupEnd()
+            ->where('quantity >', 0)
             ->where('status !=', 'expired')
             ->where('status !=', 'manually deleted')
             ->orderBy('name', 'ASC')
@@ -46,12 +40,7 @@ class PosController extends BaseController
     public function staffIndex()
     {
         $products = $this->productModel
-            ->groupStart()
-                ->where('quantity >', 0)
-                ->orWhere('pack_small_qty >', 0)
-                ->orWhere('pack_medium_qty >', 0)
-                ->orWhere('pack_biggest_qty >', 0)
-            ->groupEnd()
+            ->where('quantity >', 0)
             ->where('status !=', 'expired')
             ->where('status !=', 'manually deleted')
             ->orderBy('name', 'ASC')
@@ -206,13 +195,8 @@ class PosController extends BaseController
         $transactionId = 'OUT-' . date('Ymd') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
         $totalSaleAmount = 0;
         
-        $salesBatch = [];
-        $stockUpdates = [
-            'quantity' => [],
-            'pack_small_qty' => [],
-            'pack_medium_qty' => [],
-            'pack_biggest_qty' => []
-        ];
+        $salesBatch   = [];
+        $stockUpdates = []; // keyed by item id → ['id' => ..., 'quantity' => ...]
 
         try {
             $db->transStart();
@@ -239,27 +223,20 @@ class PosController extends BaseController
                 }
 
                 $realId = $product['id'];
-                $deductQty = $displayQty;
-                $stockColumn = 'quantity';
-                
-                if ($type === 'siomai' && isset($item['pack'])) {
-                    switch ($item['pack']) {
-                        case 'Small Pack': $stockColumn = 'pack_small_qty'; break;
-                        case 'Medium Pack': $stockColumn = 'pack_medium_qty'; break;
-                        case 'Large Pack': $stockColumn = 'pack_biggest_qty'; break;
-                    }
-                } elseif ($type === 'patty') {
-                    $deductQty = $displayQty * 6;
-                }
 
-                // Cumulative stock check in case same item appears multiple times
-                $baseStock = (int) ($product[$stockColumn] ?? 0);
-                $alreadyDeducted = isset($stockUpdates[$stockColumn][$realId]) ? ($baseStock - $stockUpdates[$stockColumn][$realId][$stockColumn]) : 0;
+                // All items (single or variation child) have their own quantity column.
+                // No switch/case on type — always deduct from 'quantity'.
+                $stockColumn = 'quantity';
+                $deductQty   = $displayQty;
+
+                // Cumulative stock check in case the same item appears multiple times in the cart
+                $baseStock        = (int) ($product['quantity'] ?? 0);
+                $alreadyDeducted  = isset($stockUpdates[$realId]) ? ($baseStock - $stockUpdates[$realId]['quantity']) : 0;
                 $currentAvailable = $baseStock - $alreadyDeducted;
 
                 if ($currentAvailable < $deductQty) {
                     $productName = esc($product['name'] ?? 'Unknown Item');
-                    $packSuffix = isset($item['pack']) ? " ({$item['pack']})" : "";
+                    $packSuffix  = isset($item['pack']) ? " ({$item['pack']})" : "";
                     throw new \Exception("Insufficient stock for '{$productName}{$packSuffix}'. Available: {$currentAvailable}, Required: {$deductQty}");
                 }
 
@@ -272,7 +249,7 @@ class PosController extends BaseController
                     'user_id'        => $userId,
                     'product_id'     => $realId,
                     'quantity'       => $displayQty,
-                    'pack'           => $item['pack'] ?? ($type === 'patty' ? '6pcs' : null),
+                    'pack'           => $item['pack'] ?? null,
                     'price'          => $price,
                     'total'          => $total,
                     'payment_method' => $paymentMethod,
@@ -280,10 +257,10 @@ class PosController extends BaseController
                     'customer_email' => $customerEmail,
                 ];
 
-                // Prepare Stock Update Entry
-                $stockUpdates[$stockColumn][$realId] = [
-                    'id' => $realId,
-                    $stockColumn => $currentAvailable - $deductQty
+                // Accumulate stock updates keyed by item id
+                $stockUpdates[$realId] = [
+                    'id'       => $realId,
+                    'quantity' => $currentAvailable - $deductQty,
                 ];
             }
 
@@ -304,11 +281,9 @@ class PosController extends BaseController
             // B. Sales Details (Batch)
             $this->salesModel->insertBatch($salesBatch);
 
-            // C. Inventory Adjustments (Batch per column group)
-            foreach ($stockUpdates as $column => $updates) {
-                if (!empty($updates)) {
-                    $itemModel->updateBatch(array_values($updates), 'id');
-                }
+            // C. Inventory Adjustments (single column: quantity)
+            if (!empty($stockUpdates)) {
+                $itemModel->updateBatch(array_values($stockUpdates), 'id');
             }
 
             $db->transComplete();

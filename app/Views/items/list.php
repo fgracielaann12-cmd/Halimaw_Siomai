@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= csrf_token() ?>">
-    <title>Inventory Dashboard | Halimaw Siomai</title>
+    <title>Inventory Dashboard | Halimaw </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -744,6 +744,11 @@ function getSku($name, $variation = '') {
         <?php
         $totalValue = array_reduce($items, fn($sum, $item) => $sum + (($item['price'] ?? 0) * ($item['quantity'] ?? 0)), 0);
         $lowStockItems = array_filter($items, function($i) {
+            // New sibling model: variation children use their own quantity column
+            if (!empty($i['is_variation_child'])) {
+                return ($i['quantity'] ?? 0) <= 10;
+            }
+            // Legacy fallback: items using pack_*_qty columns
             $hasPackQty = ($i['pack_small_qty'] ?? 0) > 0 || ($i['pack_medium_qty'] ?? 0) > 0 || ($i['pack_biggest_qty'] ?? 0) > 0;
             if ($hasPackQty) {
                 return ($i['pack_small_qty'] ?? 0) <= 10 || ($i['pack_medium_qty'] ?? 0) <= 10 || ($i['pack_biggest_qty'] ?? 0) <= 10;
@@ -899,11 +904,18 @@ function getSku($name, $variation = '') {
                                 $daysLeftText = "$daysLeft days left";
                             }
                         }
-                        $hasPackQty = ($item['pack_small_qty'] ?? 0) > 0 || ($item['pack_medium_qty'] ?? 0) > 0 || ($item['pack_biggest_qty'] ?? 0) > 0;
-                        if ($hasPackQty) {
-                            $isLowStock = ($item['pack_small_qty'] ?? 0) <= 10 || ($item['pack_medium_qty'] ?? 0) <= 10 || ($item['pack_biggest_qty'] ?? 0) <= 10;
+                        // New sibling model: variation children use their own quantity column
+                        if (!empty($item['is_variation_child'])) {
+                            $hasPackQty  = false;
+                            $isLowStock  = ($item['quantity'] ?? 0) <= 10;
                         } else {
-                            $isLowStock = $item['quantity'] <= 10;
+                            // Legacy fallback
+                            $hasPackQty = ($item['pack_small_qty'] ?? 0) > 0 || ($item['pack_medium_qty'] ?? 0) > 0 || ($item['pack_biggest_qty'] ?? 0) > 0;
+                            if ($hasPackQty) {
+                                $isLowStock = ($item['pack_small_qty'] ?? 0) <= 10 || ($item['pack_medium_qty'] ?? 0) <= 10 || ($item['pack_biggest_qty'] ?? 0) <= 10;
+                            } else {
+                                $isLowStock = $item['quantity'] <= 10;
+                            }
                         }
                     ?>
                     <?php if ($hasPackQty): ?>
@@ -975,7 +987,12 @@ function getSku($name, $variation = '') {
                     <?php else: ?>
                         <tr data-id="<?= $item['id'] ?>" data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>">
                             <td class="text-center align-middle"><?= esc($item['product_id']) ?></td>
-                            <td class="text-center align-middle"><?= esc($item['name']) ?></td>
+                            <td class="text-center align-middle">
+                                <?= esc($item['name']) ?>
+                                <?php if (!empty($item['is_variation_child'])): ?>
+                                    <br><span class="badge bg-info text-dark mt-1" style="font-size: 0.65rem;">Variation</span>
+                                <?php endif; ?>
+                            </td>
                             <td class="text-center align-middle"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?></td>
                             <td class="text-center align-middle text-nowrap">₱<?= number_format($item['price'], 2) ?></td>
                             <td class="text-center align-middle text-nowrap"><span><?= esc($item['quantity']) ?></span><?php if (stripos($item['name'], 'burger patty') !== false): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?></td>

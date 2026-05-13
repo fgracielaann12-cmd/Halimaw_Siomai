@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= csrf_token() ?>">
-    <title><?= esc($title) ?> | Halimaw Siomai</title>
+    <title><?= esc($title) ?> | Halimaw POS Inventory System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -469,14 +469,14 @@
                                 <option value="" disabled selected>— Choose an item —</option>
                                 <?php if(isset($items) && !empty($items)): ?>
                                     <?php foreach($items as $item): ?>
-                                        <!-- Normal Items -->
-                                        <option value="<?= esc($item['id']) ?>"><?= esc($item['name']) ?></option>
-                                        
-                                        <!-- Siomai Variations -->
-                                        <?php if(stripos($item['name'], 'siomai') !== false): ?>
-                                            <option value="<?= esc($item['id']) ?>" data-variation="Small Pack"><?= esc($item['name']) ?> - Small Pack</option>
-                                            <option value="<?= esc($item['id']) ?>" data-variation="Medium Pack"><?= esc($item['name']) ?> - Medium Pack</option>
-                                            <option value="<?= esc($item['id']) ?>" data-variation="Large Pack"><?= esc($item['name']) ?> - Large Pack</option>
+                                        <?php if (!empty($item['is_variation_child']) && !empty($item['variation_label'])): ?>
+                                            <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($item['variation_label']) ?>">
+                                                <?= esc($item['name']) ?> — <?= esc($item['variation_label']) ?>
+                                            </option>
+                                        <?php elseif (empty($item['variation_group_id'])): ?>
+                                            <option value="<?= esc($item['id']) ?>">
+                                                <?= esc($item['name']) ?>
+                                            </option>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
                                 <?php endif; ?>

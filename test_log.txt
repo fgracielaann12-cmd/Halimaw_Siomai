@@ -124,3 +124,15 @@ Array
 
 userId: 21
 Insert success: ID 31
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 2fe7b7e82eb74012ea3f414f47ff069d
+    [item_id] => 5646
+    [action] => add
+    [quantity] => 15
+    [reason] => [Variation: SMALL] Peak
+)
+
+userId: 5
+Insert success: ID 29

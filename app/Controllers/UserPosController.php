@@ -27,15 +27,46 @@ class UserPosController extends BaseController
         return view('pos/user', $data);
     }
 
+    private function extractLabel($name) {
+        if (preg_match('/(?:Small|Medium|Large|Extra Large|XL|XXL)$/i', $name, $matches)) {
+            return ucfirst($matches[0]);
+        }
+        return 'Standard';
+    }
+
     private function groupProductsForPos($products)
     {
         $grouped = [];
         $variationsMap = [];
 
         foreach ($products as $product) {
-            // Remove the isSiomai skip to allow grouping siomai variations
-            
-            if (preg_match('/^(.*?)-([A-Za-z0-9]+)$/', $product['product_id'], $matches)) {
+            $isVariation = (isset($product['is_variation_child']) && $product['is_variation_child'] == 1);
+            $groupId = $product['variation_group_id'] ?? null;
+
+            if ($isVariation && $groupId) {
+                // Use explicit variation grouping
+                if (!isset($variationsMap[$groupId])) {
+                    $variationsMap[$groupId] = [
+                        'baseName' => preg_replace('/\s*(Small|Medium|Large|Extra Large|XL|XXL)$/i', '', $product['name']),
+                        'category' => $product['category'] ?? '',
+                        'image' => $product['image'] ?? 'default.jpg',
+                        'image_path' => $product['image_path'] ?? null,
+                        'expiration_date' => $product['expiration_date'] ?? null,
+                        'totalStock' => 0,
+                        'variations' => []
+                    ];
+                }
+                
+                $variationsMap[$groupId]['totalStock'] += (int) $product['quantity'];
+                $variationsMap[$groupId]['variations'][] = [
+                    'label' => $product['variation_label'] ?? $this->extractLabel($product['name']),
+                    'price' => (float) $product['price'],
+                    'stock' => (int) $product['quantity'],
+                    'product_id' => $product['product_id'],
+                    'id' => $product['id']
+                ];
+            } else if (preg_match('/^(.*?)-([A-Za-z0-9]+)$/', $product['product_id'], $matches)) {
+                // Fallback for legacy regex-based variations
                 $baseId = $matches[1];
                 $suffix = $matches[2];
                 

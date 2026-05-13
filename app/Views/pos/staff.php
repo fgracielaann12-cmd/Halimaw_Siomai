@@ -48,7 +48,7 @@ if (!function_exists('getProductSKU')) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= csrf_hash() ?>">
-    <title>Halimaw Siomai Staff POS</title>
+    <title>Halimaw POS Inventory System Staff POS</title>
     <!-- Bootstrap 5.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -1301,7 +1301,7 @@ if (!function_exists('getProductSKU')) {
     <nav id="sidebar">
         <a class="navbar-brand" href="#">
             <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo">
-            <span>Halimaw Siomai</span>
+            <span>Halimaw POS Inventory System</span>
         </a>
         <ul class="nav flex-column px-2 mt-3">
            <li class="nav-item">
@@ -1346,7 +1346,7 @@ if (!function_exists('getProductSKU')) {
     <div class="pos-tutorial" id="posTutorial">
         <div class="tutorial-content">
             <button class="close-tutorial" id="closeTutorial">&times;</button>
-            <h3>Welcome to Halimaw Siomai POS!</h3>
+            <h3>Welcome to Halimaw POS Inventory System!</h3>
             <div class="tutorial-steps">
                 <div class="tutorial-step">
                     <div class="step-number">1</div>
@@ -1437,98 +1437,46 @@ if (!function_exists('getProductSKU')) {
             <!-- POS ITEMS -->
             <div class="pos-items">
                 <div class="pos-grid">
-                    <?php
-                    // 🔥 SPLIT PRODUCTS INTO SIOMAI AND OTHERS
-                    $siomaiItems = [];
-                    $otherItems = [];
-
-                    foreach ($products as $product) {
-                        if (($product['quantity'] ?? 0) <= 0) continue;
-
-                        $nameLower = strtolower($product['name']);
-                        $isCustomVar = !empty($product['is_custom_variation']);
-                        $hasPackPrices = (!empty($product['pack_small_price']) && $product['pack_small_price'] > 0);
-                        
-                        // Fix Bug 1: Only show siomai pack options if it actually has pack data (Legacy system)
-                        // Fix Bug 2: Move grouped variations to 'other' to use the custom_variation modal
-                        $isSiomai = (strpos($nameLower, 'siomai') !== false && $hasPackPrices && !$isCustomVar);
-
-                        if ($isSiomai) {
-                            $siomaiItems[] = $product;
-                        } else {
-                            $otherItems[] = $product;
-                        }
-                    }
-
-                    // Display siomai items first
-                    foreach ($siomaiItems as $product):
-                        $nameLower = strtolower($product['name']);
-                        $imgSrc = !empty($product['image_path']) ? base_url($product['image_path']) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
+                    <?php foreach ($products as $product): ?>
+                        <?php 
+                        $imgSrc = !empty($product['image_path']) ? base_url('uploads/' . esc($product['image_path'])) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
                         $stock = (int) ($product['quantity'] ?? 0);
                         $isLowStock = $stock <= 10;
                         ?>
-                        <div class="pos-item-card <?= $stock <= 0 ? 'out-of-stock' : '' ?>"
-                             onclick="openShopeeModal(this)"
-                             data-name="<?= esc($product['name']) ?>"
-                             data-type="siomai"
-                             data-product-id="<?= $product['id'] ?>"
-                             data-stock="<?= $stock ?>"
-                             data-image="<?= $imgSrc ?>"
-                             data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
-                             data-prices='{"Small Pack":<?=($product['pack_small_price'] ?? 115)?>,"Medium Pack":<?=($product['pack_medium_price'] ?? 185)?>,"Large Pack":<?=($product['pack_biggest_price'] ?? 335)?>}'
-                             data-packstocks='{"Small Pack":<?=($product['pack_small_qty'] ?? 0)?>,"Medium Pack":<?=($product['pack_medium_qty'] ?? 0)?>,"Large Pack":<?=($product['pack_biggest_qty'] ?? 0)?>}'>
-                            
-                            <img src="<?= $imgSrc ?>" alt="<?= esc($product['name']) ?>">
-                            <h6><?= esc($product['name']) ?></h6>
-                        </div>
+
+                        <?php if (!empty($product['is_custom_variation'])): ?>
+                            <!-- VARIATION GROUP CARD -->
+                            <div class="pos-item-card <?= $stock <= 0 ? 'out-of-stock' : '' ?>" 
+                                 onclick="openShopeeModal(this)"
+                                 data-type="variation"
+                                 data-group-id="<?= esc($product['product_id']) ?>"
+                                 data-name="<?= esc($product['name']) ?>"
+                                 data-image="<?= $imgSrc ?>"
+                                 data-variations="<?= esc($product['custom_variations']) ?>">
+                                <img src="<?= $imgSrc ?>"
+                                     onerror="this.src='<?= base_url('images/placeholder.png') ?>'" 
+                                     alt="<?= esc($product['name']) ?>">
+                                <h6><?= esc($product['name']) ?></h6>
+                            </div>
+                        <?php else: ?>
+                            <!-- REGULAR ITEM CARD -->
+                            <div class="pos-item-card <?= $stock <= 0 ? 'out-of-stock' : '' ?>"
+                                 onclick="openShopeeModal(this)"
+                                 data-type="single"
+                                 data-product-id="<?= esc($product['id']) ?>"
+                                 data-name="<?= esc($product['name']) ?>"
+                                 data-price="<?= esc($product['price'] ?? 0) ?>"
+                                 data-stock="<?= esc($stock) ?>"
+                                 data-image="<?= $imgSrc ?>">
+                                <img src="<?= $imgSrc ?>"
+                                     onerror="this.src='<?= base_url('images/placeholder.png') ?>'"
+                                     alt="<?= esc($product['name']) ?>">
+                                <h6><?= esc($product['name']) ?></h6>
+                            </div>
+                        <?php endif; ?>
                     <?php endforeach; ?>
 
-                    <!-- Then display other items (no dropdowns) -->
-                    <?php foreach ($otherItems as $product):
-                        $imgSrc = !empty($product['image_path']) ? base_url($product['image_path']) : base_url('public/Images/' . ($product['image'] ?? 'default.jpg'));
-                        $stock = (int) ($product['quantity'] ?? 0);
-                        $isLowStock = $stock <= 10;
-                        $nameLower = strtolower($product['name']);
-                        $price = $product['price'] ?? 0;
-                        
-                        $isCustomVar = !empty($product['is_custom_variation']);
-
-                        // 🔥 SET CORRECT PRICE FOR KEY ITEMS
-                        if (strpos($nameLower, 'burger patty') !== false) {
-                            $price = 190.00;
-                        } elseif (strpos($nameLower, 'pastil') !== false) {
-                            $price = 180.00;
-                        } elseif (strpos($nameLower, 'chili garlic') !== false) {
-                            $price = 120.00;
-                        } elseif (strpos($nameLower, 'toyomansi') !== false) {
-                            $price = 65.00;
-                        }
-                        
-                        $itemType = 'other';
-                        if (strpos($nameLower, 'patty') !== false) {
-                            $itemType = 'patty';
-                        }
-                        if ($isCustomVar) {
-                            $itemType = 'custom_variation';
-                        }
-                    ?>
-                        <div class="pos-item-card <?= $stock <= 0 ? 'out-of-stock' : '' ?>"
-                             onclick="openShopeeModal(this)"
-                             data-name="<?= esc($product['name']) ?>"
-                             data-type="<?= $itemType ?>"
-                             data-product-id="<?= $product['id'] ?>"
-                             data-stock="<?= $stock ?>"
-                             data-image="<?= $imgSrc ?>"
-                             data-expr="<?= esc($product['expiration_date'] ?? '') ?>"
-                             data-price="<?= $price ?>"
-                             <?= $isCustomVar ? "data-variations='" . esc($product['custom_variations']) . "'" : "" ?>>
-                            
-                            <img src="<?= $imgSrc ?>" alt="<?= esc($product['name']) ?>">
-                            <h6><?= esc($product['name']) ?></h6>
-                        </div>
-                    <?php endforeach; ?>
-
-                    <?php if (empty($siomaiItems) && empty($otherItems)): ?>
+                    <?php if (empty($products)): ?>
                         <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--secondary);">
                             <i class="bi bi-inbox" style="font-size: 2rem; margin-bottom: 10px;"></i>
                             <p>No items available in stock.</p>
@@ -1791,26 +1739,15 @@ if (!function_exists('getProductSKU')) {
                             <select id="requestItemModal" name="item_id" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
-                                    <?php
-                                        $isSiomai = stripos($item['name'], 'siomai') !== false;
-                                        $displayRows = [];
-                                        if ($isSiomai) {
-                                            $displayRows[] = ['variation' => 'S', 'pack_name' => 'Small', 'id_suffix' => '-S'];
-                                            $displayRows[] = ['variation' => 'M', 'pack_name' => 'Medium', 'id_suffix' => '-M'];
-                                            $displayRows[] = ['variation' => 'L', 'pack_name' => 'Large', 'id_suffix' => '-L'];
-                                        } else {
-                                            $displayRows[] = ['variation' => null, 'pack_name' => '', 'id_suffix' => ''];
-                                        }
-                                    ?>
-                                    <?php foreach ($displayRows as $vItem): ?>
-                                        <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
-                                            <?php if (function_exists('getProductSKU')): ?>
-                                                <?= esc(getProductSKU($item['name'], $vItem['variation'])) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
-                                            <?php else: ?>
-                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
-                                            <?php endif; ?>
+                                    <?php if (!empty($item['is_variation_child']) && !empty($item['variation_label'])): ?>
+                                        <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($item['variation_label']) ?>">
+                                            <?= esc($item['name']) ?> — <?= esc($item['variation_label']) ?>
                                         </option>
-                                    <?php endforeach; ?>
+                                    <?php elseif (empty($item['variation_group_id'])): ?>
+                                        <option value="<?= esc($item['id']) ?>">
+                                            <?= esc($item['product_id']) ?> - <?= esc($item['name']) ?>
+                                        </option>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -1877,26 +1814,15 @@ if (!function_exists('getProductSKU')) {
                             <select id="pullOutItemModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
-                                    <?php
-                                        $isSiomai = stripos($item['name'], 'siomai') !== false;
-                                        $displayRows = [];
-                                        if ($isSiomai) {
-                                            $displayRows[] = ['variation' => 'S', 'pack_name' => 'Small', 'id_suffix' => '-S'];
-                                            $displayRows[] = ['variation' => 'M', 'pack_name' => 'Medium', 'id_suffix' => '-M'];
-                                            $displayRows[] = ['variation' => 'L', 'pack_name' => 'Large', 'id_suffix' => '-L'];
-                                        } else {
-                                            $displayRows[] = ['variation' => null, 'pack_name' => '', 'id_suffix' => ''];
-                                        }
-                                    ?>
-                                    <?php foreach ($displayRows as $vItem): ?>
-                                        <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
-                                            <?php if (function_exists('getProductSKU')): ?>
-                                                <?= esc(getProductSKU($item['name'], $vItem['variation'])) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
-                                            <?php else: ?>
-                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
-                                            <?php endif; ?>
+                                    <?php if (!empty($item['is_variation_child']) && !empty($item['variation_label'])): ?>
+                                        <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($item['variation_label']) ?>">
+                                            <?= esc($item['name']) ?> — <?= esc($item['variation_label']) ?>
                                         </option>
-                                    <?php endforeach; ?>
+                                    <?php elseif (empty($item['variation_group_id'])): ?>
+                                        <option value="<?= esc($item['id']) ?>">
+                                            <?= esc($item['product_id']) ?> - <?= esc($item['name']) ?>
+                                        </option>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -2415,71 +2341,14 @@ if (!function_exists('getProductSKU')) {
             const varContainer = document.getElementById('smVariations');
             varContainer.innerHTML = '';
 
-            if (type === 'siomai') {
-                document.getElementById('smStockLabel').textContent = "Left";
-                varRow.style.display = 'flex';
-                const prices = JSON.parse(card.dataset.prices);
-                const packStocks = JSON.parse(card.dataset.packstocks);
-                let first = true;
-                
-                for (const [pack, price] of Object.entries(prices)) {
-                    const btn = document.createElement('button');
-                    btn.textContent = pack;
-                    
-                    const localStock = packStocks[pack] || 0;
-                    if(localStock <= 0) {
-                        btn.style.opacity = '0.5';
-                        btn.style.cursor = 'not-allowed';
-                        btn.disabled = true;
-                    }
-
-                    function updatePiecesDisplay(p) {
-                        document.getElementById('smPiecesRow').style.display = 'flex';
-                        if (p === 'Small Pack') document.getElementById('smPieces').textContent = '12 pcs';
-                        else if (p === 'Medium Pack') document.getElementById('smPieces').textContent = '20 pcs';
-                        else if (p === 'Large Pack') document.getElementById('smPieces').textContent = '40 pcs';
-                        else document.getElementById('smPieces').textContent = '';
-                    }
-
-                    if (first && localStock > 0) {
-                        btn.classList.add('active');
-                        currentModalItem.pack = pack;
-                        currentModalItem.price = parseFloat(price);
-                        currentModalItem.stock = parseInt(localStock);
-                        currentModalItem.packSize = 1;
-                        document.getElementById('smStock').textContent = localStock + " packs";
-                        updatePiecesDisplay(pack);
-                        first = false;
-                    }
-                    
-                    btn.onclick = () => {
-                        varContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        currentModalItem.pack = pack;
-                        currentModalItem.price = parseFloat(price);
-                        currentModalItem.stock = parseInt(localStock);
-                        currentModalItem.packSize = 1;
-                        document.getElementById('smStock').textContent = localStock + " packs";
-                        document.getElementById('smQtyInput').value = 1; // reset validation
-                        updatePiecesDisplay(pack);
-                        updateSmPriceDisplay();
-                    };
-                    varContainer.appendChild(btn);
-                }
-                
-                if (first) {
-                    document.getElementById('smStock').textContent = "0 packs";
-                    currentModalItem.stock = 0;
-                    document.getElementById('smPiecesRow').style.display = 'none';
-                }
-            } else if (type === 'custom_variation') {
+            if (type === 'variation') {
                 document.getElementById('smStockLabel').textContent = "Left";
                 varRow.style.display = 'flex';
                 
-                const customVars = JSON.parse(card.dataset.variations || '[]');
+                const variations = JSON.parse(card.dataset.variations || '[]');
                 let first = true;
                 
-                for (const v of customVars) {
+                for (const v of variations) {
                     const btn = document.createElement('button');
                     btn.textContent = v.label;
                     
@@ -2496,7 +2365,7 @@ if (!function_exists('getProductSKU')) {
                         currentModalItem.stock = parseInt(v.stock);
                         currentModalItem.packSize = 1;
                         currentModalItem.productId = parseInt(v.id);
-                        document.getElementById('smStock').textContent = v.stock + " left";
+                        document.getElementById('smStock').textContent = v.stock + " packs";
                         first = false;
                     }
                     
@@ -2508,7 +2377,7 @@ if (!function_exists('getProductSKU')) {
                         currentModalItem.stock = parseInt(v.stock);
                         currentModalItem.packSize = 1;
                         currentModalItem.productId = parseInt(v.id);
-                        document.getElementById('smStock').textContent = v.stock + " left";
+                        document.getElementById('smStock').textContent = v.stock + " packs";
                         document.getElementById('smQtyInput').value = 1;
                         updateSmPriceDisplay();
                     };
@@ -2516,22 +2385,17 @@ if (!function_exists('getProductSKU')) {
                 }
                 
                 if (first) {
-                    document.getElementById('smStock').textContent = "0 left";
+                    document.getElementById('smStock').textContent = "0 packs";
                     currentModalItem.stock = 0;
                 }
                 document.getElementById('smPiecesRow').style.display = 'none';
             } else {
                 document.getElementById('smStockLabel').textContent = "Left";
                 varRow.style.display = 'none';
-                
+                document.getElementById('smPiecesRow').style.display = 'none';
                 currentModalItem.price = parseFloat(card.dataset.price);
-                if (type === 'patty') {
-                    currentModalItem.packSize = 1;
-                    document.getElementById('smPiecesRow').style.display = 'flex';
-                    document.getElementById('smPieces').textContent = '6 pcs';
-                } else {
-                    document.getElementById('smPiecesRow').style.display = 'none';
-                }
+                currentModalItem.productId = parseInt(card.dataset.productId);
+                document.getElementById('smStock').textContent = currentModalItem.stock + " in stock";
             }
 
             updateSmPriceDisplay();

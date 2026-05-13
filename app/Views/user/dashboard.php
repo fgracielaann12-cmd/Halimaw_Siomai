@@ -1643,6 +1643,7 @@ if (!function_exists('getProductSKU')) {
                     submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Pull-Out';
                 }
             });
+        }
         // ✅ RETURNS SUBMISSION
         const returnForm = document.getElementById("returnFormModal");
         if (returnForm) {

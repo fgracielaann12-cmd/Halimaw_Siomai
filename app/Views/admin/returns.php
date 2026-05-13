@@ -649,8 +649,8 @@ $(document).ready(function() {
                 });
 
                 const data = await response.json();
-                if (data.status === 'success') {
-                    alert("Return processed successfully: " + data.message);
+                if (data.status === 'success' || data.success) {
+                    alert("Return processed successfully: " + (data.message || ''));
                     location.reload();
                 } else {
                     alert("Error: " + data.message);

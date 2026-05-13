@@ -28,6 +28,16 @@ class Auth extends Controller
     public function authenticate()
     {
         $session = session();
+
+        // Check if locked out first
+        if ($session->get('lockout_time')) {
+            if (time() < $session->get('lockout_time')) {
+                return redirect()->back(); // View will handle showing the persistent timeout message
+            } else {
+                $session->remove(['login_attempts', 'lockout_time']);
+            }
+        }
+
         $loginInput = $this->request->getPost('login'); // username or email
         $password = $this->request->getPost('password');
 
@@ -36,13 +46,27 @@ class Auth extends Controller
                      ->orWhere('email', $loginInput)
                      ->first();
 
-        if (!$user) {
-            return redirect()->back()->withInput()->with('error', '⚠️ User not found.');
+        // If user not found OR incorrect password, count as failed attempt
+        if (!$user || !password_verify($password, $user['password'])) {
+            // Exclude admin accounts from being locked out
+            if ($user && $user['role'] === 'admin') {
+                return redirect()->back()->withInput()->with('error', '⚠️ Invalid Username and Password!');
+            }
+
+            $attempts = $session->get('login_attempts') ?? 0;
+            $attempts++;
+            $session->set('login_attempts', $attempts);
+
+            if ($attempts >= 3) {
+                $session->set('lockout_time', time() + (15 * 60)); // 15 mins
+                return redirect()->back();
+            }
+
+            return redirect()->back()->withInput()->with('error', '⚠️ Invalid Username and Password!');
         }
 
-        if (!password_verify($password, $user['password'])) {
-            return redirect()->back()->withInput()->with('error', '❌ Incorrect password.');
-        }
+        // On successful login, reset attempts
+        $session->remove(['login_attempts', 'lockout_time']);
 
         $session->set([
             'isLoggedIn' => true,

@@ -177,7 +177,23 @@
         <p class="login-subtitle">POS Inventory Management System</p>
 
         <!-- Flash Messages -->
-        <?php if (session()->getFlashdata('error')): ?>
+        <?php 
+            $isLockedOut = false;
+            $remaining = 0;
+            if (session()->get('lockout_time') && time() < session()->get('lockout_time')) {
+                $isLockedOut = true;
+                $remaining = ceil((session()->get('lockout_time') - time()) / 60);
+            }
+            $disabledAttr = $isLockedOut ? 'disabled' : '';
+        ?>
+
+        <?php if ($isLockedOut): ?>
+            <div class="alert alert-danger text-center" role="alert"
+                style="width: 100%; border-radius: 15px; font-size: 0.85rem; padding: 10px;">
+                <i class="bi bi-lock-fill me-2"></i>
+                Time Out Session! Please try again after <?= $remaining ?> minute(s).
+            </div>
+        <?php elseif (session()->getFlashdata('error')): ?>
             <div class="alert alert-danger alert-dismissible fade show text-center" role="alert"
                 style="width: 100%; border-radius: 15px; font-size: 0.85rem; padding: 10px;">
                 <i class="bi bi-exclamation-circle-fill me-2"></i>
@@ -200,16 +216,18 @@
             <?= csrf_field() ?>
 
             <div class="input-container">
-                <input type="text" name="login" class="form-control" placeholder="User" required>
+                <input type="text" name="login" class="form-control" placeholder="User" required <?= $disabledAttr ?>>
             </div>
 
             <div class="input-container">
                 <input type="password" name="password" id="password" class="form-control" placeholder="Password"
-                    required>
+                    required <?= $disabledAttr ?>>
                 <i class="bi bi-eye password-icon" id="togglePassword"></i>
             </div>
 
-            <button type="submit" class="submit-button" onclick="localStorage.setItem('auth_status', 'active');">LOG IN</button>
+            <button type="submit" class="submit-button" <?= $disabledAttr ?> onclick="if(!this.disabled) localStorage.setItem('auth_status', 'active');">
+                <?= $isLockedOut ? 'LOCKED' : 'LOG IN' ?>
+            </button>
         </form>
 
     </div>

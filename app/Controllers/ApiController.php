@@ -82,95 +82,86 @@ class ApiController extends ResourceController
         $salesModel = new \App\Models\SalesModel();
         $transactionModel = new \App\Models\TransactionModel();
 
-        // 1. Validate Stock for all items in a single query
-        $itemIds = array_unique(array_column($json->items, 'id'));
-        $dbItems = $itemModel->whereIn('id', $itemIds)->findAll();
-        $itemsMap = [];
-        foreach ($dbItems as $it) {
-            $itemsMap[$it['id']] = $it;
-        }
-
-        // Check availability before starting transaction
-        foreach ($json->items as $item) {
-            $dbItem = $itemsMap[$item->id] ?? null;
-            if (!$dbItem) {
-                return $this->respond(['status' => 'error', 'message' => "Product ID {$item->id} not found"], 422);
-            }
-
-            $qtyCol = 'quantity';
-            $var = strtolower($item->variation ?? '');
-            if (strpos($var, 'small') !== false) $qtyCol = 'pack_small_qty';
-            elseif (strpos($var, 'medium') !== false) $qtyCol = 'pack_medium_qty';
-            elseif (strpos($var, 'large') !== false) $qtyCol = 'pack_biggest_qty';
-
-            if (($dbItem[$qtyCol] ?? 0) < $item->qty) {
-                return $this->respond([
-                    'status' => 'error', 
-                    'message' => "Insufficient stock for {$dbItem['name']} ({$item->variation}). Available: " . ($dbItem[$qtyCol] ?? 0)
-                ], 422);
-            }
-        }
-
-        // 2. Atomic Order Processing
-        $txnId = 'API-' . strtoupper(substr(uniqid(), -6));
+        // 1. Validate Items and Parse IDs
+        $itemsToProcess = [];
         $totalAmount = 0;
-        $salesBatch = [];
-        $itemUpdates = [];
+        foreach ($json->items as $item) {
+            $rawId = $item->id;
+            $variation = $item->variation ?? '';
+            
+            // Fallback: If ID is composite (e.g., "5616-Medium"), split it
+            if (strpos($rawId, '-') !== false && !is_numeric($rawId)) {
+                list($pId, $vId) = explode('-', $rawId);
+                $rawId = $pId;
+                if (empty($variation)) $variation = $vId;
+            }
+            
+            $dbItem = $itemModel->find($rawId);
+            if (!$dbItem) {
+                return $this->respond(['status' => 'error', 'message' => "Product ID {$rawId} not found"], 422);
+            }
+
+            $subtotal = $item->price * $item->qty;
+            $totalAmount += $subtotal;
+
+            $itemsToProcess[] = [
+                'product_id'   => $dbItem['id'],
+                'product_name' => $dbItem['name'],
+                'variation'    => $variation,
+                'quantity'     => $item->qty,
+                'price'        => $item->price,
+                'subtotal'     => $subtotal
+            ];
+        }
+
+        // 2. Record Order for Approval
+        $txnId = 'ORD-' . strtoupper(substr(uniqid(), -6));
         $now = date('Y-m-d H:i:s');
 
         try {
             $db->transStart();
 
-            foreach ($json->items as $item) {
-                $dbItem = $itemsMap[$item->id];
-                $subtotal = $item->price * $item->qty;
-                $totalAmount += $subtotal;
-
-                $salesBatch[] = [
-                    'transaction_id' => $txnId,
-                    'user_id'        => 0, // 0 indicates External API Order
-                    'product_id'     => $item->id,
-                    'quantity'       => $item->qty,
-                    'price'          => $item->price,
-                    'total'          => $subtotal,
-                    'pack'           => $item->variation ?? '1pc',
-                    'payment_method' => $json->payment_method ?? 'External API',
-                    'customer_name'  => $json->customer_name ?? 'Guest',
-                    'customer_email' => $json->customer_email ?? null,
-                    'is_seen'        => 0,
-                    'created_at'     => $now
-                ];
-
-                // Prepare Stock Deduction
-                $qtyCol = 'quantity';
-                $var = strtolower($item->variation ?? '');
-                if (strpos($var, 'small') !== false) $qtyCol = 'pack_small_qty';
-                elseif (strpos($var, 'medium') !== false) $qtyCol = 'pack_medium_qty';
-                elseif (strpos($var, 'large') !== false) $qtyCol = 'pack_biggest_qty';
-
-                if (!isset($itemUpdates[$item->id])) {
-                    $itemUpdates[$item->id] = ['id' => $item->id];
-                }
-                
-                // Cumulative deduction in case same item appears twice
-                $currentNewQty = $itemUpdates[$item->id][$qtyCol] ?? $dbItem[$qtyCol];
-                $itemUpdates[$item->id][$qtyCol] = $currentNewQty - $item->qty;
-            }
-
-            // Create Transaction Record
-            $transactionModel->insert([
-                'transaction_id' => $txnId,
-                'user_id'        => 0,
-                'total_amount'   => $totalAmount,
-                'payment_method' => $json->payment_method ?? 'External API',
+            // Create Online Order Record (for management tracking)
+            $onlineOrderModel = new \App\Models\OnlineOrderModel();
+            $onlineOrderModel->insert([
+                'order_id'       => $txnId,
                 'customer_name'  => $json->customer_name ?? 'Guest',
-                'customer_email' => $json->customer_email ?? null,
+                'customer_email' => $json->customer_email ?? '',
+                'customer_phone' => $json->customer_phone ?? '',
+                'total_amount'   => $totalAmount,
+                'status'         => 'Pending',
                 'created_at'     => $now
             ]);
 
-            // Execute Batch Operations
-            if (!empty($salesBatch)) $salesModel->insertBatch($salesBatch);
-            if (!empty($itemUpdates)) $itemModel->updateBatch(array_values($itemUpdates), 'id');
+            $onlineOrderItems = [];
+            foreach ($itemsToProcess as $entry) {
+                $onlineOrderItems[] = [
+                    'order_id'     => $txnId,
+                    'product_id'   => $entry['product_id'],
+                    'product_name' => $entry['product_name'],
+                    'variation'    => $entry['variation'],
+                    'quantity'     => $entry['quantity'],
+                    'price'        => $entry['price'],
+                    'subtotal'     => $entry['subtotal']
+                ];
+            }
+
+            if (!empty($onlineOrderItems)) {
+                $onlineOrderItemModel = new \App\Models\OnlineOrderItemModel();
+                $onlineOrderItemModel->insertBatch($onlineOrderItems);
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                return $this->respond(['status' => 'error', 'message' => 'Failed to submit order'], 500);
+            }
+
+            return $this->respond([
+                'status' => 'success', 
+                'message' => 'Order submitted successfully! Please wait for staff approval.',
+                'order_id' => $txnId
+            ]);
 
             $db->transComplete();
 
@@ -178,10 +169,12 @@ class ApiController extends ResourceController
                 throw new \Exception('Transaction failed to commit order.');
             }
 
-            // 3. Email Notification (Optional/Best Effort)
+            // 3. Email Notification (Handled client-side via EmailJS)
+            /*
             if (!empty($json->customer_email)) {
                 $this->sendOrderEmail($txnId, $json, $totalAmount);
             }
+            */
 
             return $this->respond([
                 'status'     => 'success', 
@@ -197,6 +190,7 @@ class ApiController extends ResourceController
 
     private function sendOrderEmail($txnId, $json, $totalAmount)
     {
+        /*
         try {
             $email = \Config\Services::email();
             $email->setTo($json->customer_email);
@@ -220,6 +214,7 @@ class ApiController extends ResourceController
         } catch (\Exception $e) {
             log_message('error', 'API Order Email Error: ' . $e->getMessage());
         }
+        */
     }
 
     public function getPendingOrders()

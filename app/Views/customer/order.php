@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Poppins Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="<?= base_url('public/js/emailjs-helper.js') ?>"></script>
     <style>
         :root {
             --primary: #4e73df;
@@ -990,7 +993,14 @@
             if (existingItem) {
                 existingItem.qty += modalQuantity;
             } else {
-                cart.push({ id: cartItemId, name: fullName, price: activeVariation.price, qty: modalQuantity });
+                cart.push({ 
+                    id: cartItemId, 
+                    productId: activeProduct.id,
+                    variation: activeVariation.id,
+                    name: fullName, 
+                    price: activeVariation.price, 
+                    qty: modalQuantity 
+                });
             }
 
             renderCart();
@@ -1076,17 +1086,17 @@
                 const itemTotal = item.price * item.qty;
                 total += itemTotal;
                 
-                // Try to find image and variation from product ID (format: "productId-variationId")
-                const [pId, vId] = item.id.split('-');
+                // Use productId and variation from the item object
+                const pId = item.productId;
                 const product = products.find(p => p.id == pId);
                 const imgPath = (product && product.image) ? `<?= base_url('public/Images/') ?>${product.image}` : `<?= base_url('public/Images/default.jpg') ?>`;
                 
                 // Parse name into Base Name and Variation (if any)
                 let baseName = item.name;
-                let varName = '';
+                let varName = item.variation && item.variation !== 'Regular' ? item.variation : '';
                 if (item.name.includes('(')) {
                     baseName = item.name.split('(')[0].trim();
-                    varName = item.name.split('(')[1].replace(')', '').trim();
+                    if (!varName) varName = item.name.split('(')[1].replace(')', '').trim();
                 }
 
                 list.innerHTML += `
@@ -1132,7 +1142,13 @@
                 customer_name: name,
                 customer_phone: phone,
                 customer_email: email,
-                items: cart
+                items: cart.map(item => ({
+                    id: item.productId,
+                    variation: item.variation,
+                    qty: item.qty,
+                    price: item.price,
+                    name: item.name
+                }))
             };
 
             fetch('<?= site_url("api/submit-order") ?>', {
@@ -1148,10 +1164,58 @@
                 btn.disabled = false;
 
                 if (data.status === 'success') {
-                    alert(`Success! Thank you ${name}, your order has been placed.\nYour Order ID is: ${data.order_id}`);
+                    // Create Order Summary for Alert
+                    const itemsSummary = cart.map(item => `${item.name} x ${item.qty}`).join('\n');
+                    const orderSummary = `Success! Thank you ${name}.\n\nOrder ID: ${data.order_id}\n\nItems:\n${itemsSummary}\n\nTotal: ${document.getElementById('chkTotal').innerText}\n\nA copy has been sent to ${email}.`;
+                    
+                    alert(orderSummary);
+                    
+                    closeCheckout();
+
+                    // Send EmailJS Confirmation
+                    try {
+                        const itemsHtml = cart.map(item => `
+                            <tr>
+                                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td>
+                                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">₱${(item.price * item.qty).toFixed(2)}</td>
+                            </tr>
+                        `).join('');
+                        
+                        const totalAmount = document.getElementById('chkTotal').innerText;
+                        const orderTable = `
+                            <table style="width: 100%; border-collapse: collapse; font-family: sans-serif;">
+                                <thead style="background: #f8f9fc;">
+                                    <tr>
+                                        <th style="padding: 10px; text-align: left;">Item</th>
+                                        <th style="padding: 10px; text-align: center;">Qty</th>
+                                        <th style="padding: 10px; text-align: right;">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${itemsHtml}</tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2" style="padding: 10px; text-align: right; font-weight: bold;">Total Due:</td>
+                                        <td style="padding: 10px; text-align: right; font-weight: bold; color: #1cc88a;">${totalAmount}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        `;
+                        
+                        sendHalimawEmail({
+                            customer_email: email,
+                            customer_name: name,
+                            order_id: data.order_id,
+                            order_items_html: orderTable,
+                            order_total: totalAmount,
+                            type: 'Confirmation'
+                        });
+                    } catch (e) {
+                        console.error("EmailJS error:", e);
+                    }
+                    
                     cart = [];
                     renderCart();
-                    closeCheckout();
                     
                     // Clear form
                     document.getElementById('chkName').value = '';

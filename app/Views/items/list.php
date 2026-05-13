@@ -105,19 +105,49 @@
             min-width: 0;
         }
         #sidebar .navbar-brand {
-            padding: 1.25rem 1.5rem;
+            padding: 1.25rem 0.75rem;
             font-size: 1.15rem;
-            font-weight: 700;
+            font-weight: 800;
             color: white;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            justify-content: center;
+            gap: 0.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
         }
         #sidebar .navbar-brand img {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px !important;
+            background-color: white;
+            padding: 6px;
+            object-fit: contain;
+        }
+
+        #sidebar .sidebar-brand-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            line-height: 1.1;
+        }
+
+        #sidebar .sidebar-brand-text .main-text {
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+        }
+
+        #sidebar .sidebar-brand-text .sub-text {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ffffff;
+            opacity: 0.9;
+            margin-top: 2px;
         }
 
 

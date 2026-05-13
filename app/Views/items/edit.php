@@ -537,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('.select2').select2({
         theme: 'bootstrap-5',
         width: '100%',
-        minimumResultsForSearch: Infinity // Hides the search box since there are only two categories
+        minimumResultsForSearch: -1 // Hides the search box since there are only two categories
     });
 
     // Mobile Menu

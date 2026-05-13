@@ -608,7 +608,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
     $('#returnsTable').DataTable({
@@ -619,22 +619,25 @@ $(document).ready(function() {
         }
     });
 
-    if ($('#returnItemModal').length) {
-        $('#returnItemModal').select2({
-            theme: 'bootstrap-5',
-            dropdownParent: $('#returnModal'),
-            width: '100%'
-        });
-    }
+    $('#returnModal').on('shown.bs.modal', function () {
+        if ($('#returnItemModal').length) {
+            $('#returnItemModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+        }
 
-    if ($('#returnReasonModal').length) {
-        $('#returnReasonModal').select2({
-            theme: 'bootstrap-5',
-            dropdownParent: $('#returnModal'),
-            width: '100%',
-            minimumResultsForSearch: Infinity
-        });
-    }
+        if ($('#returnReasonModal').length) {
+            $('#returnReasonModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+        }
+    });
 
     // RETURNS SUBMISSION
     const txnInput = document.getElementById('returnTransactionId');
@@ -784,6 +787,5 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </body>
 </html>

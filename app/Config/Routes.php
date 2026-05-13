@@ -112,6 +112,12 @@ $routes->group('admin', function ($routes) {
         $routes->post('users/update/(:num)', 'UserManagement::update/$1');
         $routes->match(['post', 'delete'], 'users/delete/(:num)', 'UserManagement::delete/$1');
     });
+
+    // Online Orders Management
+    $routes->get('online-orders', 'OnlineOrdersController::index');
+    $routes->get('online-orders/view/(:any)', 'OnlineOrdersController::view/$1');
+    $routes->get('online-orders/confirm/(:num)', 'OnlineOrdersController::confirm/$1');
+    $routes->get('online-orders/cancel/(:num)', 'OnlineOrdersController::cancel/$1');
 });
 
 // -------------------------------------------------------------

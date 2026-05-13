@@ -168,12 +168,35 @@ if (!function_exists('getProductSKU')) {
             white-space: nowrap;
         }
         #sidebar .navbar-brand img {
-            width: 45px;
-            height: 45px;
-            border-radius: 10px !important;
-            background-color: #f8f9fa;
-            padding: 3px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px !important;
+            background-color: white;
+            padding: 6px;
+            object-fit: contain;
+        }
+
+        #sidebar .sidebar-brand-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            line-height: 1.1;
+        }
+
+        #sidebar .sidebar-brand-text .main-text {
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+        }
+
+        #sidebar .sidebar-brand-text .sub-text {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ffffff;
+            opacity: 0.9;
+            margin-top: 2px;
         }
 
 
@@ -805,13 +828,14 @@ if (!function_exists('getProductSKU')) {
 
     <!-- SIDEBAR -->
     <nav id="sidebar">
-        <a class="navbar-brand" href="#">
-            <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo">
+        <a class="navbar-brand" href="<?= site_url('user/dashboard') ?>">
+            <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Logo">
             <div class="sidebar-brand-text">
-                HALIMAW POS<br>
-                <small style="font-size: 0.65rem; opacity: 0.8; font-weight: 600;">INVENTORY SYSTEM</small>
+                <span class="main-text">HALIMAW POS</span>
+                <span class="sub-text">INVENTORY SYSTEM</span>
             </div>
-        </a>        <ul class="nav flex-column px-2 mt-3">
+        </a>
+        <ul class="nav flex-column px-2 mt-3">
             <li class="nav-item">
                 <a class="nav-link <?= isActive(['user/dashboard', '', 'dashboard']) ?>" href="<?= site_url('user/dashboard') ?>">
                     <i class="bi bi-house-door"></i> Dashboard
@@ -1280,12 +1304,18 @@ if (!function_exists('getProductSKU')) {
     </div>
     </div>
 
-    <!-- CUSTOMER RETURN MODAL -->
-    <div class="modal fade" id="returnModal" tabindex="-1" aria-hidden="true">
+    <!-- ✅ Customer Return Modal -->
+    <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
+<<<<<<< Updated upstream
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
                 <div class="modal-header p-3 border-0 position-relative" style="background-color: #2c3e50; border-top-left-radius: 12px; border-top-right-radius: 12px;">
                     <h5 class="modal-title fw-semibold text-white w-100 text-center" style="font-size: 1.15rem;">
+=======
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header p-3 border-0 position-relative" style="background-color: #2c3e50; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h5 class="modal-title fw-semibold text-white w-100 text-center" id="returnModalLabel" style="font-size: 1.15rem;">
+>>>>>>> Stashed changes
                         <i class="bi bi-arrow-return-left me-2"></i>Process Customer Return
                     </h5>
                     <button type="button" class="btn-close btn-close-white position-absolute top-50 end-0 translate-middle-y me-3" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1294,6 +1324,7 @@ if (!function_exists('getProductSKU')) {
                     <form id="returnFormModal">
                         <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" id="returnCsrf">
                         
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
@@ -1325,11 +1356,26 @@ if (!function_exists('getProductSKU')) {
                                 </select>
                             </div>
 =======
+=======
+>>>>>>> Stashed changes
                         <div class="mb-4">
                             <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
                                 <i class="bi bi-receipt me-1"></i> Transaction ID
                             </label>
+<<<<<<< Updated upstream
                             <input type="text" id="returnTransactionId" class="form-control form-control-lg" required placeholder="Enter Transaction ID (e.g. TXN-12345 or OUT-6789)" style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+>>>>>>> Stashed changes
+=======
+                            <input type="text" class="form-control form-control-lg" id="returnTransactionId" placeholder="Enter Transaction ID (e.g. TXN-12345)" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                <i class="bi bi-box me-1"></i> Select Item
+                            </label>
+                            <select class="form-select form-select-lg" id="returnItemModal" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                                <option value="" disabled selected>— Enter Transaction ID first —</option>
+                            </select>
 >>>>>>> Stashed changes
                         </div>
 
@@ -1344,6 +1390,7 @@ if (!function_exists('getProductSKU')) {
                         
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
+<<<<<<< Updated upstream
                                 <label for="returnQtyModal" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
                                     <i class="bi bi-hash me-1"></i> Quantity
                                 </label>
@@ -1360,17 +1407,35 @@ if (!function_exists('getProductSKU')) {
                                     <option value="Change of Mind">Change of Mind</option>
                                     <option value="Quality Issue">Quality Issue</option>
                                     <option value="Damaged Item">Damaged Item</option>
+=======
+                                <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                    <i class="bi bi-hash me-1"></i> Quantity
+                                </label>
+                                <input type="number" class="form-control form-control-lg" id="returnQtyModal" min="1" placeholder="Enter amount" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> Reason for Return
+                                </label>
+                                <select class="form-select form-select-lg" id="returnReasonModal" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                                    <option value="" disabled selected>— Select Reason —</option>
+                                    <option value="Wrong Item Served">Wrong Item Served</option>
+                                    <option value="Customer Changed Mind">Customer Changed Mind</option>
+                                    <option value="Item Damaged / Bad Quality">Item Damaged / Bad Quality</option>
+                                    <option value="Foreign Object Found">Foreign Object Found</option>
+                                    <option value="Under-cooked / Spoilage">Under-cooked / Spoilage</option>
+>>>>>>> Stashed changes
                                 </select>
                             </div>
                         </div>
 
                         <!-- PROOF OF EVIDENCE -->
                         <div class="mb-4">
-                            <label class="form-label fw-semibold text-dark mb-2">
+                            <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
                                 <i class="bi bi-camera me-1 text-primary"></i> Proof of Evidence (Optional)
                             </label>
-                            <input type="file" class="form-control form-control-lg shadow-sm" id="returnEvidenceModal" accept="image/*,video/*" style="border-radius: 8px;">
-                            <small class="text-muted mt-1 d-block"><i class="bi bi-info-circle me-1"></i>Attach photo or video showing the item's condition.</small>
+                            <input type="file" class="form-control form-control-lg" id="returnEvidenceModal" accept="image/*,video/*" style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                            <small class="text-muted mt-1 d-block" style="font-size: 0.85rem;"><i class="bi bi-info-circle me-1"></i>Attach photo or video showing the item's condition.</small>
                         </div>
 
                         <!-- CONDITION EVALUATION -->
@@ -1445,7 +1510,8 @@ if (!function_exists('getProductSKU')) {
             $('#requestItemModal').select2({
                 theme: 'bootstrap-5',
                 dropdownParent: $('#helpModal'),
-                width: '100%'
+                width: '100%',
+                minimumResultsForSearch: -1
             });
         }
         
@@ -1453,7 +1519,8 @@ if (!function_exists('getProductSKU')) {
             $('#pullOutItemModal').select2({
                 theme: 'bootstrap-5',
                 dropdownParent: $('#pullOutModal'),
-                width: '100%'
+                width: '100%',
+                minimumResultsForSearch: -1
             });
         }
         
@@ -1462,7 +1529,7 @@ if (!function_exists('getProductSKU')) {
                 theme: 'bootstrap-5',
                 dropdownParent: $('#helpModal'),
                 width: '100%',
-                minimumResultsForSearch: Infinity
+                minimumResultsForSearch: -1
             });
         }
 
@@ -1471,7 +1538,7 @@ if (!function_exists('getProductSKU')) {
                 theme: 'bootstrap-5',
                 dropdownParent: $('#pullOutModal'),
                 width: '100%',
-                minimumResultsForSearch: Infinity
+                minimumResultsForSearch: -1
             });
         }
         
@@ -1479,7 +1546,8 @@ if (!function_exists('getProductSKU')) {
             $('#returnItemModal').select2({
                 theme: 'bootstrap-5',
                 dropdownParent: $('#returnModal'),
-                width: '100%'
+                width: '100%',
+                minimumResultsForSearch: -1
             });
         }
 
@@ -1488,7 +1556,7 @@ if (!function_exists('getProductSKU')) {
                 theme: 'bootstrap-5',
                 dropdownParent: $('#returnModal'),
                 width: '100%',
-                minimumResultsForSearch: Infinity
+                minimumResultsForSearch: -1
             });
         }
 
@@ -1667,6 +1735,41 @@ if (!function_exists('getProductSKU')) {
                 }
             });
         }
+<<<<<<< Updated upstream
+=======
+        if ($('#returnItemModal').length) {
+            $('#returnItemModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+        }
+
+        if ($('#returnReasonModal').length) {
+            $('#returnReasonModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+        }
+
+        $('#returnModal').on('shown.bs.modal', function () {
+            $('#returnItemModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+            $('#returnReasonModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+        });
+>>>>>>> Stashed changes
 
         // ✅ RETURNS SUBMISSION
         const txnInput = document.getElementById('returnTransactionId');
@@ -1707,6 +1810,10 @@ if (!function_exists('getProductSKU')) {
                     } else {
                         alert('No items found for this Transaction ID. Please verify the ID.');
                         itemSelect.empty().append('<option value="" disabled selected>— No items found —</option>').trigger('change');
+<<<<<<< Updated upstream
+=======
+                        lastFetchedTxn = '';
+>>>>>>> Stashed changes
                     }
                 } catch (err) {
                     console.error(err);
@@ -1785,6 +1892,7 @@ if (!function_exists('getProductSKU')) {
                         alert("Return processed successfully: " + (data.message || ''));
                         returnForm.reset();
                         bootstrap.Modal.getInstance(document.getElementById("returnModal")).hide();
+                        location.reload();
                     } else {
                         alert("Error: " + (data.message || 'Failed'));
                         submitBtn.disabled = false;

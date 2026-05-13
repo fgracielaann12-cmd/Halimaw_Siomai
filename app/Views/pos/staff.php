@@ -58,6 +58,10 @@ if (!function_exists('getProductSKU')) {
     <!-- Poppins Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="<?= csrf_token() ?>">
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="<?= base_url('public/js/emailjs-helper.js') ?>"></script>
+
     <style>
         :root {
             --sidebar-width: 260px;
@@ -161,12 +165,35 @@ if (!function_exists('getProductSKU')) {
         }
 
         #sidebar .navbar-brand img {
-            width: 45px;
-            height: 45px;
-            border-radius: 10px !important;
-            background-color: #f8f9fa;
-            padding: 3px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px !important;
+            background-color: white;
+            padding: 6px;
+            object-fit: contain;
+        }
+
+        #sidebar .sidebar-brand-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            line-height: 1.1;
+        }
+
+        #sidebar .sidebar-brand-text .main-text {
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+        }
+
+        #sidebar .sidebar-brand-text .sub-text {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ffffff;
+            opacity: 0.9;
+            margin-top: 2px;
         }
 
 
@@ -1299,9 +1326,12 @@ if (!function_exists('getProductSKU')) {
 
     <!-- SIDEBAR -->
     <nav id="sidebar">
-        <a class="navbar-brand" href="#">
-            <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo">
-            <span>Halimaw POS Inventory System</span>
+        <a class="navbar-brand" href="<?= site_url('user/dashboard') ?>">
+            <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Logo">
+            <div class="sidebar-brand-text">
+                <span class="main-text">HALIMAW POS</span>
+                <span class="sub-text">INVENTORY SYSTEM</span>
+            </div>
         </a>
         <ul class="nav flex-column px-2 mt-3">
            <li class="nav-item">
@@ -1881,42 +1911,42 @@ if (!function_exists('getProductSKU')) {
                 </div>
                 <div class="modal-body p-4 bg-white">
                     <form id="returnFormModal">
-                        <?= csrf_field() ?>
+                        <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" id="returnCsrf">
                         
                         <div class="mb-4">
-                            <label for="returnTransactionId" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                            <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
                                 <i class="bi bi-receipt me-1"></i> Transaction ID
                             </label>
-                            <input type="text" id="returnTransactionId" class="form-control form-control-lg" required placeholder="Enter Transaction ID (e.g. TXN-12345 or OUT-6789)" style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                            <input type="text" class="form-control form-control-lg" id="returnTransactionId" placeholder="Enter Transaction ID (e.g. TXN-12345)" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
                         </div>
 
                         <div class="mb-4">
-                            <label for="returnItemModal" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                            <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
                                 <i class="bi bi-box me-1"></i> Select Item
                             </label>
-                            <select id="returnItemModal" class="form-select form-select-lg" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                            <select class="form-select form-select-lg" id="returnItemModal" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
                                 <option value="" disabled selected>— Enter Transaction ID first —</option>
                             </select>
                         </div>
-                        
+
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
-                                <label for="returnQtyModal" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
                                     <i class="bi bi-hash me-1"></i> Quantity
                                 </label>
-                                <input type="number" id="returnQtyModal" class="form-control form-control-lg" min="1" placeholder="Enter amount" required
-                                       style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                                <input type="number" class="form-control form-control-lg" id="returnQtyModal" min="1" placeholder="Enter amount" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
                             </div>
                             <div class="col-md-6">
-                                <label for="returnReasonModal" class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
+                                <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">
                                     <i class="bi bi-exclamation-triangle me-1"></i> Reason for Return
                                 </label>
-                                <select id="returnReasonModal" class="form-select form-select-lg" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
+                                <select class="form-select form-select-lg" id="returnReasonModal" required style="border-radius: 8px; border: 1px solid #ced4da; font-size: 1rem; box-shadow: none;">
                                     <option value="" disabled selected>— Select Reason —</option>
-                                    <option value="Wrong Order">Wrong Order</option>
-                                    <option value="Change of Mind">Change of Mind</option>
-                                    <option value="Quality Issue">Quality Issue</option>
-                                    <option value="Damaged Item">Damaged Item</option>
+                                    <option value="Wrong Item Served">Wrong Item Served</option>
+                                    <option value="Customer Changed Mind">Customer Changed Mind</option>
+                                    <option value="Item Damaged / Bad Quality">Item Damaged / Bad Quality</option>
+                                    <option value="Foreign Object Found">Foreign Object Found</option>
+                                    <option value="Under-cooked / Spoilage">Under-cooked / Spoilage</option>
                                 </select>
                             </div>
                         </div>
@@ -1930,6 +1960,7 @@ if (!function_exists('getProductSKU')) {
                             <small class="text-muted mt-1 d-block" style="font-size: 0.85rem;"><i class="bi bi-info-circle me-1"></i>Attach photo or video showing the item's condition.</small>
                         </div>
 
+                        <!-- CONDITION EVALUATION -->
                         <div class="mb-4">
                             <label class="form-label fw-bold text-dark mb-3 d-block" style="font-size: 0.95rem;">
                                 <i class="bi bi-check-circle me-1"></i> Item Condition Evaluation
@@ -2025,7 +2056,8 @@ if (!function_exists('getProductSKU')) {
             $('#requestItemModal').select2({
                 theme: 'bootstrap-5',
                 dropdownParent: $('#helpModal'),
-                width: '100%'
+                width: '100%',
+                minimumResultsForSearch: -1
             });
         }
 
@@ -2034,7 +2066,7 @@ if (!function_exists('getProductSKU')) {
                 theme: 'bootstrap-5',
                 dropdownParent: $('#helpModal'),
                 width: '100%',
-                minimumResultsForSearch: Infinity // hide search for small lists
+                minimumResultsForSearch: -1 // hide search for small lists
             });
         }
 
@@ -2042,7 +2074,8 @@ if (!function_exists('getProductSKU')) {
             $('#pullOutItemModal').select2({
                 theme: 'bootstrap-5',
                 dropdownParent: $('#pullOutModal'),
-                width: '100%'
+                width: '100%',
+                minimumResultsForSearch: -1
             });
         }
 
@@ -2051,7 +2084,7 @@ if (!function_exists('getProductSKU')) {
                 theme: 'bootstrap-5',
                 dropdownParent: $('#pullOutModal'),
                 width: '100%',
-                minimumResultsForSearch: Infinity
+                minimumResultsForSearch: -1
             });
         }
 
@@ -2059,7 +2092,8 @@ if (!function_exists('getProductSKU')) {
             $('#returnItemModal').select2({
                 theme: 'bootstrap-5',
                 dropdownParent: $('#returnModal'),
-                width: '100%'
+                width: '100%',
+                minimumResultsForSearch: -1
             });
         }
 
@@ -2068,9 +2102,24 @@ if (!function_exists('getProductSKU')) {
                 theme: 'bootstrap-5',
                 dropdownParent: $('#returnModal'),
                 width: '100%',
-                minimumResultsForSearch: Infinity
+                minimumResultsForSearch: -1
             });
         }
+
+        $('#returnModal').on('shown.bs.modal', function () {
+            $('#returnItemModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+            $('#returnReasonModal').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#returnModal'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+        });
 
 
 
@@ -2240,7 +2289,7 @@ if (!function_exists('getProductSKU')) {
                         method: "POST",
                         headers: {
                             "X-Requested-With": "XMLHttpRequest",
-                            "X-CSRF-TOKEN": document.querySelector('input[name="<?= csrf_token() ?>"]').value
+                            "X-CSRF-TOKEN": document.getElementById("returnCsrf").value
                         },
                         body: formData
                     });
@@ -2471,6 +2520,7 @@ if (!function_exists('getProductSKU')) {
             }
             input.value = val;
         }
+
 
         window.smAddToCart = function() {
             if (!currentModalItem) return;
@@ -2719,7 +2769,8 @@ if (!function_exists('getProductSKU')) {
                         customer_name: customerName,
                         customer_email: customerEmail,
                         apply_vat: applyVatTax.checked,
-                        vat_type: vatIncludedRadio.checked ? 'included' : 'excluded'
+                        vat_type: vatIncludedRadio.checked ? 'included' : 'excluded',
+                        online_order_id: currentOnlineOrder // Link to the online order
                     })
                 });
 
@@ -2727,7 +2778,29 @@ if (!function_exists('getProductSKU')) {
                 if (data.success) {
                     showNotification('success', `Sale completed! Total: ₱${data.total.toFixed(2)} (${selectedPaymentMethod.toUpperCase()})`);
                     cartItems.length = 0;
+                    currentOnlineOrder = null;
+                    pendingOnlineCustomerName = '';
+                    pendingOnlineCustomerEmail = '';
                     updateCart();
+
+                    // Send Electronic Receipt via EmailJS
+                    if (customerEmail) {
+                        try {
+                            const itemsHtml = cartItems.map(item => `<li>${item.name} (${item.pack || 'Standard'}) x ${item.qty} - ₱${(item.price * item.qty).toFixed(2)}</li>`).join('');
+                            
+                            sendHalimawEmail({
+                                customer_email: customerEmail,
+                                customer_name: customerName || 'Valued Customer',
+                                order_id: 'TXN-' + new Date().getTime(), // Fallback if no ID returned
+                                order_items_html: `<ul>${itemsHtml}</ul>`,
+                                order_total: '₱' + data.total.toFixed(2),
+                                payment_method: selectedPaymentMethod,
+                                type: 'Receipt'
+                            });
+                        } catch (e) {
+                            console.error("EmailJS POS error:", e);
+                        }
+                    }
                     
                     // Hide Modal
                     const modalEl = document.getElementById('checkoutReviewModal');
@@ -2911,6 +2984,6 @@ if (!function_exists('getProductSKU')) {
         fetchOnlineOrders(); // Initial fetch
     });
     </script>
-<script src="<?= base_url('js/table-pagination.js') ?>"></script>
+    <script src="<?= base_url('js/table-pagination.js') ?>"></script>
 </body>
 </html>

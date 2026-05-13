@@ -81,12 +81,35 @@ $expiredNotif = $db->table('items')
 }
 
 #sidebar .navbar-brand img {
-    width: 45px;
-    height: 45px;
-    border-radius: 10px !important;
-    background-color: #f8f9fa;
-    padding: 3px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 50px;
+    height: 50px;
+    border-radius: 12px !important;
+    background-color: white;
+    padding: 6px;
+    object-fit: contain;
+}
+
+#sidebar .sidebar-brand-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.1;
+}
+
+#sidebar .sidebar-brand-text .main-text {
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+}
+
+#sidebar .sidebar-brand-text .sub-text {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ffffff;
+    opacity: 0.9;
+    margin-top: 2px;
 }
 
 /* Prevent text wrapping overlapping issues in sidebar navigation */
@@ -164,11 +187,11 @@ $expiredNotif = $db->table('items')
 
 <!-- SIDEBAR -->
 <nav id="sidebar">
-    <a class="navbar-brand" href="<?= site_url('items') ?>">
-        <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Inventa Logo">
+    <a class="navbar-brand" href="<?= site_url('admin/dashboard') ?>">
+        <img src="<?= base_url('public/Images/Inventa.png') ?>" alt="Logo">
         <div class="sidebar-brand-text">
-            HALIMAW POS<br>
-            <small style="font-size: 0.65rem; opacity: 0.8; font-weight: 600;">INVENTORY SYSTEM</small>
+            <span class="main-text">HALIMAW POS</span>
+            <span class="sub-text">INVENTORY SYSTEM</span>
         </div>
     </a>
     <ul class="nav flex-column px-2 mt-3">

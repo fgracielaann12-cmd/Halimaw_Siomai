@@ -168,6 +168,7 @@ class PosController extends BaseController
         $customerEmail = $input['customer_email'] ?? null;
         $applyVat = $input['apply_vat'] ?? false;
         $vatType = $input['vat_type'] ?? 'included';
+        $onlineOrderId = $input['online_order_id'] ?? null;
 
         if (!$cart) {
             $cart = $this->request->getPost('cart');
@@ -285,6 +286,12 @@ class PosController extends BaseController
             if (!empty($stockUpdates)) {
                 $itemModel->updateBatch(array_values($stockUpdates), 'id');
             }
+            
+            // D. Link and Complete Online Order
+            if ($onlineOrderId) {
+                $onlineOrderModel = new \App\Models\OnlineOrderModel();
+                $onlineOrderModel->where('order_id', $onlineOrderId)->update(null, ['status' => 'Completed']);
+            }
 
             $db->transComplete();
 
@@ -293,7 +300,8 @@ class PosController extends BaseController
                 throw new \Exception("Database transaction failed to complete.");
             }
 
-            // 3. EMAIL RECEIPT LOGIC (POST-COMMIT)
+            // 3. EMAIL RECEIPT LOGIC (Moved to Client-side via EmailJS)
+            /*
             $emailError = '';
             if (!empty($customerEmail)) {
                 try {
@@ -325,6 +333,7 @@ class PosController extends BaseController
                     $emailError = $e->getMessage();
                 }
             }
+            */
 
             $responseMessage = 'Sale completed successfully!';
             if (!empty($emailError)) $responseMessage .= " [Email failed: " . strip_tags($emailError) . "]";

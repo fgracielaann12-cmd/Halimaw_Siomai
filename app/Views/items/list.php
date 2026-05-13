@@ -189,10 +189,11 @@
             top: 0;
             z-index: 1000;
             background: white;
-            padding: 12px 20px;
+            height: 60px;
+            padding: 0 20px;
             border-radius: 0 0 var(--border-radius) var(--border-radius);
             box-shadow: var(--card-shadow);
-            margin: 0 0 15px 0 !important;
+            margin: 0 0 20px 0 !important;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -202,6 +203,8 @@
             font-weight: 600;
             color: var(--dark);
             font-size: 1.1rem;
+            display: flex;
+            align-items: center;
         }
 
         /* USER PROFILE */
@@ -279,6 +282,8 @@
 
         /* Responsive Table */
         .table-responsive-custom {
+            display: block;
+            width: 100%;
             overflow-x: auto;
             overflow-y: auto;
             max-height: 65vh;
@@ -296,9 +301,22 @@
         }
 
         @media (max-width: 768px) {
-            .hide-mobile { display: none; }
+            .hide-mobile { display: none !important; }
             .summary-card h3 { font-size: 1.5rem; }
             .summary-card h6 { font-size: 0.8rem; }
+            .main-content { 
+                margin-left: 0 !important; 
+                width: 100% !important;
+                box-sizing: border-box !important;
+                padding: 0 !important; 
+            }
+            .container {
+                padding: 15px !important;
+            }
+            .top-navbar {
+                border-radius: 0 !important;
+                margin-bottom: 15px !important;
+            }
             .controls-section {
                 flex-direction: column;
                 align-items: stretch;
@@ -306,6 +324,19 @@
             .controls-section > div {
                 width: 100%;
             }
+        }
+
+        /* --- UNIFIED TABLE SIZING --- */
+        .table, table {
+            font-size: 0.95rem !important;
+        }
+        .table th, .table td, table th, table td {
+            padding: 12px 15px !important;
+            vertical-align: middle !important;
+        }
+        @media (max-width: 991px) {
+            .table, table { font-size: 0.9rem !important; }
+            .table th, .table td, table th, table td { padding: 0.75rem 0.5rem !important; }
         }
 
         /* 🔽 Dropdown Slide Animation */
@@ -342,6 +373,7 @@
             transition: all 0.2s;
             margin-bottom: 20px;
             text-decoration: none;
+            white-space: nowrap !important;
         }
         .btn-add-new-item:hover {
             background: var(--primary-dark);
@@ -726,15 +758,17 @@ function getSku($name, $variation = '') {
 <div class="main-content">
     <?php
     $extra_buttons = '
-        <a href="' . site_url('items/add') . '" class="btn-add-new-item mb-0 shadow-sm" style="height: 40px; margin: 0; padding: 0 16px; display: flex; align-items: center;">
-            <i class="bi bi-plus-lg me-2"></i>Add New Item
+        <a href="' . site_url('items/add') . '" class="btn-add-new-item mb-0 shadow-sm" style="height: 40px; margin: 0; padding: 0 16px; display: flex; align-items: center; white-space: nowrap !important;">
+            <i class="bi bi-plus-lg me-1 me-md-2"></i>
+            <span class="d-none d-md-inline">Add New Item</span>
+            <span class="d-md-none">Add</span>
         </a>
         <button onclick="location.reload()" class="btn btn-light shadow-sm border" style="height: 40px; width: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px;" title="Refresh Table">
             <i class="bi bi-arrow-clockwise" style="font-size: 1.2rem; color: #3a3b45;"></i>
         </button>
     ';
     echo view('partials/admin_topbar', [
-        'title' => 'Admin Inventory',
+        'title' => '<span class="d-none d-sm-inline">Admin Inventory</span><span class="d-sm-none">Inventory</span>',
         'icon' => 'bi bi-box-seam',
         'extra_buttons' => $extra_buttons
     ]);
@@ -831,27 +865,7 @@ function getSku($name, $variation = '') {
             </div>
         </div>
 
-        <!-- Alerts -->
-        <?php if (!empty($lowStockItems)): ?>
-            <div class="floating-alert inventory-alert" id="lowStockAlert" onclick="showLowStockItems()">
-                <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
-                You have <?= count($lowStockItems) ?> item(s) running low on stock.
-                <span class="ms-2 text-decoration-underline" style="font-size: 0.85rem;">Click to view</span>
-            </div>
-            <div class="text-center mb-3">
-                <button id="showAllBtn" class="btn btn-outline-secondary btn-sm" style="display:none;" onclick="showAllItems()">Show All Items</button>
-            </div>
-        <?php endif; ?>
-
-        <?php if (!empty($expiringItems)): ?>
-            <a href="<?= site_url('items/expiring-soon') ?>" class="text-decoration-none">
-                <div class="floating-alert expiry-alert">
-                    <i class="bi bi-shield-exclamation me-2 fs-6"></i>
-                    You have <?= count($expiringItems) ?> item(s) expiring soon!
-                    <span class="ms-2 text-decoration-underline" style="font-size: 0.85rem;">View details</span>
-                </div>
-            </a>
-        <?php endif; ?>
+        <!-- Alerts Container spacing handled above -->
 
         <!-- Alerts Container spacing handled above -->
 
@@ -861,9 +875,9 @@ function getSku($name, $variation = '') {
             <table id="itemsTable" class="table table-bordered table-hover align-middle mb-0 text-center">
                 <thead>
                     <tr>
-                        <th class="text-center align-middle">Prod ID</th>
+                        <th class="text-center align-middle hide-mobile">Prod ID</th>
                         <th class="text-center align-middle">Name</th>
-                        <th class="text-center align-middle">SKU</th>
+                        <th class="text-center align-middle hide-mobile">SKU</th>
                         <th class="text-center align-middle">Price</th>
                         <th class="text-center align-middle">Quantity</th>
                         <th class="text-center align-middle hide-mobile">Value %</th>
@@ -928,9 +942,9 @@ function getSku($name, $variation = '') {
                         foreach ($sizes as $idx => $sz): 
                         ?>
                         <tr data-id="<?= $item['id'] ?>" data-low-stock="<?= ($sz['q'] <= 10) ? 'true' : 'false' ?>" <?= $idx > 0 ? 'style="border-top:1px dashed #dee2e6;"' : '' ?>>
-                            <td class="text-center align-middle"><?= esc($item['product_id']) ?><?= $sz['s'] ?></td>
+                            <td class="text-center align-middle hide-mobile"><?= esc($item['product_id']) ?><?= $sz['s'] ?></td>
                             <td class="text-center align-middle"><?= esc($item['name']) ?> <small class="text-muted">(<?= $sz['l'] ?>)</small></td>
-                            <td class="text-center align-middle"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?></td>
+                            <td class="text-center align-middle hide-mobile"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?></td>
                             <td class="text-center align-middle text-nowrap">₱<?= number_format($sz['p'], 2) ?></td>
                             <td class="text-center align-middle text-nowrap"><span><?= esc($sz['q']) ?></span> <small class="text-muted"><?= $sz['ql'] ?></small></td>
                             <td class="text-center align-middle hide-mobile">
@@ -986,6 +1000,7 @@ function getSku($name, $variation = '') {
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr data-id="<?= $item['id'] ?>" data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>">
+<<<<<<< Updated upstream
                             <td class="text-center align-middle"><?= esc($item['product_id']) ?></td>
                             <td class="text-center align-middle">
                                 <?= esc($item['name']) ?>
@@ -994,6 +1009,11 @@ function getSku($name, $variation = '') {
                                 <?php endif; ?>
                             </td>
                             <td class="text-center align-middle"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?></td>
+=======
+                            <td class="text-center align-middle hide-mobile"><?= esc($item['product_id']) ?></td>
+                            <td class="text-center align-middle"><?= esc($item['name']) ?></td>
+                            <td class="text-center align-middle hide-mobile"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?></td>
+>>>>>>> Stashed changes
                             <td class="text-center align-middle text-nowrap">₱<?= number_format($item['price'], 2) ?></td>
                             <td class="text-center align-middle text-nowrap"><span><?= esc($item['quantity']) ?></span><?php if (stripos($item['name'], 'burger patty') !== false): ?>&nbsp;<small class="text-muted">(6)</small><?php endif; ?></td>
                             <td class="text-center align-middle hide-mobile">
@@ -1162,6 +1182,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Handle URL filters (e.g. ?filter=low_stock)
+    const urlParams = new URLSearchParams(window.location.search);
+    const filter = urlParams.get('filter');
+    if (filter === 'low_stock') {
+        setTimeout(() => {
+            if (typeof showLowStockItems === 'function') showLowStockItems();
+        }, 300);
+    }
+
     // Quantity Modal
     function openQtyModal() {
         const row = this.closest("tr");
@@ -1316,15 +1345,6 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => alert.remove(), 400);
         }, 5000);
         alert.querySelector('.close-alert')?.addEventListener('click', () => alert.remove());
-    });
-
-    // Floating Auto-dismiss Alerts
-    document.querySelectorAll('.floating-alert').forEach((alert, i) => {
-        setTimeout(() => alert.classList.add('show'), 100 + i * 200);
-        setTimeout(() => {
-            alert.classList.remove('show');
-            setTimeout(() => alert.remove(), 400); // Wait for transition
-        }, 4000 + i * 500);
     });
 
     window.showItemInfo = function(product_id, name, sku, category, qty, price, date_entry, exp_date, status_html) {

@@ -115,6 +115,7 @@ Insert success: ID 35
 --- submitStockRequest POST DATA ---
 Array
 (
+<<<<<<< HEAD
     [csrf_test_name] => 6fc1bf4f03535e9092d1e97738f7576d
     [item_id] => 5615
     [action] => add
@@ -124,6 +125,7 @@ Array
 
 userId: 21
 Insert success: ID 31
+<<<<<<< Updated upstream
 --- submitStockRequest POST DATA ---
 Array
 (
@@ -136,3 +138,39 @@ Array
 
 userId: 5
 Insert success: ID 29
+=======
+=======
+    [csrf_test_name] => 9658529089b3410c332ec72caadbb254
+    [item_id] => 5615
+    [action] => add
+    [quantity] => 10
+    [reason] => [Variation: Large] sample
+)
+
+userId: 19
+Insert success: ID 36
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 9658529089b3410c332ec72caadbb254
+    [item_id] => 5619
+    [action] => add
+    [quantity] => 10
+    [reason] => [Variation: Small] sampleee
+)
+
+userId: 19
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 090b63bb07af8d897b13462e2b8bee4c
+    [item_id] => 5621
+    [action] => add
+    [quantity] => 10
+    [reason] => sampleeee
+)
+
+userId: 19
+Insert success: ID 37
+>>>>>>> d593f3b68d7012d8920aeb94a5e238f6a0fec424
+>>>>>>> Stashed changes

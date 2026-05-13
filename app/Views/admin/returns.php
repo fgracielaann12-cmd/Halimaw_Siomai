@@ -277,6 +277,46 @@
     #returnsTable tbody tr:hover {
         background-color: #f8f9ff;
     }
+
+    /* Unified Process Return Button Design */
+    .btn-process-return {
+        background-color: #4e73df;
+        color: white;
+        border: none;
+        border-radius: 12px !important;
+        padding: 0 20px;
+        height: 40px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 4px 12px rgba(78, 115, 223, 0.2);
+        cursor: pointer;
+        text-decoration: none;
+        margin: 0;
+    }
+    .btn-process-return:hover {
+        background-color: #2e59d9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(78, 115, 223, 0.3);
+        color: white;
+    }
+    .btn-process-return i {
+        font-size: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+        .btn-process-return {
+            height: 36px;
+            padding: 0 16px;
+            font-size: 0.85rem;
+        }
+        .btn-process-return i {
+            font-size: 1.1rem;
+        }
+    }
 </style>
 
     
@@ -312,8 +352,8 @@
 <div class="main-content">
     <?php
     $extra_buttons = '
-        <button class="btn btn-primary shadow-sm btn-sm px-3 py-2" data-bs-toggle="modal" data-bs-target="#returnModal" style="border-radius: 8px !important;">
-            <i class="bi bi-plus-circle me-1"></i> Process Return
+        <button class="btn-process-return shadow-sm" data-bs-toggle="modal" data-bs-target="#returnModal">
+            <i class="bi bi-plus me-2"></i>Process Return
         </button>
     ';
     echo view('partials/admin_topbar', [

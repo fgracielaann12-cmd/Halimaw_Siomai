@@ -329,6 +329,45 @@
             color: var(--success);
         }
 
+        /* Unified Export Button Design */
+        .btn-export-logs {
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            border-radius: 12px !important;
+            padding: 0 20px;
+            height: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 12px rgba(78, 115, 223, 0.2);
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-export-logs:hover {
+            background-color: #2e59d9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(78, 115, 223, 0.3);
+            color: white;
+        }
+        .btn-export-logs i {
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .btn-export-logs {
+                height: 36px;
+                padding: 0 16px;
+                font-size: 0.85rem;
+            }
+            .btn-export-logs i {
+                font-size: 1.1rem;
+            }
+        }
+
         /* ALERTS */
         .alert {
             border-radius: 5px;
@@ -500,8 +539,8 @@
 <div class="main-content">
     <?php
     $extra_buttons = '
-        <a href="' . base_url('items/export-logs-csv') . '" class="btn btn-primary shadow-sm px-3 py-2 fw-semibold" style="transition: all 0.3s ease; border-radius: 8px !important; font-size: 0.9rem; display: flex; align-items: center;">
-            <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Logs (CSV)
+        <a href="' . base_url('items/export-logs-csv') . '" class="btn-export-logs shadow-sm">
+            <i class="bi bi-file-earmark-arrow-down me-2"></i>Export Logs (CSV)
         </a>
     ';
     echo view('partials/admin_topbar', [

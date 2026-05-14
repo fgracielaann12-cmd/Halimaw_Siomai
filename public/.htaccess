@@ -6,7 +6,7 @@ Options -Indexes
     RewriteEngine On
 
     # If you installed CodeIgniter in a subfolder, adjust this:
-    RewriteBase /
+    # RewriteBase /
 
     # Remove trailing slashes
     RewriteCond %{REQUEST_FILENAME} !-d

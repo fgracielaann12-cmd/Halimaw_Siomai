@@ -16,13 +16,13 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    public string $baseURL = 'http://localhost/Halimaw_Siomai/';
+    public string $baseURL = 'http://192.168.100.200/Halimaw_Siomai/public/';
 
     public function __construct()
     {
         parent::__construct();
         if (isset($_SERVER['HTTP_HOST'])) {
-            $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http');
+            $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
             $dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
             if ($dir === '/') {
                 $dir = '';
@@ -42,7 +42,7 @@ class App extends BaseConfig
      *
      * @var list<string>
      */
-    public array $allowedHostnames = [];
+    public array $allowedHostnames = ['192.168.100.200'];
 
     /**
      * --------------------------------------------------------------------------
@@ -53,7 +53,7 @@ class App extends BaseConfig
      * something else. If you have configured your web server to remove this file
      * from your site URIs, set this variable to an empty string.
      */
-    public string $indexPage = 'index.php';
+    public string $indexPage = '';
 
     /**
      * --------------------------------------------------------------------------

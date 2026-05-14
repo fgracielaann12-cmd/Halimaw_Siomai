@@ -60,7 +60,7 @@ if (!function_exists('getProductSKU')) {
     <meta name="csrf-token" content="<?= csrf_token() ?>">
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script src="<?= base_url('public/js/emailjs-helper.js') ?>"></script>
+    <script src="<?= base_url('public/js/emailjs-helper.js') ?>?v=<?= time() ?>"></script>
 
     <style>
         :root {
@@ -1902,7 +1902,7 @@ if (!function_exists('getProductSKU')) {
     <!-- ✅ Customer Return Modal -->
     <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
                 <div class="modal-header p-3 border-0 position-relative" style="background-color: #2c3e50; border-top-left-radius: 12px; border-top-right-radius: 12px;">
                     <h5 class="modal-title fw-semibold text-white w-100 text-center" id="returnModalLabel" style="font-size: 1.15rem;">
                         <i class="bi bi-arrow-return-left me-2"></i>Process Customer Return
@@ -2777,30 +2777,44 @@ if (!function_exists('getProductSKU')) {
                 const data = await response.json();
                 if (data.success) {
                     showNotification('success', `Sale completed! Total: ₱${data.total.toFixed(2)} (${selectedPaymentMethod.toUpperCase()})`);
-                    cartItems.length = 0;
-                    currentOnlineOrder = null;
-                    pendingOnlineCustomerName = '';
-                    pendingOnlineCustomerEmail = '';
-                    updateCart();
 
                     // Send Electronic Receipt via EmailJS
                     if (customerEmail) {
                         try {
-                            const itemsHtml = cartItems.map(item => `<li>${item.name} (${item.pack || 'Standard'}) x ${item.qty} - ₱${(item.price * item.qty).toFixed(2)}</li>`).join('');
-                            
-                            sendHalimawEmail({
+                            // Build a proper receipt BEFORE clearing cart — responsive card layout
+                            const receiptCards = cartItems.map(item => {
+                                const itemTotal = (item.price * item.qty).toFixed(2);
+                                return `<div style="padding:14px 0; border-bottom:1px solid #e2e8f0;">
+                                    <div style="font-weight:600; color:#333; font-size:15px; margin-bottom:4px;">${item.name}</div>
+                                    <div style="color:#858796; font-size:13px; margin-bottom:6px;">${item.pack || 'Standard'}</div>
+                                    <table style="width:100%;"><tr>
+                                        <td style="color:#555; font-size:13px;">₱${parseFloat(item.price).toFixed(2)} × ${item.qty}</td>
+                                        <td style="text-align:right; font-weight:700; color:#333; font-size:15px;">₱${itemTotal}</td>
+                                    </tr></table>
+                                </div>`;
+                            }).join('');
+
+                            const receiptHtml = `<div style="font-family:'Segoe UI',Arial,sans-serif;">${receiptCards}</div>`;
+
+                            sendPosReceipt({
                                 customer_email: customerEmail,
                                 customer_name: customerName || 'Valued Customer',
-                                order_id: 'TXN-' + new Date().getTime(), // Fallback if no ID returned
-                                order_items_html: `<ul>${itemsHtml}</ul>`,
+                                transaction_id: data.transaction_id || ('TXN-' + new Date().getTime()),
+                                order_items_html: receiptHtml,
                                 order_total: '₱' + data.total.toFixed(2),
                                 payment_method: selectedPaymentMethod,
-                                type: 'Receipt'
+                                cashier_name: '<?= session()->get("username") ?? "Staff" ?>'
                             });
                         } catch (e) {
                             console.error("EmailJS POS error:", e);
                         }
                     }
+
+                    cartItems.length = 0;
+                    currentOnlineOrder = null;
+                    pendingOnlineCustomerName = '';
+                    pendingOnlineCustomerEmail = '';
+                    updateCart();
                     
                     // Hide Modal
                     const modalEl = document.getElementById('checkoutReviewModal');

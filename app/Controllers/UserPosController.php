@@ -210,6 +210,7 @@ class UserPosController extends BaseController
             return $this->response->setJSON([
                 'success' => true,
                 'total' => $totalSaleAmount,
+                'transaction_id' => $transactionId,
                 'message' => 'Sale completed successfully'
             ]);
 

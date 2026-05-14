@@ -21,23 +21,17 @@ class Items extends BaseController
         $model->db->query("UPDATE items SET status = 'expired' WHERE expiration_date < CURDATE() AND expiration_date IS NOT NULL");
 
         $updatedItems = [];
-        // Use FIFO sorting by default, exclude manually deleted
-        $items = $model->db->query("
-            SELECT *,
-                CASE 
-                    WHEN expiration_date IS NULL THEN 3
-                    WHEN expiration_date < CURDATE() THEN 4
-                    WHEN expiration_date = CURDATE() THEN 0
-                    WHEN expiration_date <= DATE_ADD(CURDATE(), INTERVAL 10 DAY) THEN 1
-                    ELSE 2
-                END AS expiry_priority
-            FROM items
-            WHERE status != 'manually deleted' AND status != 'expired'
-            ORDER BY 
-                expiry_priority ASC,
-                expiration_date ASC,
-                id ASC
-        ")->getResultArray();
+        $items = $model->where('status !=', 'manually deleted')
+                       ->where('status !=', 'expired')
+                       ->orderBy('product_id', 'ASC')
+                       ->findAll();
+
+        foreach ($items as &$itm) {
+            $itm['display_label'] = !empty($itm['variation_label']) 
+                ? $itm['name'] . ' — ' . $itm['variation_label'] . ' (' . $itm['product_id'] . ')' 
+                : $itm['name'] . ' (' . $itm['product_id'] . ')';
+        }
+        unset($itm);
 
         foreach ($items as $item) {
             // ✅ Skip already deleted items
@@ -162,23 +156,16 @@ class Items extends BaseController
         $warningDays = 10;
 
         $updatedItems = [];
-        // Use FIFO sorting by default
-        $items = $model->db->query("
-            SELECT *,
-                CASE 
-                    WHEN expiration_date IS NULL THEN 3
-                    WHEN expiration_date < CURDATE() THEN 4
-                    WHEN expiration_date = CURDATE() THEN 0
-                    WHEN expiration_date <= DATE_ADD(CURDATE(), INTERVAL 10 DAY) THEN 1
-                    ELSE 2
-                END AS expiry_priority
-            FROM items
-            WHERE status != 'manually deleted'
-            ORDER BY 
-                expiry_priority ASC,
-                expiration_date ASC,
-                id ASC
-        ")->getResultArray();
+        $items = $model->where('status !=', 'manually deleted')
+                       ->orderBy('product_id', 'ASC')
+                       ->findAll();
+
+        foreach ($items as &$itm) {
+            $itm['display_label'] = !empty($itm['variation_label']) 
+                ? $itm['name'] . ' — ' . $itm['variation_label'] . ' (' . $itm['product_id'] . ')' 
+                : $itm['name'] . ' (' . $itm['product_id'] . ')';
+        }
+        unset($itm);
 
         foreach ($items as $item) {
             if (in_array($item['status'], ['manually deleted', 'auto deleted'])) {
@@ -291,23 +278,16 @@ class Items extends BaseController
     {
         $model = new ItemModel();
         $updatedItems = [];
-        // Use FIFO sorting by default
-        $items = $model->db->query("
-            SELECT *,
-                CASE 
-                    WHEN expiration_date IS NULL THEN 3
-                    WHEN expiration_date < CURDATE() THEN 4
-                    WHEN expiration_date = CURDATE() THEN 0
-                    WHEN expiration_date <= DATE_ADD(CURDATE(), INTERVAL 10 DAY) THEN 1
-                    ELSE 2
-                END AS expiry_priority
-            FROM items
-            WHERE status != 'manually deleted'
-            ORDER BY 
-                expiry_priority ASC,
-                expiration_date ASC,
-                id ASC
-        ")->getResultArray();
+        $items = $model->where('status !=', 'manually deleted')
+                       ->orderBy('product_id', 'ASC')
+                       ->findAll();
+
+        foreach ($items as &$itm) {
+            $itm['display_label'] = !empty($itm['variation_label']) 
+                ? $itm['name'] . ' — ' . $itm['variation_label'] . ' (' . $itm['product_id'] . ')' 
+                : $itm['name'] . ' (' . $itm['product_id'] . ')';
+        }
+        unset($itm);
         $totalValue = 0;
         $today = date('Y-m-d');
         $warningDays = 10;

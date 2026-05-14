@@ -20,7 +20,23 @@ class Userdashboard extends BaseController
         $warningDays = 10;
 
         $updatedItems = [];
-        $items = $model->orderBy('created_at', 'ASC')->findAll();
+        // Use FIFO sorting by default
+        $items = $model->db->query("
+            SELECT *,
+                CASE 
+                    WHEN expiration_date IS NULL THEN 3
+                    WHEN expiration_date < CURDATE() THEN 4
+                    WHEN expiration_date = CURDATE() THEN 0
+                    WHEN expiration_date <= DATE_ADD(CURDATE(), INTERVAL 10 DAY) THEN 1
+                    ELSE 2
+                END AS expiry_priority
+            FROM items
+            WHERE status != 'manually deleted'
+            ORDER BY 
+                expiry_priority ASC,
+                expiration_date ASC,
+                id ASC
+        ")->getResultArray();
 
         foreach ($items as $item) {
             if (in_array($item['status'], ['manually deleted', 'auto deleted'])) {

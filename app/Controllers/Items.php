@@ -14,12 +14,30 @@ class Items extends BaseController
         $deletedModel = new DeletedItemModel();
 
         date_default_timezone_set('Asia/Manila');
-
         $today = date('Y-m-d');
         $warningDays = 10;
+        
+        // Mark all expired items as 'expired' before fetching
+        $model->db->query("UPDATE items SET status = 'expired' WHERE expiration_date < CURDATE() AND expiration_date IS NOT NULL");
 
         $updatedItems = [];
-        $items = $model->orderBy('created_at', 'ASC')->findAll();
+        // Use FIFO sorting by default, exclude manually deleted
+        $items = $model->db->query("
+            SELECT *,
+                CASE 
+                    WHEN expiration_date IS NULL THEN 3
+                    WHEN expiration_date < CURDATE() THEN 4
+                    WHEN expiration_date = CURDATE() THEN 0
+                    WHEN expiration_date <= DATE_ADD(CURDATE(), INTERVAL 10 DAY) THEN 1
+                    ELSE 2
+                END AS expiry_priority
+            FROM items
+            WHERE status != 'manually deleted' AND status != 'expired'
+            ORDER BY 
+                expiry_priority ASC,
+                expiration_date ASC,
+                id ASC
+        ")->getResultArray();
 
         foreach ($items as $item) {
             // ✅ Skip already deleted items
@@ -112,6 +130,7 @@ class Items extends BaseController
         $data['items'] = $updatedItems;
         $data['totalValue'] = $totalValue;
         $data['currentPath'] = service('uri')->getPath();
+        $data['maxPrice'] = $model->db->table('items')->selectMax('price')->get()->getRow()->price;
 
         $salesModel = new \App\Models\SalesModel();
         $itemModel = new \App\Models\ItemModel();
@@ -143,7 +162,23 @@ class Items extends BaseController
         $warningDays = 10;
 
         $updatedItems = [];
-        $items = $model->orderBy('created_at', 'ASC')->findAll();
+        // Use FIFO sorting by default
+        $items = $model->db->query("
+            SELECT *,
+                CASE 
+                    WHEN expiration_date IS NULL THEN 3
+                    WHEN expiration_date < CURDATE() THEN 4
+                    WHEN expiration_date = CURDATE() THEN 0
+                    WHEN expiration_date <= DATE_ADD(CURDATE(), INTERVAL 10 DAY) THEN 1
+                    ELSE 2
+                END AS expiry_priority
+            FROM items
+            WHERE status != 'manually deleted'
+            ORDER BY 
+                expiry_priority ASC,
+                expiration_date ASC,
+                id ASC
+        ")->getResultArray();
 
         foreach ($items as $item) {
             if (in_array($item['status'], ['manually deleted', 'auto deleted'])) {
@@ -231,6 +266,7 @@ class Items extends BaseController
         $data['items'] = $updatedItems;
         $data['totalValue'] = $totalValue;
         $data['currentPath'] = service('uri')->getPath();
+        $data['maxPrice'] = $model->db->table('items')->selectMax('price')->get()->getRow()->price;
 
         $salesModel = new \App\Models\SalesModel();
         $itemModel = new \App\Models\ItemModel();
@@ -255,7 +291,23 @@ class Items extends BaseController
     {
         $model = new ItemModel();
         $updatedItems = [];
-        $items = $model->orderBy('created_at', 'ASC')->findAll();
+        // Use FIFO sorting by default
+        $items = $model->db->query("
+            SELECT *,
+                CASE 
+                    WHEN expiration_date IS NULL THEN 3
+                    WHEN expiration_date < CURDATE() THEN 4
+                    WHEN expiration_date = CURDATE() THEN 0
+                    WHEN expiration_date <= DATE_ADD(CURDATE(), INTERVAL 10 DAY) THEN 1
+                    ELSE 2
+                END AS expiry_priority
+            FROM items
+            WHERE status != 'manually deleted'
+            ORDER BY 
+                expiry_priority ASC,
+                expiration_date ASC,
+                id ASC
+        ")->getResultArray();
         $totalValue = 0;
         $today = date('Y-m-d');
         $warningDays = 10;
@@ -377,7 +429,7 @@ class Items extends BaseController
 
         $file = $this->request->getFile('bulk_file');
 
-        // --- Handle BULK upload ---
+        // --- Handle BULK upload (Existing) ---
         if ($file && $file->isValid() && !$file->hasMoved()) {
             $ext = strtolower($file->getClientExtension());
             require_once ROOTPATH . 'vendor/autoload.php';
@@ -463,166 +515,118 @@ class Items extends BaseController
         }
 
         // --- Handle SINGLE manual add ---
-        $isVariation = $this->request->getPost('size_variation') === '1';
-
-        // Validation Rules
         $rules = [
             'product_id'      => 'required|max_length[50]',
-            'name'            => 'required|min_length[2]|max_length[255]',
+            'name'            => 'required|max_length[255]',
             'sku'             => 'required|max_length[100]|is_unique[items.sku]',
             'category'        => 'required',
-            'expiration_date' => 'permit_empty|valid_date',
+            'expiration_date' => 'permit_empty|valid_date[Y-m-d]',
         ];
 
-        if (!$isVariation) {
-            $rules['quantity'] = 'required|integer|greater_than_equal_to[0]';
-            $rules['price']    = 'required|decimal|greater_than_equal_to[0]';
-        }
-
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', $this->validator->getErrors());
         }
 
-        // Additional Manual Checks (Uniqueness for both parent and potential children)
-        $product_id = $this->request->getPost('product_id');
-        $base_sku = $this->request->getPost('sku');
-        $name = $this->request->getPost('name');
+        $variationsPost = $this->request->getPost('variations');
 
-        if (!$isVariation) {
-            if ($itemModel->where('product_id', $product_id)->first()) {
-                return redirect()->back()->withInput()->with('error', 'Product ID "' . $product_id . '" already exists.');
+        if (empty($variationsPost) || !is_array($variationsPost)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Please add at least one size row.');
+        }
+
+        // Validate each variation row manually
+        foreach ($variationsPost as $index => $v) {
+            $label = trim(strip_tags($v['label'] ?? ''));
+            $qty   = $v['qty'] ?? '';
+            $price = $v['price'] ?? '';
+
+            if (empty($label)) {
+                return redirect()->back()->withInput()
+                    ->with('error', 'Row ' . ($index + 1) . ': Label is required.');
             }
-        } else {
-            $variationsPost = $this->request->getPost('variations') ?? [];
-            if (empty($variationsPost)) {
-                return redirect()->back()->withInput()->with('error', 'Please add at least one pack size variation.');
+            if ($qty === '' || (int)$qty < 0) {
+                return redirect()->back()->withInput()
+                    ->with('error', 'Row ' . ($index + 1) . ': Qty must be 0 or more.');
             }
-
-            $collisions = [];
-            foreach ($variationsPost as $v) {
-                $suffix = $this->generateVariationSuffix($v['label'] ?? '');
-                if ($suffix === '') continue;
-
-                $childId = $product_id . '-' . $suffix;
-                $childSku = $base_sku . '-' . $suffix;
-
-                if ($itemModel->where('product_id', $childId)->first()) {
-                    $collisions[] = "ID: $childId";
-                }
-                if ($itemModel->where('sku', $childSku)->first()) {
-                    $collisions[] = "SKU: $childSku";
-                }
-            }
-
-            if (!empty($collisions)) {
-                return redirect()->back()->withInput()->with('error', 'These variations already exist: ' . implode(', ', $collisions) . '. Please use a different Product ID or SKU.');
+            if ($price === '' || (float)$price <= 0) {
+                return redirect()->back()->withInput()
+                    ->with('error', 'Row ' . ($index + 1) . ': Price must be greater than 0.');
             }
         }
 
-        // Prepare Data
-        $category = $this->request->getPost('category');
-        $subcategory = $this->request->getPost('subcategory');
-        $expiration_date = $this->request->getPost('expiration_date');
-        $expiration_date = !empty($expiration_date) ? date('Y-m-d', strtotime($expiration_date)) : null;
+        // Check collisions
+        $groupId = uniqid('VG-', true);
+        $baseId  = $this->request->getPost('product_id');
+        $baseSku = $this->request->getPost('sku');
 
-        $auto_delete = 0;
-        if (strtolower($category) === 'food' || strtolower($subcategory) === 'expirable') {
-            $auto_delete = 1;
+        $collisions = [];
+        foreach ($variationsPost as $v) {
+            $suffix  = $this->generateVariationSuffix($v['label']);
+            $childId = $baseId . '-' . $suffix;
+            if ($db->table('items')
+                    ->where('product_id', $childId)
+                    ->countAllResults() > 0) {
+                $collisions[] = $childId;
+            }
+        }
+        if (!empty($collisions)) {
+            return redirect()->back()->withInput()
+                ->with('error', 'These IDs already exist: ' 
+                    . implode(', ', $collisions) 
+                    . '. Use a different Product ID.');
         }
 
-        $imageFile = $this->request->getFile('product_image');
-        $imagePath = null;
-
-        // Image upload BEFORE transaction
-        if ($imageFile && $imageFile->isValid() && !$imageFile->hasMoved()) {
-            $ext = strtolower($imageFile->getClientExtension());
+        // Handle image upload BEFORE transaction
+        $uploadedImageName = null;
+        $file = $this->request->getFile('product_image');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $ext = strtolower($file->getClientExtension());
             if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
-                $imageFile->move(FCPATH . 'uploads');
-                $imagePath = $imageFile->getName();
+                $file->move(FCPATH . 'uploads/');
+                $uploadedImageName = $file->getName();
             }
         }
 
-        try {
-            $db->transStart();
+        // Expiration date
+        $expirationDate = $this->request->getPost('expiration_date') ?: null;
 
-            if (!$isVariation) {
-                $itemData = [
-                    'product_id'         => $product_id,
-                    'sku'                => $base_sku,
-                    'name'               => $name,
-                    'quantity'           => $this->request->getPost('quantity') ?? 0,
-                    'price'              => $this->request->getPost('price') ?? 0.00,
-                    'barcode'            => '',
-                    'expiration_date'    => $expiration_date,
-                    'category'           => $category,
-                    'subcategory'        => $subcategory ?: null,
-                    'auto_delete'        => $auto_delete,
-                    'status'             => 'active',
-                    'image_path'         => $imagePath,
-                    'created_at'         => date('Y-m-d H:i:s'),
-                    'is_variation_child' => 0,
-                    'variation_group_id' => null,
-                    'variation_label'    => null,
-                ];
-
-                if ($itemModel->insert($itemData) === false) {
-                    throw new \Exception(implode(', ', $itemModel->errors()));
-                }
-            } else {
-                $groupId = uniqid('VG-', true);
-                $variationBatch = [];
-
-                foreach ($variationsPost as $v) {
-                    $label = trim(strip_tags((string)($v['label'] ?? '')));
-                    $suffix = $this->generateVariationSuffix($label);
-                    if ($suffix === '') continue;
-
-                    $variationBatch[] = [
-                        'product_id'         => $product_id . '-' . $suffix,
-                        'sku'                => $base_sku . '-' . $suffix,
-                        'name'               => $name, // Keep base name
-                        'quantity'           => (int)($v['qty'] ?? 0),
-                        'price'              => (float)($v['price'] ?? 0),
-                        'barcode'            => '',
-                        'expiration_date'    => $expiration_date,
-                        'category'           => $category,
-                        'subcategory'        => $subcategory ?: null,
-                        'auto_delete'        => $auto_delete,
-                        'status'             => 'active',
-                        'image_path'         => $imagePath,
-                        'created_at'         => date('Y-m-d H:i:s'),
-                        'is_variation_child' => 1,
-                        'variation_group_id' => $groupId,
-                        'variation_label'    => $label,
-                    ];
-                }
-
-                if (empty($variationBatch)) {
-                    throw new \Exception('No valid size rows were provided.');
-                }
-
-                if ($itemModel->insertBatch($variationBatch) === false) {
-                    throw new \Exception(implode(', ', $itemModel->errors()));
-                }
-            }
-
-            $db->transComplete();
-
-            if ($db->transStatus() === false) {
-                $error = $db->error();
-                log_message('error', 'Items::store() transaction failed: ' . json_encode($error));
-                throw new \Exception('Database transaction failed to complete. ' . ($error['message'] ?? ''));
-            }
-
-            return redirect()->to('/items')->with('success', 'Item added successfully!');
-
-        } catch (\Exception $e) {
-            $db->transRollback();
-            log_message('error', 'Items::store() exception: ' . $e->getMessage());
-            
-            $msg = (ENVIRONMENT === 'development') ? $e->getMessage() : 'Failed to add item.';
-            return redirect()->back()->withInput()->with('error', $msg);
+        // Insert all variation children
+        $db->transStart();
+        foreach ($variationsPost as $v) {
+            $suffix = $this->generateVariationSuffix($v['label']);
+            $db->table('items')->insert([
+                'product_id'         => $baseId . '-' . $suffix,
+                'name'               => $this->request->getPost('name'),
+                'sku'                => $baseSku . '-' . $suffix,
+                'quantity'           => (int)$v['qty'],
+                'price'              => (float)$v['price'],
+                'category'           => $this->request->getPost('category'),
+                'expiration_date'    => $expirationDate,
+                'auto_delete'        => $this->request->getPost('auto_delete') ? 1 : 0,
+                'image_path'         => $uploadedImageName,
+                'status'             => 'active',
+                'is_variation_child' => 1,
+                'variation_group_id' => $groupId,
+                'variation_label'    => trim(strip_tags($v['label'])),
+                'barcode'            => null,
+                'subcategory'        => null,
+                'created_at'         => date('Y-m-d H:i:s'),
+            ]);
         }
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            $dbError = $db->error();
+            log_message('error', 'Items::store() failed: ' . json_encode($dbError));
+            return redirect()->back()->withInput()
+                ->with('error', 'Database error: ' . ($dbError['message'] ?? 'Unknown error'));
+        }
+
+        return redirect()->to(base_url('index.php/items'))
+            ->with('success', 'Item added successfully!');
     }
 
     public function downloadSampleTemplate()

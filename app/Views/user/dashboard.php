@@ -1073,8 +1073,17 @@ if (!function_exists('getProductSKU')) {
                         <?php
                             $isLowStock = $vItem['qty'] <= 10;
                             $priceDisplay = !empty($vItem['price']) ? '₱' . number_format((float)$vItem['price'], 2) : '<span class="text-muted">—</span>';
+                            
+                            $rowClass = '';
+                            if ($status === 'expired') {
+                                $rowClass = 'table-danger';
+                            } elseif (!empty($item['expiration_date']) && $item['expiration_date'] === date('Y-m-d')) {
+                                $rowClass = 'table-warning';
+                            } elseif ($status === 'expiring soon') {
+                                $rowClass = 'table-warning';
+                            }
                         ?>
-                        <tr data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>" data-id="<?= $item['id'] ?>">
+                        <tr class="<?= $rowClass ?>" data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>" data-id="<?= $item['id'] ?>" data-expiry="<?= esc($item['expiration_date'] ?? '') ?>">
                             <td class="text-center align-middle"><?= esc($item['product_id']) ?><?= $vItem['id_suffix'] ?></td>
                             <td class="text-center align-middle">
                                 <?= esc($item['name']) ?>

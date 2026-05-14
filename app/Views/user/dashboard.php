@@ -1006,9 +1006,9 @@ if (!function_exists('getProductSKU')) {
                         <?php
                             $today = new DateTime();
                             if (empty($item['expiration_date']) || $item['expiration_date'] === '0000-00-00') {
-                                $status = 'na';
-                                $statusLabel = "N/A";
-                                $daysLeftText = "—";
+                                $status = 'active';
+                                $statusLabel = "Active";
+                                $daysLeftText = "Non-Expirable";
                             } else {
                                 $expiration = new DateTime($item['expiration_date']);
                                 $interval = $today->diff($expiration);
@@ -1598,7 +1598,7 @@ if (!function_exists('getProductSKU')) {
                 const dateB = new Date(b.children[9]?.textContent.trim() || 0);
                 const statusA = a.querySelector(".badge")?.textContent.trim().toLowerCase() || "";
                 const statusB = b.querySelector(".badge")?.textContent.trim().toLowerCase() || "";
-                const statusOrder = { 'expired': 0, 'expiring today': 1, 'expiring soon': 1, 'active': 2, 'n/a': 3 };
+                const statusOrder = { 'expired': 0, 'expiring today': 1, 'expiring soon': 1, 'active': 2 };
                 switch (sortValue) {
                     case "name_asc": return nameA.localeCompare(nameB);
                     case "name_desc": return nameB.localeCompare(nameA);

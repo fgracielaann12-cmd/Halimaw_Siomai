@@ -341,6 +341,7 @@ class PosController extends BaseController
             return $this->response->setJSON([
                 'success' => true,
                 'total'   => round($totalSaleAmount, 2),
+                'transaction_id' => $transactionId,
                 'message' => $responseMessage
             ]);
 

@@ -1317,16 +1317,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const nameB = b.children[1]?.textContent.trim().toLowerCase() || "";
             const qtyA = parseFloat(a.children[4]?.textContent) || 0;
             const qtyB = parseFloat(b.children[4]?.textContent) || 0;
-<<<<<<< HEAD
-            const dateA = new Date(a.children[7]?.textContent.trim() || 0);
-            const dateB = new Date(b.children[7]?.textContent.trim() || 0);
-=======
-            
             // Get date from data-expiry attribute
             const dateA = new Date(a.dataset.expiry || '9999-12-31');
             const dateB = new Date(b.dataset.expiry || '9999-12-31');
-
->>>>>>> 9540bbc6c32afc140d67be9ea08283a106b5b29b
             const statusA = a.querySelector(".badge")?.textContent.trim().toLowerCase() || "";
             const statusB = b.querySelector(".badge")?.textContent.trim().toLowerCase() || "";
             const statusOrder = { 'expired': 0, 'expiring today': 1, 'expiring soon': 1, 'active': 2, 'n/a': 3 };

@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script src="<?= base_url('public/js/emailjs-helper.js') ?>"></script>
+    <script src="<?= base_url('public/js/emailjs-helper.js') ?>?v=<?= time() ?>"></script>
     <style>
         :root {
             --primary: #4e73df;
@@ -1166,53 +1166,42 @@
                 if (data.status === 'success') {
                     // Create Order Summary for Alert
                     const itemsSummary = cart.map(item => `${item.name} x ${item.qty}`).join('\n');
-                    const orderSummary = `Success! Thank you ${name}.\n\nOrder ID: ${data.order_id}\n\nItems:\n${itemsSummary}\n\nTotal: ${document.getElementById('chkTotal').innerText}\n\nA copy has been sent to ${email}.`;
+                    const orderSummary = `✅ Order Placed! Thank you ${name}.\n\nOrder ID: ${data.order_id}\n\nItems:\n${itemsSummary}\n\nTotal: ${document.getElementById('chkTotal').innerText}`;
                     
                     alert(orderSummary);
                     
                     closeCheckout();
 
-                    // Send EmailJS Confirmation
-                    try {
-                        const itemsHtml = cart.map(item => `
-                            <tr>
-                                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
-                                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td>
-                                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">₱${(item.price * item.qty).toFixed(2)}</td>
-                            </tr>
-                        `).join('');
-                        
-                        const totalAmount = document.getElementById('chkTotal').innerText;
-                        const orderTable = `
-                            <table style="width: 100%; border-collapse: collapse; font-family: sans-serif;">
-                                <thead style="background: #f8f9fc;">
-                                    <tr>
-                                        <th style="padding: 10px; text-align: left;">Item</th>
-                                        <th style="padding: 10px; text-align: center;">Qty</th>
-                                        <th style="padding: 10px; text-align: right;">Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${itemsHtml}</tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="2" style="padding: 10px; text-align: right; font-weight: bold;">Total Due:</td>
-                                        <td style="padding: 10px; text-align: right; font-weight: bold; color: #1cc88a;">${totalAmount}</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        `;
-                        
-                        sendHalimawEmail({
-                            customer_email: email,
-                            customer_name: name,
-                            order_id: data.order_id,
-                            order_items_html: orderTable,
-                            order_total: totalAmount,
-                            type: 'Confirmation'
-                        });
-                    } catch (e) {
-                        console.error("EmailJS error:", e);
-                    }
+                    // Send EmailJS Order Confirmation (async — runs after alert)
+                    (async () => {
+                        try {
+                            const itemsHtml = cart.map(item => {
+                                const itemTotal = (item.price * item.qty).toFixed(2);
+                                return `<div style="padding:14px 0; border-bottom:1px solid #e2e8f0;">
+                                    <div style="font-weight:600; color:#333; font-size:15px; margin-bottom:6px;">${item.name}</div>
+                                    <table style="width:100%;"><tr>
+                                        <td style="color:#555; font-size:13px;">₱${parseFloat(item.price).toFixed(2)} × ${item.qty}</td>
+                                        <td style="text-align:right; font-weight:700; color:#333; font-size:15px;">₱${itemTotal}</td>
+                                    </tr></table>
+                                </div>`;
+                            }).join('');
+
+                            const totalAmount = document.getElementById('chkTotal').innerText;
+                            const orderHtml = `<div style="font-family:'Segoe UI',Arial,sans-serif;">${itemsHtml}</div>`;
+
+                            await sendOrderConfirmation({
+                                customer_email: email,
+                                customer_name: name,
+                                order_id: data.order_id,
+                                order_items_html: orderHtml,
+                                order_total: totalAmount
+                            });
+                            console.log('Order confirmation email sent to', email);
+                        } catch (e) {
+                            console.error('EmailJS order confirmation failed:', e);
+                            // Silent fail — order is already placed, don't alarm the customer
+                        }
+                    })();
                     
                     cart = [];
                     renderCart();

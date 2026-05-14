@@ -66,7 +66,7 @@
         .alert-success { background-color: #e6f4ea; color: #1e5631; }
         .alert-danger { background-color: #fde8e8; color: #721c24; }
 
-<<<<<<< HEAD
+
         * {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }

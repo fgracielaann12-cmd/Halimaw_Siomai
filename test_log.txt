@@ -174,3 +174,15 @@ userId: 19
 Insert success: ID 37
 >>>>>>> d593f3b68d7012d8920aeb94a5e238f6a0fec424
 >>>>>>> Stashed changes
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 187b070d7fed8139eb6987c2f942a910
+    [item_id] => 5637
+    [action] => add
+    [quantity] => 25
+    [reason] => [Variation: KALBO] PEak
+)
+
+userId: 5
+Insert success: ID 29

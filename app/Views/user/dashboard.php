@@ -1166,28 +1166,10 @@ if (!function_exists('getProductSKU')) {
                             <select id="requestItemModal" name="item_id" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
-                                    <?php
-                                        $isSiomai = stripos($item['name'], 'siomai') !== false;
-                                        $displayRows = [];
-                                        if ($isSiomai) {
-                                            $displayRows[] = ['variation' => 'S', 'pack_name' => 'Small', 'id_suffix' => '-S'];
-                                            $displayRows[] = ['variation' => 'M', 'pack_name' => 'Medium', 'id_suffix' => '-M'];
-                                            $displayRows[] = ['variation' => 'L', 'pack_name' => 'Large', 'id_suffix' => '-L'];
-                                        } else {
-                                            $displayRows[] = ['variation' => null, 'pack_name' => '', 'id_suffix' => ''];
-                                        }
-                                    ?>
-                                    <?php foreach ($displayRows as $vItem): ?>
-                                        <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
-                                            <?php if (function_exists('getProductSKU')): ?>
-                                                <?= esc(getProductSKU($item['name'], $vItem['variation'] ?? null)) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
-                                            <?php else: ?>
-                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
-                                            <?php endif; ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                <?php endforeach; ?>
-                            </select>
+                                    <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($item['variation_label'] ?? '') ?>">
+                                        <?= esc($item['display_label']) ?>
+                                    </option>
+                                <?php endforeach; ?>                            </select>
                         </div>
                         <div class="mb-4">
                             <label for="requestActionModal" class="form-label fw-semibold text-dark mb-2">
@@ -1252,26 +1234,9 @@ if (!function_exists('getProductSKU')) {
                             <select id="pullOutItemModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
-                                    <?php
-                                        $isSiomai = stripos($item['name'], 'siomai') !== false;
-                                        $displayRows = [];
-                                        if ($isSiomai) {
-                                            $displayRows[] = ['variation' => 'S', 'pack_name' => 'Small', 'id_suffix' => '-S'];
-                                            $displayRows[] = ['variation' => 'M', 'pack_name' => 'Medium', 'id_suffix' => '-M'];
-                                            $displayRows[] = ['variation' => 'L', 'pack_name' => 'Large', 'id_suffix' => '-L'];
-                                        } else {
-                                            $displayRows[] = ['variation' => null, 'pack_name' => '', 'id_suffix' => ''];
-                                        }
-                                    ?>
-                                    <?php foreach ($displayRows as $vItem): ?>
-                                        <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
-                                            <?php if (function_exists('getProductSKU')): ?>
-                                                <?= esc(getProductSKU($item['name'], $vItem['variation'] ?? null)) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
-                                            <?php else: ?>
-                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
-                                            <?php endif; ?>
-                                        </option>
-                                    <?php endforeach; ?>
+                                    <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($item['variation_label'] ?? '') ?>">
+                                        <?= esc($item['display_label']) ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>

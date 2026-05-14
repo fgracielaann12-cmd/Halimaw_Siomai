@@ -121,7 +121,14 @@ class PullOutController extends BaseController
     public function index()
     {
         $pullOuts = $this->pullOutModel
-            ->select('pull_outs.*, items.name as product_name, items.product_id as product_sku, users.username as reporter_name')
+            ->select('pull_outs.*, 
+                CASE 
+                    WHEN pull_outs.variation IS NOT NULL AND pull_outs.variation != "" 
+                    THEN CONCAT(items.name, " — ", pull_outs.variation, " (", items.product_id, ")")
+                    ELSE CONCAT(items.name, " (", items.product_id, ")")
+                END as display_label,
+                items.product_id as product_sku, 
+                users.username as reporter_name')
             ->join('items', 'items.id = pull_outs.product_id', 'left')
             ->join('users', 'users.id = pull_outs.reported_by', 'left')
             ->orderBy('pull_outs.date_reported', 'DESC')

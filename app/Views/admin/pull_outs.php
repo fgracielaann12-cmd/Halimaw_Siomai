@@ -549,10 +549,9 @@
                         <td><?= date('M d, Y h:i A', strtotime($r['date_reported'])) ?></td>
                         <td><?= esc($r['reporter_name'] ?? 'Unknown') ?></td>
                         <td>
-                            <a href="<?= site_url('items/edit/' . $r['product_id']) ?>" class="text-decoration-none fw-semibold"><?= esc($r['product_sku']) ?> - <?= esc($r['product_name']) ?></a>
-                            <?php if(!empty($r['variation'])): ?>
-                                <br><small class="text-muted text-uppercase fw-bold"><?= esc($r['variation']) ?></small>
-                            <?php endif; ?>
+                            <a href="<?= site_url('items/edit/' . $r['product_id']) ?>" class="text-decoration-none fw-semibold">
+                                <?= esc($r['display_label'] ?? $r['product_name']) ?>
+                            </a>
                         </td>
                         <td><strong><?= $r['quantity'] ?></strong></td>
                         <td class="text-danger fw-semibold">₱<?= number_format($r['total_loss'], 2) ?></td>

@@ -29,7 +29,11 @@ class Userdashboard extends BaseController
                     WHEN expiration_date = CURDATE() THEN 0
                     WHEN expiration_date <= DATE_ADD(CURDATE(), INTERVAL 10 DAY) THEN 1
                     ELSE 2
-                END AS expiry_priority
+                END AS expiry_priority,
+                CASE 
+                    WHEN variation_label IS NOT NULL THEN CONCAT(name, ' — ', variation_label, ' (', product_id, ')')
+                    ELSE CONCAT(name, ' (', product_id, ')')
+                END AS display_label
             FROM items
             WHERE status != 'manually deleted'
             ORDER BY 

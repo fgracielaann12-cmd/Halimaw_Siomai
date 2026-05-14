@@ -177,6 +177,7 @@ Insert success: ID 37
 --- submitStockRequest POST DATA ---
 Array
 (
+<<<<<<< HEAD
     [csrf_test_name] => eec2cee16bab61af0133955fda2420e7
     [item_id] => 5616
     [action] => add
@@ -199,3 +200,14 @@ Array
 
 userId: 19
 Insert success: ID 39
+=======
+    [csrf_test_name] => 187b070d7fed8139eb6987c2f942a910
+    [item_id] => 5637
+    [action] => add
+    [quantity] => 25
+    [reason] => [Variation: KALBO] PEak
+)
+
+userId: 5
+Insert success: ID 29
+>>>>>>> 9540bbc6c32afc140d67be9ea08283a106b5b29b

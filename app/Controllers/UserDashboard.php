@@ -20,7 +20,31 @@ class Userdashboard extends BaseController
         $warningDays = 10;
 
         $updatedItems = [];
+<<<<<<< HEAD
         $items = $model->orderBy('product_id', 'ASC')->findAll();
+=======
+        // Use FIFO sorting by default
+        $items = $model->db->query("
+            SELECT *,
+                CASE 
+                    WHEN expiration_date IS NULL THEN 3
+                    WHEN expiration_date < CURDATE() THEN 4
+                    WHEN expiration_date = CURDATE() THEN 0
+                    WHEN expiration_date <= DATE_ADD(CURDATE(), INTERVAL 10 DAY) THEN 1
+                    ELSE 2
+                END AS expiry_priority,
+                CASE 
+                    WHEN variation_label IS NOT NULL THEN CONCAT(name, ' — ', variation_label, ' (', product_id, ')')
+                    ELSE CONCAT(name, ' (', product_id, ')')
+                END AS display_label
+            FROM items
+            WHERE status != 'manually deleted'
+            ORDER BY 
+                expiry_priority ASC,
+                expiration_date ASC,
+                id ASC
+        ")->getResultArray();
+>>>>>>> 9540bbc6c32afc140d67be9ea08283a106b5b29b
 
         foreach ($items as $item) {
             if (in_array($item['status'], ['manually deleted', 'auto deleted'])) {

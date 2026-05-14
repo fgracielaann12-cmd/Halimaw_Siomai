@@ -211,7 +211,7 @@
         <?php endif; ?>
 
         <!-- Login Form -->
-        <form method="post" action="<?= base_url('/authenticate') ?>" class="login-form">
+        <form method="post" action="<?= base_url('/index.php/authenticate') ?>" class="login-form">
             <?= csrf_field() ?>
 
             <div class="input-container">

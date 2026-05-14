@@ -1006,9 +1006,9 @@ if (!function_exists('getProductSKU')) {
                         <?php
                             $today = new DateTime();
                             if (empty($item['expiration_date']) || $item['expiration_date'] === '0000-00-00') {
-                                $status = 'na';
-                                $statusLabel = "N/A";
-                                $daysLeftText = "—";
+                                $status = 'active';
+                                $statusLabel = "Active";
+                                $daysLeftText = "Non-Expirable";
                             } else {
                                 $expiration = new DateTime($item['expiration_date']);
                                 $interval = $today->diff($expiration);
@@ -1073,8 +1073,17 @@ if (!function_exists('getProductSKU')) {
                         <?php
                             $isLowStock = $vItem['qty'] <= 10;
                             $priceDisplay = !empty($vItem['price']) ? '₱' . number_format((float)$vItem['price'], 2) : '<span class="text-muted">—</span>';
+                            
+                            $rowClass = '';
+                            if ($status === 'expired') {
+                                $rowClass = 'table-danger';
+                            } elseif (!empty($item['expiration_date']) && $item['expiration_date'] === date('Y-m-d')) {
+                                $rowClass = 'table-warning';
+                            } elseif ($status === 'expiring soon') {
+                                $rowClass = 'table-warning';
+                            }
                         ?>
-                        <tr data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>" data-id="<?= $item['id'] ?>">
+                        <tr class="<?= $rowClass ?>" data-low-stock="<?= $isLowStock ? 'true' : 'false' ?>" data-id="<?= $item['id'] ?>" data-expiry="<?= esc($item['expiration_date'] ?? '') ?>">
                             <td class="text-center align-middle"><?= esc($item['product_id']) ?><?= $vItem['id_suffix'] ?></td>
                             <td class="text-center align-middle">
                                 <?= esc($item['name']) ?>
@@ -1157,28 +1166,10 @@ if (!function_exists('getProductSKU')) {
                             <select id="requestItemModal" name="item_id" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
-                                    <?php
-                                        $isSiomai = stripos($item['name'], 'siomai') !== false;
-                                        $displayRows = [];
-                                        if ($isSiomai) {
-                                            $displayRows[] = ['variation' => 'S', 'pack_name' => 'Small', 'id_suffix' => '-S'];
-                                            $displayRows[] = ['variation' => 'M', 'pack_name' => 'Medium', 'id_suffix' => '-M'];
-                                            $displayRows[] = ['variation' => 'L', 'pack_name' => 'Large', 'id_suffix' => '-L'];
-                                        } else {
-                                            $displayRows[] = ['variation' => null, 'pack_name' => '', 'id_suffix' => ''];
-                                        }
-                                    ?>
-                                    <?php foreach ($displayRows as $vItem): ?>
-                                        <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
-                                            <?php if (function_exists('getProductSKU')): ?>
-                                                <?= esc(getProductSKU($item['name'], $vItem['variation'] ?? null)) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
-                                            <?php else: ?>
-                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?>
-                                            <?php endif; ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                <?php endforeach; ?>
-                            </select>
+                                    <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($item['variation_label'] ?? '') ?>">
+                                        <?= esc($item['display_label']) ?>
+                                    </option>
+                                <?php endforeach; ?>                            </select>
                         </div>
                         <div class="mb-4">
                             <label for="requestActionModal" class="form-label fw-semibold text-dark mb-2">
@@ -1243,26 +1234,9 @@ if (!function_exists('getProductSKU')) {
                             <select id="pullOutItemModal" class="form-select shadow-sm" required style="border-radius: 5px; padding: 0.6rem 1rem;">
                                 <option value="">— Choose an item —</option>
                                 <?php foreach ($items as $item): ?>
-                                    <?php
-                                        $isSiomai = stripos($item['name'], 'siomai') !== false;
-                                        $displayRows = [];
-                                        if ($isSiomai) {
-                                            $displayRows[] = ['variation' => 'S', 'pack_name' => 'Small', 'id_suffix' => '-S'];
-                                            $displayRows[] = ['variation' => 'M', 'pack_name' => 'Medium', 'id_suffix' => '-M'];
-                                            $displayRows[] = ['variation' => 'L', 'pack_name' => 'Large', 'id_suffix' => '-L'];
-                                        } else {
-                                            $displayRows[] = ['variation' => null, 'pack_name' => '', 'id_suffix' => ''];
-                                        }
-                                    ?>
-                                    <?php foreach ($displayRows as $vItem): ?>
-                                        <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($vItem['pack_name']) ?>">
-                                            <?php if (function_exists('getProductSKU')): ?>
-                                                <?= esc(getProductSKU($item['name'], $vItem['variation'] ?? null)) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
-                                            <?php else: ?>
-                                                <?= esc($item['product_id']) ?><?= esc($vItem['id_suffix']) ?> - <?= esc($item['name']) ?><?= $vItem['pack_name'] ? ' (' . esc($vItem['pack_name']) . ')' : '' ?> [Batch: <?= esc($item['created_at']) ?> | Exp: <?= empty($item['expiration_date']) ? 'N/A' : esc($item['expiration_date']) ?>]
-                                            <?php endif; ?>
-                                        </option>
-                                    <?php endforeach; ?>
+                                    <option value="<?= esc($item['id']) ?>" data-variation="<?= esc($item['variation_label'] ?? '') ?>">
+                                        <?= esc($item['display_label']) ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -1565,7 +1539,7 @@ if (!function_exists('getProductSKU')) {
                 const dateB = new Date(b.children[9]?.textContent.trim() || 0);
                 const statusA = a.querySelector(".badge")?.textContent.trim().toLowerCase() || "";
                 const statusB = b.querySelector(".badge")?.textContent.trim().toLowerCase() || "";
-                const statusOrder = { 'expired': 0, 'expiring today': 1, 'expiring soon': 1, 'active': 2, 'n/a': 3 };
+                const statusOrder = { 'expired': 0, 'expiring today': 1, 'expiring soon': 1, 'active': 2 };
                 switch (sortValue) {
                     case "name_asc": return nameA.localeCompare(nameB);
                     case "name_desc": return nameB.localeCompare(nameA);

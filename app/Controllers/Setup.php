@@ -40,6 +40,9 @@ class Setup extends Controller
         $itemsColumns = $db->getFieldNames('items');
         $missingItems = [];
         
+        if (!in_array('sku', $itemsColumns)) {
+            $missingItems['sku'] = ['type' => 'VARCHAR', 'constraint' => '100', 'null' => true, 'after' => 'name'];
+        }
         if (!in_array('image_path', $itemsColumns)) {
             $missingItems['image_path'] = ['type' => 'VARCHAR', 'constraint' => '255', 'null' => true, 'after' => 'sku'];
         }

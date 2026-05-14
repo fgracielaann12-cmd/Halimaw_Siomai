@@ -2852,6 +2852,7 @@ if (!function_exists('getProductSKU')) {
 
         // Online Orders Logic
         let pendingOnlineOrders = [];
+        let currentOnlineOrder = null;
         let pendingOnlineCustomerName = '';
         let pendingOnlineCustomerEmail = '';
 

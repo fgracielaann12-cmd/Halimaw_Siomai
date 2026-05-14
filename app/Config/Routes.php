@@ -77,6 +77,8 @@ $routes->group('admin', function ($routes) {
 
     // Stock Requests
     $routes->get('stock-requests', 'AdminRequests::index');
+    $routes->post('stock-requests/approve/(:num)', 'AdminRequests::approve/$1');
+    $routes->post('stock-requests/reject/(:num)', 'AdminRequests::reject/$1');
     $routes->post('submit-stock-request', 'AdminRequests::submitStockRequest');
     $routes->match(['get', 'post'], 'approve-request/(:num)', 'AdminRequests::approve/$1');
     $routes->match(['get', 'post'], 'reject-request/(:num)', 'AdminRequests::reject/$1');

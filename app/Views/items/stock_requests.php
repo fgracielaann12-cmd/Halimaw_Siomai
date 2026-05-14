@@ -778,7 +778,7 @@ document.addEventListener('DOMContentLoaded', () => {
         approveModal.addEventListener('show.bs.modal', event => {
             const button = event.relatedTarget;
             const requestId = button.getAttribute('data-id');
-            document.getElementById('approveForm').action = '<?= base_url("admin/approve-request/") ?>' + requestId;
+            document.getElementById('approveForm').action = '<?= base_url("index.php/admin/approve-request/") ?>' + requestId;
         });
     }
 
@@ -787,7 +787,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rejectModal.addEventListener('show.bs.modal', event => {
             const button = event.relatedTarget;
             const requestId = button.getAttribute('data-id');
-            document.getElementById('rejectForm').action = '<?= base_url("admin/reject-request/") ?>' + requestId;
+            document.getElementById('rejectForm').action = '<?= base_url("index.php/admin/reject-request/") ?>' + requestId;
         });
     }
 });

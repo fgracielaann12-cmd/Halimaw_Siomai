@@ -87,7 +87,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1050;
+            z-index: 1100;
             transition: transform 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -196,7 +196,7 @@
         }
 
         /* MOBILE MENU */
-        .mobile-menu-toggle-inline {
+        .mobile-menu-toggle {
             display: none;
             background: var(--sidebar-bg);
             color: white;
@@ -212,7 +212,7 @@
             flex-shrink: 0;
             transition: all 0.2s;
         }
-        .mobile-menu-toggle-inline:hover {
+        .mobile-menu-toggle:hover {
             background: var(--sidebar-hover);
         }
         
@@ -307,8 +307,14 @@
 
         /* RESPONSIVE */
         @media (max-width: 991px) {
-            .mobile-menu-toggle-inline { display: flex; }
-            .top-navbar { position: sticky; top: 0; z-index: 1000; border-radius: 0 !important; margin: 0 0 15px 0 !important; }
+            .mobile-menu-toggle { display: flex; }
+            .top-navbar { 
+                position: sticky !important; 
+                top: 0; 
+                z-index: 1000 !important; 
+                border-radius: 0 !important; 
+                margin: 0 0 15px 0 !important; 
+            }
             .main-content { margin-left: 0; width: 100%; padding-top: 0 !important; }
             .container { padding: 20px 15px; }
             .table th, .table td { white-space: nowrap; padding: 12px 15px; }
@@ -333,7 +339,7 @@
                 width: 100%;
                 height: 100%;
                 background: rgba(0,0,0,0.5);
-                z-index: 1040;
+                z-index: 1090;
             }
             .sidebar-overlay.active { display: block; }
         }
@@ -461,8 +467,7 @@
 <div class="main-content">
     <?= view('partials/admin_topbar', [
         'title' => 'Pull-Outs',
-        'icon' => 'bi bi-trash3',
-        'hide_toggle' => true
+        'icon' => 'bi bi-trash3'
     ]) ?>
 
     <div class="container">

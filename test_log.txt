@@ -234,3 +234,15 @@ Array
 userId: 5
 Insert success: ID 36
 >>>>>>> Stashed changes
+--- submitStockRequest POST DATA ---
+Array
+(
+    [csrf_test_name] => 755c60e2a75deb66a4ccacd39d32e397
+    [item_id] => 5636
+    [action] => add
+    [quantity] => 20
+    [reason] => [Variation: Large] Need this to adjust!
+)
+
+userId: 5
+Insert success: ID 37

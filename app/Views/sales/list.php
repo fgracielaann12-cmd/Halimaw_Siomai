@@ -311,7 +311,7 @@
             font-weight: 600;
             color: white;
             border: none;
-            border-radius: 16px;
+            border-radius: 12px;
             transition: all 0.2s;
             text-decoration: none;
         }
@@ -578,10 +578,10 @@
     
     
     
-    <!-- UNIFIED 16PX SYSTEM-WIDE RADIUS OVERRIDE -->
+    <!-- UNIFIED 12PX SYSTEM-WIDE RADIUS OVERRIDE -->
     <style>
         :root {
-            --border-radius: 16px !important;
+            --border-radius: 12px !important;
         }
         
         /* Buttons */
@@ -597,14 +597,13 @@
         .card, .pos-item-card, .summary-card, .img-metric-card, .chart-card-premium, .pos-checkout,
         .alert, .badge, .modal-content, .modal-header, .nav-link, .login-card,
         
-        /* Bootstrap Overrides */
         .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-circle, .rounded-pill,
         .rounded-top, .rounded-bottom, .rounded-start, .rounded-end {
-            border-radius: 16px !important;
+            border-radius: 12px !important;
         }
 
         /* Specific Button Padding */
-        button, .btn, .btn-export {
+        button:not(.mobile-menu-toggle), .btn, .btn-export {
             padding: 12px 24px !important;
         }
         

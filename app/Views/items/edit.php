@@ -27,7 +27,7 @@
             --sidebar-hover: #34495e;
             --sidebar-active: #4e73df;
             --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            --border-radius: 5px;
+            --border-radius: 12px;
         }
 
         * {
@@ -89,7 +89,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1050;
+            z-index: 1100;
             transition: transform 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -200,19 +200,22 @@
         /* MOBILE MENU */
         .mobile-menu-toggle {
             display: none;
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 998;
             background: var(--sidebar-bg);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
+            width: 42px;
+            height: 42px;
+            font-size: 1.3rem;
             cursor: pointer;
             box-shadow: var(--card-shadow);
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .mobile-menu-toggle:hover {
+            background: var(--sidebar-hover);
         }
 
         /* CONTAINER */
@@ -301,36 +304,15 @@
 
         /* RESPONSIVE */
         @media (max-width: 991px) {
-            .mobile-menu-toggle { display: block; }
+            .mobile-menu-toggle { display: flex; }
             #sidebar { transform: translateX(-100%); }
-
-        #sidebar .nav {
-            width: 100%;
-            min-width: 0;
-        }
-        #sidebar .nav-item {
-            width: 100%;
-            min-width: 0;
-        }
+            #sidebar.active { transform: translateX(0); }
             .main-content { margin-left: 0; width: 100%; }
             .top-navbar { position: sticky; top: 0; z-index: 1000; border-radius: 0; margin-bottom: 15px; }
-            #sidebar.active { transform: translateX(0); }
-
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-                z-index: 1040;
-            }
+            .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1090; }
             .sidebar-overlay.active { display: block; }
-
-            .container { padding: 20px 15px; }
-            .card { padding: 20px; }
-            .btn { width: 100%; padding: 12px 20px; border-radius: 5px; }
+            .container { padding: 15px 10px; }
+            .form-card { padding: 25px 20px; }
         }
     </style>
     

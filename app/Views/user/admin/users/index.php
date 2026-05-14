@@ -37,7 +37,7 @@
     </style>
 
 <?= $this->section('header_actions') ?>
-    <a href="<?= site_url('admin/staff/users/create') ?>" class="btn btn-primary shadow-sm px-4 py-2 fw-semibold" style="transition: all 0.3s ease; border-radius: 8px !important;">
+    <a href="<?= site_url('admin/staff/users/create') ?>" class="btn btn-primary d-none d-md-inline-block shadow-sm px-4 py-2 fw-semibold" style="transition: all 0.3s ease; border-radius: 8px !important;">
         <i class="bi bi-person-plus-fill me-2"></i> Add Staff
     </a>
 <?= $this->endSection() ?>
@@ -59,6 +59,12 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
+    <!-- Mobile Add Staff Button -->
+    <div class="d-md-none mb-3">
+        <a href="<?= site_url('admin/staff/users/create') ?>" class="btn btn-primary w-100 py-3 fw-bold shadow-sm rounded-3">
+            <i class="bi bi-person-plus-fill me-2"></i> Add Staff
+        </a>
+    </div>
 
     <div class="table-card">
         <div class="table-responsive">

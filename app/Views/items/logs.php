@@ -198,19 +198,22 @@
         /* MOBILE MENU */
         .mobile-menu-toggle {
             display: none;
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 998;
             background: var(--sidebar-bg);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
+            width: 42px;
+            height: 42px;
+            font-size: 1.3rem;
             cursor: pointer;
             box-shadow: var(--card-shadow);
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .mobile-menu-toggle:hover {
+            background: var(--sidebar-hover);
         }
 
         .mobile-menu-toggle-inline {
@@ -377,23 +380,17 @@
 
         /* RESPONSIVE */
         @media (max-width: 991px) {
-            .mobile-menu-toggle { display: block; }
-            .mobile-menu-toggle-inline { display: flex; }
+            .mobile-menu-toggle { display: flex !important; }
             body > #mobileMenuToggle { display: none !important; }
-            .top-navbar { position: sticky; top: 0; z-index: 1000;
+            #sidebar { transform: translateX(-100%); z-index: 1100; }
+            
+            .top-navbar { 
+                position: sticky !important; 
+                top: 0 !important; 
+                z-index: 1000 !important;
                 border-radius: 0 !important;
                 margin: 0 0 15px 0 !important;
             }
-            #sidebar { transform: translateX(-100%); }
-
-        #sidebar .nav {
-            width: 100%;
-            min-width: 0;
-        }
-        #sidebar .nav-item {
-            width: 100%;
-            min-width: 0;
-        }
             .main-content { margin-left: 0; width: 100%; padding-top: 0 !important; }
             #sidebar.active { transform: translateX(0); }
 
@@ -405,7 +402,7 @@
                 width: 100%;
                 height: 100%;
                 background: rgba(0,0,0,0.5);
-                z-index: 1040;
+                z-index: 1090;
             }
             .sidebar-overlay.active { display: block; }
 
@@ -539,7 +536,7 @@
 <div class="main-content">
     <?php
     $extra_buttons = '
-        <a href="' . base_url('items/export-logs-csv') . '" class="btn-export-logs shadow-sm">
+        <a href="' . base_url('items/export-logs-csv') . '" class="btn-export-logs d-none d-md-flex shadow-sm">
             <i class="bi bi-file-earmark-arrow-down me-2"></i>Export Logs (CSV)
         </a>
     ';
@@ -551,6 +548,12 @@
     ?>
 
     <div class="container-fluid">
+        <!-- Mobile Export Button -->
+        <div class="d-md-none mb-3">
+            <a href="<?= base_url('items/export-logs-csv') ?>" class="btn-export-logs w-100 py-3 fw-bold shadow-sm" style="border-radius: 12px !important; height: auto;">
+                <i class="bi bi-file-earmark-arrow-down me-2"></i> Export Logs (CSV)
+            </a>
+        </div>
         <!-- Flash Message -->
         <?php if (session()->getFlashdata('success')): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">

@@ -1,17 +1,17 @@
 # Halimaw POS Inventory System — Technical Documentation
 
-> **Last Updated:** May 13, 2026  
-> **Version:** 2.1  
+> **Last Updated:** May 14, 2026  
+> **Version:** 2.2  
 > **Stack:** CodeIgniter 4 · PHP 8.1 · MySQL/MariaDB · Bootstrap 5.3
 
 ---
 
 ## 1. Project Overview
 
-**Halimaw POS Inventory System** (formerly Halimaw Siomai) is a web-based Point of Sale (POS) and Inventory Management System. It supports multi-role access (Admin, Staff), real-time inventory tracking, transactional sales with receipts, stock request workflows, food waste pull-out management, customer returns processing, and a REST API for external ordering platforms.
+**Halimaw POS Inventory System** is a web-based Point of Sale (POS) and Inventory Management System. It supports multi-role access (Admin, Staff), real-time inventory tracking, transactional sales with receipts, stock request workflows, food waste pull-out management, customer returns processing, and a REST API for external ordering platforms.
 
 ### Branding & Identity
-- **App Name:** Halimaw POS Inventory Siomai (UI) / Halimaw POS Inventory System (System)
+- **App Name:** Halimaw POS Inventory System
 - **Primary Logo:** `public/Images/Inventa.png`
 - **Theme:** Professional Dark Sidebar with Unified 12px Radius.
 
@@ -20,7 +20,7 @@
 | Layer | Technology |
 |---|---|
 | Framework | CodeIgniter 4 (MVC) |
-| Language | PHP 8.1+ |
+| Language | PHP 8.2 |
 | Database | MySQL / MariaDB (MySQLi driver) |
 | Frontend | HTML5, Vanilla CSS, JavaScript (ES6+) |
 | UI Framework | Bootstrap 5.3, Bootstrap Icons, Select2 4.1 |
@@ -32,7 +32,7 @@
 
 ## 2. System Architecture
 
-The application follows the **Model-View-Controller (MVC)** pattern with explicit routing (auto-routing disabled).
+The application follows the **Model-View-Controller (MVC)** pattern.
 
 ### Directory Structure
 
@@ -40,176 +40,76 @@ The application follows the **Model-View-Controller (MVC)** pattern with explici
 Halimaw_Siomai/
 ├── app/
 │   ├── Config/          # Routes.php, Filters.php, Database.php
-│   ├── Controllers/     # 21 controllers (see §5)
-│   ├── Models/          # 15 models (see §4)
+│   ├── Controllers/     # AdminRequests, Items, PullOutController, etc.
+│   ├── Models/          # ItemModel, PullOutModel, etc.
 │   ├── Views/
 │   │   ├── admin/       # dashboard.php, pull_outs.php, returns.php
-│   │   ├── auth/        # login.php, adminlogin.php, register.php
-│   │   ├── customer/    # Customer-facing order page
-│   │   ├── items/       # add, edit, list, logs, stock_requests, etc.
-│   │   ├── partials/    # admin_sidebar.php, header.php, footer.php
-│   │   ├── pos/         # index.php (Admin POS), staff.php (Staff POS)
-│   │   ├── sales/       # list.php, transactions.php
-│   │   └── user/        # dashboard.php, deleted-items.php, expiring-soon.php
-│   └── Filters/         # AuthFilter, AdminAuthFilter, RoleFilter
-├── public/              # index.php, CSS, JS, images, uploads/
-├── vendor/              # Composer dependencies
+│   │   ├── auth/        # login.php
+│   │   ├── customer/    # order.php
+│   │   ├── items/       # add, edit, list.php
+│   │   ├── pos/         # staff.php
+│   │   └── user/        # dashboard.php
+├── public/              # index.php, JS, images, uploads/
 ├── writable/            # Cache, logs, sessions
 └── .env                 # Environment configuration
 ```
 
 ---
 
-## 3. Database Configuration
+## 3. Database Updates
 
-| Setting | Value |
-|---|---|
-| Database Name | `halimawsiomai` |
-| Hostname | `localhost` |
-| Username | `root` |
-| Port | `3306` |
-| Driver | MySQLi |
+### Items Table Schema (Recent Additions)
+The `items` table has been extended to support variations and improved data integrity:
+- `sku` (VARCHAR, Unique Index)
+- `is_variation_child` (TINYINT)
+- `variation_group_id` (VARCHAR)
+- `variation_label` (VARCHAR)
+- `image_path` (VARCHAR)
 
-Configured via `.env` file. The `/setup-db` route provides database schema synchronization.
-
----
-
-## 4. Database Schema (Models)
-
-### 4.1 `users` — User accounts
-
-| Field | Notes |
-|---|---|
-| `id`, `username`, `email`, `password`, `role` | Role: `admin` or `user` (staff) |
-| `created_at`, `updated_at` | Auto-managed timestamps |
-
-- Passwords are auto-hashed via `beforeInsert`/`beforeUpdate` callbacks.
-- Login supports username or email via `findByLogin()`.
-
-### 4.2 `items` — Product inventory
-
-| Field | Notes |
-|---|---|
-| `id`, `product_id`, `name`, `sku` | Core identification |
-| `quantity`, `price`, `category`, `subcategory` | Stock & classification |
-| `pack_small_qty`, `pack_medium_qty`, `pack_biggest_qty` | Legacy Siomai pack quantities |
-| `pack_small_price`, `pack_medium_price`, `pack_biggest_price` | Legacy pack-specific pricing |
-| `expiration_date`, `status`, `auto_delete` | Expiry management (`active`, `expiring_soon`, `expired`) |
-| `barcode`, `image_path` | Product identification |
-| `is_variation_child`, `variation_group_id`, `variation_label` | **Enhanced Variation System** (see §8.6) |
-| `is_expiring_seen`, `is_expired_seen` | Notification tracking |
+Database synchronization is managed by `Setup::index()` (`/setup-db` route), which includes schema checks to ensure these columns exist.
 
 ---
 
-## 5. Controllers Reference
+## 4. Key Features & Recent Updates
 
-### 5.1 Authentication
+### 4.1 Auto-FIFO Sorting
+Inventory is automatically sorted based on expiration urgency (FIFO).
+- **Sorting Logic:** Query uses a `CASE` statement to assign `expiry_priority`:
+  - 0: Expiring TODAY
+  - 1: Expiring Soon (<= 10 days)
+  - 2: Active
+  - 3: Non-Expirable
+  - 4: Expired
+- **UI:** The inventory list (`items/list.php` and `user/dashboard.php`) defaults to FIFO sorting.
+- **Visuals:** Rows are color-coded (Red for Expired, Yellow for Expiring Soon/Today).
 
-| Controller | Purpose |
-|---|---|
-| `Auth` | Unified login (`/login`), registration (`/register`), logout |
-| `AdminAuth` | Admin-specific login (`/admin/login`) |
-| `UserAuth` | User/Staff login helpers |
-| `BaseController` | Session init, `checkLogin()`, `checkAdmin()`, `checkUser()`, redirect-if-logged-in |
+### 4.2 Dynamic Item Labels
+Inventory modals and dropdowns (Stock Adjustment, Pull-Outs, Returns) now use a dynamically generated `display_label` derived from SQL `CONCAT`:
+- `(name, ' — ', variation_label, ' (', product_id, ')')` for variations.
+- `(name, ' (', product_id, ')')` for standard items.
+- This eliminated legacy "N/A" placeholders.
 
-### 5.2 Dashboards
+### 4.3 Value % Calculation
+Inventory tables display a "Value %" column:
+- **Calculation:** `(item_price / max_price_in_inventory) * 100` (formatted to 1 decimal).
+- **Fetch:** `Items::index()` pre-calculates `$maxPrice` via SQL `selectMax`.
 
-| Controller | Route | Purpose |
-|---|---|---|
-| `Items::dashboard` | `/admin/dashboard` | Admin dashboard with inventory analytics |
-| `UserDashboard::index` | `/user/dashboard` | Staff dashboard with inventory view, pull-out modal, return modal |
+### 4.4 Non-Expirable Items
+- **Storage:** Saved with `NULL` expiration dates and `auto_delete = 0`.
+- **UI:** Displayed as "Active" with a green badge; expiration date column shows "Non-Expirable".
 
-### 5.3 Point of Sale
-
-| Controller | Route | Purpose |
-|---|---|---|
-| `PosController::adminIndex` | `/admin/pos` | Admin POS with VAT, email receipts |
-| `PosController::staffIndex` | `/admin/staff/pos` | Staff POS (same sell logic as Admin) |
-| `PosController::sell` | POST `/admin/pos/sell` | Atomic batch sale — creates `transactions` + `sales` records + deducts inventory |
-| `UserPosController::index` | `/user/pos` | User POS (simplified) |
-| `UserPosController::sell` | POST `/user/pos/sell` | Creates `transactions` + batch `sales` records + deducts inventory |
-
-**POS UI Logic:**
-- Variation labels are displayed exactly as entered in the admin (e.g., "Small", "Large").
-- Hardcoded " Pack" suffix has been removed for a cleaner interface.
-
-### 5.4 Inventory Management
-
-| Controller | Route | Purpose |
-|---|---|---|
-| `Items::index` | `/items/` | Full inventory list with search, filter, sort |
-| `Items::add` / `store` | `/items/add`, POST `/items/store` | Add new items with variation support |
-| `Items::edit` / `update` | `/items/edit/:id` | Edit item details |
-| `Items::delete` | `/items/delete/:id` | Soft delete items |
-| `Items::bulkUpload` | POST `/items/bulk-upload` | CSV/Excel bulk import |
-| `Items::exportCsv` | `/items/export-csv` | Chunked CSV export (200 rows/chunk) |
+### 4.5 Route Fixes
+- Standardized routes to include `/index.php/` prefix in `base_url` for form actions and redirects (e.g., `/items/store`, `/authenticate`) to prevent 404 errors in specific server configurations.
 
 ---
 
-## 8. Key Business Logic
-
-### 8.1 Transaction ID Generation
-All POS sales generate a unique Transaction ID: `OUT-YYYYMMDD-XXXX` (e.g., `OUT-20260513-0042`).
-
-### 8.2 Product ID Generation (`getNextProductId`)
-The system auto-suggests the next numeric Product ID (e.g., `P001`, `P002`).
-- The logic strips variation suffixes (e.g., `P001-SML`) to find the true maximum base ID.
-- The field is **fully editable** in the UI, allowing users to override the suggestion.
-- Manual collision checks are performed for both the parent ID and all potential variation IDs before insertion.
-
-### 8.3 Database Transactions & Error Logging
-All critical write operations use atomic database transactions with detailed error logging.
-```php
-try {
-    $db->transStart();
-    // ... logic ...
-    $db->transComplete();
-    if ($db->transStatus() === false) {
-        $error = $db->error();
-        log_message('error', 'Transaction failed: ' . json_encode($error));
-        throw new \Exception('Database transaction failed: ' . ($error['message'] ?? ''));
-    }
-} catch (\Exception $e) {
-    $db->transRollback();
-    log_message('error', 'Exception: ' . $e->getMessage());
-}
-```
-
-### 8.6 Item Variation System (Refactored)
-Items can be added as single entries or with **Size Variations**.
-- **Suffix Generation:** Uses a label-based suffixing algorithm (e.g., "Small" → `SML`, "Extra Large" → `EL`).
-- **Storage:** Child rows store the base product name in the `name` field and the specific size in `variation_label`.
-- **Validation:** Performs per-child uniqueness checks for both `product_id` and `sku` before starting a transaction.
-- **Grouped POST:** The Add Item view sends variations as a grouped array `variations[idx][field]` for better data integrity.
-
----
-
-## 10. UI & Design System
-
-### Design Tokens
-| Token | Value |
-|---|---|
-| Primary Color | `#4e73df` |
-| Sidebar BG | `#2c3e50` |
-| Border Radius | `12px` (unified across all elements) |
-| Brand Name | HALIMAW POS INVENTORY SYSTEM |
-
-### Key UI Features
-- **Unified 12px border-radius** on all cards, buttons, inputs, tables, modals.
-- **Editable Product ID** with auto-suggested next ID.
-- **Clean POS labels** with no hardcoded suffixes.
-- **Mobile responsive** sidebar with hamburger toggle and overlay.
-
----
-
-## 11. Maintenance
+## 5. Maintenance
 
 ### Scheduled Tasks
-The `Cron::checkExpiry` method should be called periodically to update item statuses.
+The `Cron::checkExpiry` method updates item statuses.
 
-### Logging
-- Application logs: `writable/logs/` (logs detailed database errors for failed transactions).
-- Item changes tracked in `item_logs` table.
+### Route Cache
+If routing issues (404s) persist after configuration changes, clear `writable/cache/` (e.g., `Get-ChildItem -Path writable\cache\ -Recurse | Remove-Item -Force`).
 
 ---
-*(Refer to version 2.0 for unchanged legacy route maps and schema details.)*
+*(Refer to version 2.0/2.1 for unchanged legacy route maps and schema details.)*

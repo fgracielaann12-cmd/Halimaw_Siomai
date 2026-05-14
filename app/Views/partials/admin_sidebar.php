@@ -26,6 +26,9 @@ $salesNotif = $db->table('sales')->where('is_seen', 0)->countAllResults();
 // 2. Stock Requests (status = 'pending')
 $stockReqNotif = $db->table('stock_requests')->where('status', 'pending')->countAllResults();
 
+// 2.5 Pull-Out Requests (status = 'PENDING')
+$pullOutNotif = $db->table('pull_outs')->where('status', 'PENDING')->countAllResults();
+
 // 3. Expiring Soon (0 to 10 days away, is_expiring_seen = 0)
 $today = date('Y-m-d');
 $expiringDate = date('Y-m-d', strtotime('+10 days'));
@@ -238,6 +241,9 @@ $expiredNotif = $db->table('items')
         <li class="nav-item">
             <a class="nav-link <?= isActive(['admin/pull-outs']) ?>" href="<?= site_url('admin/pull-outs') ?>">
                 <i class="bi bi-trash3"></i> Pull-Outs
+                <?php if (isset($pullOutNotif) && $pullOutNotif > 0): ?>
+                    <span class="badge bg-danger badge-dot ms-auto"><?= $pullOutNotif ?></span>
+                <?php endif; ?>
             </a>
         </li>
         <li class="nav-item">

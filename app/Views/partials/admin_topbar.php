@@ -28,7 +28,9 @@ $expiredNotif = $db->table('items')
     ->where('expiration_date <', $today)
     ->countAllResults();
 
-$totalNotif = $salesNotif + $stockReqNotif + $expiringNotif + $expiredNotif + $lowStockNotif;
+$pullOutNotif = $db->table('pull_outs')->where('status', 'PENDING')->countAllResults();
+
+$totalNotif = $salesNotif + $stockReqNotif + $expiringNotif + $expiredNotif + $lowStockNotif + $pullOutNotif;
 ?>
 
 <div class="top-navbar" style="padding-left: 20px; padding-right: 20px;">
@@ -49,13 +51,15 @@ $totalNotif = $salesNotif + $stockReqNotif + $expiringNotif + $expiredNotif + $l
     <div class="d-flex align-items-center gap-3">
         <!-- Notification Bell -->
         <div class="dropdown">
-            <button class="btn btn-light position-relative shadow-sm border" type="button" id="notifBell" data-bs-toggle="dropdown" aria-expanded="false" style="width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-bell-fill" style="font-size: 1.2rem; color: #4e73df;"></i>
-                <?php if ($totalNotif > 0): ?>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem; padding: 0.35em 0.6em;">
-                        <?= $totalNotif > 99 ? '99+' : $totalNotif ?>
-                    </span>
-                <?php endif; ?>
+            <button class="btn p-0" type="button" id="notifBell" data-bs-toggle="dropdown" aria-expanded="false" style="width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: transparent; border: none; box-shadow: none;">
+                <span class="position-relative d-inline-flex">
+                    <i class="bi bi-bell-fill" style="font-size: 1.3rem; color: #4e73df;"></i>
+                    <?php if ($totalNotif > 0): ?>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem; padding: 0.25em 0.5em; margin-top: 0; margin-left: 4px;">
+                            <?= $totalNotif > 99 ? '99+' : $totalNotif ?>
+                        </span>
+                    <?php endif; ?>
+                </span>
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-0 notification-dropdown" aria-labelledby="notifBell">
                 <li class="p-3 border-bottom bg-light">
@@ -100,6 +104,17 @@ $totalNotif = $salesNotif + $stockReqNotif + $expiringNotif + $expiredNotif + $l
                             </div>
                         </a></li>
                     <?php endif; ?>
+                    <?php if ($pullOutNotif > 0): ?>
+                        <li><a class="dropdown-item p-3 d-flex align-items-center gap-3 border-bottom notification-item" href="<?= site_url('admin/pull-outs') ?>">
+                            <div class="notification-icon bg-secondary-subtle text-secondary rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-trash3"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="fw-bold"><?= $pullOutNotif ?> Pull-Out Requests</div>
+                                <small class="text-muted">Pull-outs needing approval</small>
+                            </div>
+                        </a></li>
+                    <?php endif; ?>
                     <?php if ($expiringNotif > 0): ?>
                         <li><a class="dropdown-item p-3 d-flex align-items-center gap-3 border-bottom notification-item" href="<?= site_url('items/expiring-soon') ?>">
                             <div class="notification-icon bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center">
@@ -133,7 +148,7 @@ $totalNotif = $salesNotif + $stockReqNotif + $expiringNotif + $expiredNotif + $l
 
         <!-- User Profile (Optional inclusion) -->
         <?php if (isset($show_profile) && $show_profile): ?>
-            <div class="user-profile border-start ps-3 ms-2">
+            <div class="user-profile border-start ps-3 ms-2 hide-border-mobile">
                 <div class="profile-initial">
                     <?php 
                     $username = session()->get('username') ?? 'User';
@@ -199,6 +214,13 @@ $totalNotif = $salesNotif + $stockReqNotif + $expiringNotif + $expiredNotif + $l
         right: 15px !important;
         width: auto !important;
         margin-top: 0 !important;
+    }
+}
+@media (max-width: 768px) {
+    .hide-border-mobile {
+        border-left: none !important;
+        padding-left: 0 !important;
+        margin-left: 0 !important;
     }
 }
 </style>

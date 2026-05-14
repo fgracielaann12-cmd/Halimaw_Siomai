@@ -43,7 +43,7 @@ class ApiController extends ResourceController
             $processedProducts[] = [
                 'id' => $product['id'],
                 'name' => $product['name'],
-                'image' => $product['image'] ?? null,
+                'image' => $product['image_path'] ?? null,
                 'isSiomai' => $isSiomai,
                 'price' => $price,
                 'quantity' => (int)$product['quantity'],

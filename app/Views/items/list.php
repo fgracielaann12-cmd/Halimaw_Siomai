@@ -54,7 +54,7 @@
             opacity: 0;
             animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
         }
-        .container > .row, .controls-section, .summary-card {
+        .container > .row, .controls-section, .summary-card, .animated-actions {
             opacity: 0;
             animation: fadeScaleUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
         }
@@ -88,7 +88,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1050;
+            z-index: 1100;
             transition: transform 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -344,6 +344,9 @@
                 padding: 15px !important;
             }
             .top-navbar {
+                position: sticky !important;
+                top: 0 !important;
+                z-index: 1000 !important;
                 border-radius: 0 !important;
                 margin-bottom: 15px !important;
             }
@@ -396,18 +399,21 @@
             padding: 8px 20px;
             font-size: 0.95rem;
             font-weight: 600;
-            background: var(--primary);
-            color: white;
+            background-color: var(--primary) !important;
+            color: white !important;
             border: none;
             border-radius: 8px;
             transition: all 0.2s;
             margin-bottom: 20px;
             text-decoration: none;
             white-space: nowrap !important;
+            box-shadow: 0 4px 12px rgba(78, 115, 223, 0.2);
         }
         .btn-add-new-item:hover {
-            background: var(--primary-dark);
+            background-color: var(--primary-dark) !important;
             transform: translateY(-2px);
+            color: white !important;
+            box-shadow: 0 6px 15px rgba(78, 115, 223, 0.3);
         }
 
         .form-select, .form-control {
@@ -618,7 +624,7 @@
                 width: 100%;
                 height: 100%;
                 background: rgba(0,0,0,0.5);
-                z-index: 1040;
+                z-index: 1090;
             }
             .sidebar-overlay.active { display: block; }
 
@@ -788,10 +794,9 @@ function getSku($name, $variation = '') {
 <div class="main-content">
     <?php
     $extra_buttons = '
-        <a href="' . site_url('items/add') . '" class="btn-add-new-item mb-0 shadow-sm" style="height: 40px; margin: 0; padding: 0 16px; display: flex; align-items: center; white-space: nowrap !important;">
-            <i class="bi bi-plus-lg me-1 me-md-2"></i>
+        <a href="' . site_url('items/add') . '" class="btn-add-new-item d-none d-md-flex mb-0 shadow-sm" style="height: 40px; margin: 0; padding: 0 16px; display: flex; align-items: center; white-space: nowrap !important;">
+            <i class="bi bi-plus-lg me-2"></i>
             <span class="d-none d-md-inline">Add New Item</span>
-            <span class="d-md-none">Add</span>
         </a>
         <button onclick="location.reload()" class="btn btn-light shadow-sm border" style="height: 40px; width: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px;" title="Refresh Table">
             <i class="bi bi-arrow-clockwise" style="font-size: 1.2rem; color: #3a3b45;"></i>
@@ -896,6 +901,13 @@ function getSku($name, $variation = '') {
             </div>
         </div>
 
+        <!-- Mobile Add Button -->
+        <div class="d-md-none mb-3 animated-actions">
+            <a href="<?= site_url('items/add') ?>" class="btn-add-new-item w-100 py-3 shadow-sm rounded-3 fw-bold">
+                <i class="bi bi-plus-lg me-2"></i> Add New Item
+            </a>
+        </div>
+
         <!-- Alerts Container spacing handled above -->
 
         <!-- Alerts Container spacing handled above -->
@@ -908,15 +920,14 @@ function getSku($name, $variation = '') {
                     <tr>
                         <th class="text-center align-middle hide-mobile">Prod ID</th>
                         <th class="text-center align-middle">Name</th>
-                        <th class="text-center align-middle hide-mobile">SKU</th>
+                        <th class="text-center align-middle">SKU</th>
                         <th class="text-center align-middle">Price</th>
                         <th class="text-center align-middle">Quantity</th>
                         <th class="text-center align-middle">Value %</th>
                         <th class="text-center align-middle hide-mobile">Category</th>
-                        <th class="text-center align-middle hide-mobile">Expiration Date</th>
-                        <th class="text-center align-middle hide-mobile">Date Entry</th>
-                        <th class="text-center align-middle" style="width: 1%; white-space: nowrap;">Status</th>
+                        <th class="text-center align-middle">Expiration Date</th>
                         <th class="text-center align-middle">Date Entry</th>
+                        <th class="text-center align-middle" style="width: 1%; white-space: nowrap;">Status</th>
                         <th class="text-center align-middle">Actions</th>
                     </tr>
                 </thead>
@@ -986,21 +997,21 @@ function getSku($name, $variation = '') {
                         <tr class="<?= $rowClass ?>" data-id="<?= $item['id'] ?>" data-expiry="<?= esc($item['expiration_date'] ?? '') ?>" data-low-stock="<?= ($sz['q'] <= 10) ? 'true' : 'false' ?>" <?= $idx > 0 ? 'style="border-top:1px dashed #dee2e6;"' : '' ?>>
                             <td class="text-center align-middle hide-mobile"><?= esc($item['product_id']) ?><?= $sz['s'] ?></td>
                             <td class="text-center align-middle"><?= esc($item['name']) ?> <small class="text-muted">(<?= $sz['l'] ?>)</small></td>
-                            <td class="text-center align-middle hide-mobile"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?></td>
+                            <td class="text-center align-middle"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'], $sz['s_sku'])) ?></td>
                             <td class="text-center align-middle text-nowrap">₱<?= number_format($sz['p'], 2) ?></td>
                             <td class="text-center align-middle text-nowrap"><span><?= esc($sz['q']) ?></span> <small class="text-muted"><?= $sz['ql'] ?></small></td>
                             <td class="text-center align-middle">
                                 <?= $maxPrice > 0 ? number_format(($item['price'] / $maxPrice) * 100, 1) . '%' : '—' ?>
                             </td>
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
-                            <td class="text-center align-middle hide-mobile">
+                            <td class="text-center align-middle">
                                 <?php if (empty($item['expiration_date']) || $item['expiration_date'] === '0000-00-00'): ?>
                                     <span class="text-muted">Non-Expirable</span>
                                 <?php else: ?>
                                     <?= date('m/d/Y', strtotime($item['expiration_date'])) ?>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-center align-middle hide-mobile">
+                            <td class="text-center align-middle">
                                 <?= !empty($item['created_at']) ? date('m/d/Y H:i', strtotime($item['created_at'])) : '&mdash;' ?>
                             </td>
                             <td class="text-center align-middle">
@@ -1011,7 +1022,6 @@ function getSku($name, $variation = '') {
                                     <?= $statusLabel ?>
                                 </span>
                             </td>
-                            <td class="text-center align-middle"><?= !empty($item['created_at']) ? date('m/d/Y', strtotime($item['created_at'])) : '&mdash;' ?></td>
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
                                     <button type="button" class="btn btn-sm btn-view-info" 
@@ -1043,21 +1053,21 @@ function getSku($name, $variation = '') {
                                     <br><span class="badge bg-info text-dark mt-1" style="font-size: 0.65rem;">Variation</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-center align-middle hide-mobile"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?></td>
+                            <td class="text-center align-middle"><?= esc(!empty($item['sku']) ? $item['sku'] : getSku($item['name'])) ?></td>
                             <td class="text-center align-middle text-nowrap">₱<?= number_format($item['price'], 2) ?></td>
                             <td class="text-center align-middle text-nowrap"><span><?= esc($item['quantity']) ?></span></td>
                             <td class="text-center align-middle">
                                 <?= $maxPrice > 0 ? number_format(($item['price'] / $maxPrice) * 100, 1) . '%' : '—' ?>
                             </td>
                             <td class="text-center align-middle hide-mobile"><?= esc($item['category'] ?? '&mdash;') ?></td>
-                            <td class="text-center align-middle hide-mobile">
+                            <td class="text-center align-middle">
                                 <?php if (empty($item['expiration_date']) || $item['expiration_date'] === '0000-00-00'): ?>
                                     <span class="text-muted">Non-Expirable</span>
                                 <?php else: ?>
                                     <?= date('m/d/Y', strtotime($item['expiration_date'])) ?>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-center align-middle hide-mobile">
+                            <td class="text-center align-middle">
                                 <?= !empty($item['created_at']) ? date('m/d/Y H:i', strtotime($item['created_at'])) : '&mdash;' ?>
                             </td>
                             <td class="text-center align-middle">
@@ -1068,7 +1078,6 @@ function getSku($name, $variation = '') {
                                     <?= $statusLabel ?>
                                 </span>
                             </td>
-                            <td class="text-center align-middle"><?= !empty($item['created_at']) ? date('m/d/Y', strtotime($item['created_at'])) : '&mdash;' ?></td>
                             <td class="text-center align-middle">
                                 <div class="d-flex gap-1 justify-content-center">
                                     <button type="button" class="btn btn-sm btn-view-info" 

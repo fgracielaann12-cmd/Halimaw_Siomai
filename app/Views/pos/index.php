@@ -740,7 +740,7 @@ function isActive($paths) {
             border-radius: 5px;
             max-width: 600px;
             width: 90%;
-            padding: 30px;
+            padding: 50px 30px 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             position: relative;
         }
@@ -751,6 +751,7 @@ function isActive($paths) {
             margin-bottom: 20px;
             font-size: 1.5rem;
             text-align: center;
+            padding: 0 20px;
         }
 
         .tutorial-steps {
@@ -851,7 +852,7 @@ function isActive($paths) {
         @media (max-width: 480px) {
             .pos-item-card { min-height: auto; }
             .tutorial-content {
-                padding: 20px;
+                padding: 45px 20px 20px;
             }
             .tutorial-step {
                 gap: 10px;
@@ -1272,7 +1273,7 @@ function isActive($paths) {
                     <div class="step-number">2</div>
                     <div class="step-content">
                         <h4>Select Packaging</h4>
-                        <p>For siomai products, choose your preferred packaging (12pcs, 20pcs, or 40pcs) before clicking the item.</p>
+                        <p>For every product, choose your prefered packaging, before clicking the item</p>
                     </div>
                 </div>
                 <div class="tutorial-step">
@@ -1286,7 +1287,7 @@ function isActive($paths) {
                     <div class="step-number">4</div>
                     <div class="step-content">
                         <h4>Complete Sale</h4>
-                        <p>Choose a payment method (Cash, Card, or GCash) and click <strong>Complete Sale</strong>.</p>
+                        <p>When done choosing a product, click <strong>Complete Sale</strong></p>
                     </div>
                 </div>
             </div>
@@ -2052,7 +2053,7 @@ function isActive($paths) {
                     displayName += ` (${item.pack})`;
                 }
                 div.innerHTML = `
-                    <span class="item-name">${displayName} × ${item.qty}</span>
+                    <span class="item-name">${displayName}</span>
                     <div class="quantity-control">
                         <button class="qty-decrease" data-index="${index}">-</button>
                         <input type="number" class="cart-qty-input" data-index="${index}" value="${item.qty}" min="1" style="width: 40px; text-align: center; border: 1px solid #ddd; border-radius: 4px; border-left: none; border-right: none; height: 28px; outline: none;">

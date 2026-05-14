@@ -50,7 +50,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1050;
+            z-index: 1100;
             transition: transform 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -97,17 +97,12 @@
         /* Mobile Overlay */
         .sidebar-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.5); z-index: 1040; display: none; opacity: 0;
+            background: rgba(0,0,0,0.5); z-index: 1090; display: none; opacity: 0;
             transition: opacity 0.3s;
         }
         .sidebar-overlay.active { display: block; opacity: 1; }
 
-        @media (max-width: 991px) {
-            #sidebar { transform: translateX(-100%); }
-            #sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0 !important; width: 100% !important; }
-            .top-navbar h5 { font-size: 1rem; }
-        }
+
 
         /* MAIN CONTENT */
         .main-content {
@@ -117,11 +112,12 @@
             transition: margin-left 0.3s ease;
         }
         
-        .mobile-menu-toggle-inline {
+        .mobile-menu-toggle {
+            display: none;
             background: var(--sidebar-bg);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 50%;
             width: 42px;
             height: 42px;
             font-size: 1.3rem;
@@ -130,6 +126,10 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .mobile-menu-toggle:hover {
+            background: var(--sidebar-hover);
         }
 
         body > #mobileMenuToggle { display: none !important; }
@@ -186,56 +186,42 @@
             color: #858796;
         }
 
-    /* Metric Cards Styling */
+    /* Metric Cards Styling (Stock Requests Style) */
     .metric-card {
         background: #fff;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        display: flex;
-        align-items: center;
-        gap: 20px;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
-        border: 1px solid rgba(0,0,0,0.05);
+        border: none;
         height: 100%;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
     .metric-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 15px rgba(0,0,0,0.1);
     }
-    .metric-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.8rem;
-    }
-    .metric-icon.blue { background: rgba(78, 115, 223, 0.1); color: #4e73df; }
-    .metric-icon.green { background: rgba(28, 200, 138, 0.1); color: #1cc88a; }
-    .metric-icon.yellow { background: rgba(246, 194, 62, 0.1); color: #f6c23e; }
-    .metric-icon.red { background: rgba(231, 74, 59, 0.1); color: #e74a3b; }
     
-    .metric-info h6 {
+    .metric-card h6 {
         margin: 0;
-        font-size: 0.85rem;
-        color: #858796;
-        text-transform: uppercase;
-        font-weight: 700;
-        letter-spacing: 0.5px;
+        font-size: 0.95rem;
+        text-transform: capitalize;
+        font-weight: 600;
+        margin-bottom: 8px;
     }
-    .metric-info h3 {
-        margin: 5px 0 0 0;
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #3a3b45;
-    }
-    .metric-info p {
+    .metric-card h3 {
         margin: 0;
-        font-size: 0.85rem;
-        color: #858796;
+        font-size: 2rem;
+        font-weight: 700;
     }
+    
+    .metric-card.border-primary { border-left: 5px solid #4e73df !important; }
+    .metric-card.border-success { border-left: 5px solid #1cc88a !important; }
+    .metric-card.border-warning { border-left: 5px solid #f6c23e !important; }
+    .metric-card.border-danger { border-left: 5px solid #e74a3b !important; }
     
     .action-badge {
         padding: 5px 10px;
@@ -317,6 +303,21 @@
             font-size: 1.1rem;
         }
     }
+    @media (max-width: 991px) {
+        #sidebar { transform: translateX(-100%); }
+        #sidebar.active { transform: translateX(0); }
+        .mobile-menu-toggle { display: flex !important; }
+        body > #mobileMenuToggle { display: none !important; }
+        .top-navbar { 
+            position: sticky !important; 
+            top: 0 !important; 
+            z-index: 1000 !important;
+            border-radius: 0 !important; 
+            margin: 0 !important;
+        }
+        .main-content { margin-left: 0 !important; width: 100% !important; }
+        .top-navbar h5 { font-size: 1rem; }
+    }
 </style>
 
     
@@ -352,15 +353,14 @@
 <div class="main-content">
     <?php
     $extra_buttons = '
-        <button class="btn-process-return shadow-sm" data-bs-toggle="modal" data-bs-target="#returnModal">
+        <button class="btn-process-return d-none d-md-flex shadow-sm" data-bs-toggle="modal" data-bs-target="#returnModal">
             <i class="bi bi-plus me-2"></i>Process Return
         </button>
     ';
     echo view('partials/admin_topbar', [
         'title' => 'Customer Returns',
         'icon' => 'bi bi-arrow-return-left text-primary',
-        'extra_buttons' => $extra_buttons,
-        'hide_toggle' => true
+        'extra_buttons' => $extra_buttons
     ]);
     ?>
         
@@ -369,44 +369,35 @@
             <div class="row g-4 mb-4">
                 <div class="col-xl-3 col-md-6">
                     <div class="metric-card border-primary">
-                        <div class="metric-icon blue"><i class="bi bi-arrow-return-left"></i></div>
-                        <div class="metric-info">
-                            <h6>Total Returns</h6>
-                            <h3 class="text-primary"><?= number_format($totalReturns) ?></h3>
-                            <p>All-time processed</p>
-                        </div>
+                        <h6 class="text-primary">Total Returns</h6>
+                        <h3 class="text-dark"><?= number_format($totalReturns) ?></h3>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
                     <div class="metric-card border-success">
-                        <div class="metric-icon green"><i class="bi bi-percent"></i></div>
-                        <div class="metric-info">
-                            <h6>Return Rate</h6>
-                            <h3 class="text-success"><?= $returnRate ?>%</h3>
-                            <p>Versus total sales</p>
-                        </div>
+                        <h6 class="text-success">Return Rate</h6>
+                        <h3 class="text-dark"><?= $returnRate ?>%</h3>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
                     <div class="metric-card border-warning">
-                        <div class="metric-icon yellow"><i class="bi bi-trash3"></i></div>
-                        <div class="metric-info">
-                            <h6>Waste Escalation</h6>
-                            <h3 class="text-warning"><?= $pullOutRate ?>%</h3>
-                            <p>Returns sent to pull-outs</p>
-                        </div>
+                        <h6 class="text-warning">Waste Escalation</h6>
+                        <h3 class="text-dark"><?= $pullOutRate ?>%</h3>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
                     <div class="metric-card border-danger">
-                        <div class="metric-icon red"><i class="bi bi-cash-coin"></i></div>
-                        <div class="metric-info">
-                            <h6>Return Losses</h6>
-                            <h3 class="text-danger">₱<?= number_format($financialLoss, 2) ?></h3>
-                            <p>Value of non-restockables</p>
-                        </div>
+                        <h6 class="text-danger">Return Losses</h6>
+                        <h3 class="text-dark">₱<?= number_format($financialLoss, 2) ?></h3>
                     </div>
                 </div>
+            </div>
+
+            <!-- Mobile Process Return Button -->
+            <div class="d-md-none mb-4">
+                <button class="btn btn-primary w-100 py-3 fw-bold shadow-sm rounded-3" data-bs-toggle="modal" data-bs-target="#returnModal">
+                    <i class="bi bi-plus-lg me-2"></i> Process Return
+                </button>
             </div>
 
             <!-- Returns Data Table -->

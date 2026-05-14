@@ -196,19 +196,22 @@
         /* MOBILE MENU */
         .mobile-menu-toggle {
             display: none;
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 998;
             background: var(--sidebar-bg);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
+            width: 42px;
+            height: 42px;
+            font-size: 1.3rem;
             cursor: pointer;
             box-shadow: var(--card-shadow);
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .mobile-menu-toggle:hover {
+            background: var(--sidebar-hover);
         }
 
         /* CONTAINER */

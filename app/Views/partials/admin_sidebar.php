@@ -121,8 +121,8 @@ $expiredNotif = $db->table('items')
 
         #sidebar .nav-link {
             color: var(--sidebar-text, #d1d5db);
-            padding: 0.75rem 1.25rem;
-            margin: 0.25rem 1rem;
+            padding: 0.6rem 1rem;
+            margin: 0.15rem 0.75rem;
             border-radius: 0.4rem;
             font-size: 0.95rem;
             transition: all 0.2s ease;
@@ -131,9 +131,9 @@ $expiredNotif = $db->table('items')
             gap: 0.75rem;
             font-weight: 500;
             text-decoration: none;
-            white-space: normal; line-height: 1.2;
+            white-space: nowrap; line-height: 1.2;
             overflow: hidden;
-            width: calc(100% - 2rem);
+            width: calc(100% - 1.5rem);
         }
 
         #sidebar .nav-link:hover {
@@ -157,9 +157,9 @@ $expiredNotif = $db->table('items')
             border-radius: 0.4rem;
             animation: navGlow 2s infinite ease-in-out;
             text-decoration: none;
-            white-space: normal; line-height: 1.2;
+            white-space: nowrap; line-height: 1.2;
             overflow: hidden;
-            width: calc(100% - 2rem);
+            width: calc(100% - 1.5rem);
         }
 
         #sidebar .nav-link.active:hover {
@@ -224,25 +224,25 @@ $expiredNotif = $db->table('items')
         </li>
         <li class="nav-item">
             <a class="nav-link <?= isActive(['admin/sales']) ?>" href="<?= site_url('admin/sales') ?>">
-                <i class="bi bi-receipt"></i> Sales&nbsp;Records
+                <i class="bi bi-receipt"></i> <span class="flex-grow-1">Sales Records</span>
                 <?php if (isset($salesNotif) && $salesNotif > 0): ?>
-                    <span class="badge bg-danger badge-dot ms-auto"><?= $salesNotif ?></span>
+                    <span class="badge bg-danger badge-dot"><?= $salesNotif ?></span>
                 <?php endif; ?>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link <?= isActive(['admin/stock-requests', 'admin/approve-request', 'admin/reject-request', 'admin/stock-request-logs']) ?>" href="<?= site_url('admin/stock-requests') ?>">
-                <i class="bi bi-cart-check"></i> Stock&nbsp;Requests
+                <i class="bi bi-cart-check"></i> <span class="flex-grow-1">Stock Requests</span>
                 <?php if (isset($stockReqNotif) && $stockReqNotif > 0): ?>
-                    <span class="badge bg-danger badge-dot ms-auto"><?= $stockReqNotif ?></span>
+                    <span class="badge bg-danger badge-dot"><?= $stockReqNotif ?></span>
                 <?php endif; ?>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link <?= isActive(['admin/pull-outs']) ?>" href="<?= site_url('admin/pull-outs') ?>">
-                <i class="bi bi-trash3"></i> Pull-Outs
+                <i class="bi bi-trash3"></i> <span class="flex-grow-1">Pull-Outs</span>
                 <?php if (isset($pullOutNotif) && $pullOutNotif > 0): ?>
-                    <span class="badge bg-danger badge-dot ms-auto"><?= $pullOutNotif ?></span>
+                    <span class="badge bg-danger badge-dot"><?= $pullOutNotif ?></span>
                 <?php endif; ?>
             </a>
         </li>
@@ -253,17 +253,17 @@ $expiredNotif = $db->table('items')
         </li>
         <li class="nav-item">
             <a class="nav-link <?= isActive(['items/expiring-soon']) ?>" href="<?= site_url('items/expiring-soon') ?>">
-                <i class="bi bi-clock-history"></i> Expiring&nbsp;Soon
+                <i class="bi bi-clock-history"></i> <span class="flex-grow-1">Expiring Soon</span>
                 <?php if (isset($expiringNotif) && $expiringNotif > 0): ?>
-                    <span class="badge bg-danger badge-dot ms-auto"><?= $expiringNotif ?></span>
+                    <span class="badge bg-danger badge-dot"><?= $expiringNotif ?></span>
                 <?php endif; ?>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link <?= isActive(['items/deleted']) ?>" href="<?= site_url('items/deleted') ?>">
-                <i class="bi bi-x-circle"></i> Expired
+                <i class="bi bi-x-circle"></i> <span class="flex-grow-1">Expired</span>
                 <?php if (isset($expiredNotif) && $expiredNotif > 0): ?>
-                    <span class="badge bg-danger badge-dot ms-auto"><?= $expiredNotif ?></span>
+                    <span class="badge bg-danger badge-dot"><?= $expiredNotif ?></span>
                 <?php endif; ?>
             </a>
         </li>

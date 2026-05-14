@@ -85,7 +85,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1050;
+            z-index: 1100;
             transition: transform 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -251,22 +251,6 @@
         /* MOBILE MENU */
         .mobile-menu-toggle {
             display: none;
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 998;
-            background: var(--sidebar-bg);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: var(--card-shadow);
-        }
-        .mobile-menu-toggle-inline {
-            display: none;
             background: var(--sidebar-bg);
             color: white;
             border: none;
@@ -281,7 +265,7 @@
             flex-shrink: 0;
             transition: all 0.2s;
         }
-        .mobile-menu-toggle-inline:hover {
+        .mobile-menu-toggle:hover {
             background: var(--sidebar-hover);
         }
 
@@ -293,7 +277,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
+            z-index: 1090;
         }
         .sidebar-overlay.active {
             display: block;
@@ -461,8 +445,7 @@
 
         /* RESPONSIVE */
         @media (max-width: 991px) {
-            .mobile-menu-toggle { display: block; }
-            .mobile-menu-toggle-inline { display: flex; }
+            .mobile-menu-toggle { display: flex !important; }
             body > #mobileMenuToggle { display: none !important; }
             #sidebar { transform: translateX(-100%); width: 280px; }
 
@@ -475,8 +458,13 @@
             min-width: 0;
         }
             #content { margin-left: 0; width: 100%; }
-            .top-navbar { position: sticky; top: 0; z-index: 1000; border-radius: 0; margin-bottom: 15px; } 
-            #sidebar.active { transform: translateX(0); }
+            .top-navbar { 
+                position: sticky !important; 
+                top: 0 !important; 
+                z-index: 1000 !important;
+                border-radius: 0 !important; 
+                margin: -20px -20px 15px -20px !important;
+            }             #sidebar.active { transform: translateX(0); }
             .table { min-width: 600px; font-size: 0.85rem; }
         }
         

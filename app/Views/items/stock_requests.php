@@ -87,7 +87,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1050;
+            z-index: 1100;
             transition: transform 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -198,23 +198,6 @@
         /* MOBILE MENU */
         .mobile-menu-toggle {
             display: none;
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 998;
-            background: var(--sidebar-bg);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: var(--card-shadow);
-        }
-
-        .mobile-menu-toggle-inline {
-            display: none;
             background: var(--sidebar-bg);
             color: white;
             border: none;
@@ -229,9 +212,11 @@
             flex-shrink: 0;
             transition: all 0.2s;
         }
-        .mobile-menu-toggle-inline:hover {
+        .mobile-menu-toggle:hover {
             background: var(--sidebar-hover);
         }
+
+
 
         /* TOP NAVBAR */
         .top-navbar { position: sticky; top: 0; z-index: 1000;
@@ -384,10 +369,12 @@
 
         /* RESPONSIVE */
         @media (max-width: 991px) {
-            .mobile-menu-toggle { display: block; }
-            .mobile-menu-toggle-inline { display: flex; }
+            .mobile-menu-toggle { display: flex; }
             body > #mobileMenuToggle { display: none !important; }
-            .top-navbar { position: sticky; top: 0; z-index: 1000;
+            .top-navbar { 
+                position: sticky !important; 
+                top: 0; 
+                z-index: 1000 !important;
                 border-radius: 0 !important;
                 margin: 0 0 5px 0 !important;
             }
@@ -412,7 +399,7 @@
                 width: 100%;
                 height: 100%;
                 background: rgba(0,0,0,0.5);
-                z-index: 1040;
+                z-index: 1090;
             }
             .sidebar-overlay.active { display: block; }
 
